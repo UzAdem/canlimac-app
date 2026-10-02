@@ -7,25 +7,31 @@ export default async function handler(req, res) {
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
-  // Süper Lig ve Popüler Liglerin ID Listesi (Önemli Ligler)
-  // 203: Süper Lig, 39: Premier League, 140: La Liga, 135: Serie A, 78: Bundesliga, 2: Champions League, 3: Europa League, 204: TFF 1. Lig
-  const PRIORITY_LEAGUES = [203, 39, 140, 135, 78, 2, 3, 204];
+  // Kapsamak istediğimiz liglerin ID'leri
+  // 203: Süper Lig, 39: Premier League, 140: La Liga, 135: Serie A, 78: Bundesliga, 61: Ligue 1, 2: UCL, 3: UEL, 204: TFF 1. Lig
+  const LEAGUES = [203, 39, 140, 135, 78, 61, 2, 3, 204];
 
   try {
-    // 1. Önce genel günlük isteği atıyoruz
-    let apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}&timezone=Europe/Istanbul`, {
+    // 1. Önce genel tarih sorgusu atıyoruz
+    const apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}&timezone=Europe/Istanbul`, {
       headers: { 'x-apisports-key': API_KEY }
     });
 
-    let data = await apiRes.json();
-    let allFixtures = data.response || [];
+    let allFixtures = [];
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data.response && data.response.length > 0) {
+        allFixtures = data.response;
+      }
+    }
 
-    // 2. Eğer ileri bir tarihse ve genel istek boş geldiyse, popüler liglerin fikstüründen filtreleme yapıyoruz
+    // 2. Genel sorgu boş dönerse (geçmiş veya çok ileri tarihlerde ücretsiz plan sınırı nedeniyle),
+    // Lig lig özel sorgu atarak geçmiş/gelecek maç verilerini çekiyoruz.
     if (allFixtures.length === 0) {
-      const fetchPromises = PRIORITY_LEAGUES.map(leagueId =>
+      const fetchPromises = LEAGUES.map(leagueId =>
         fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
           headers: { 'x-apisports-key': API_KEY }
-        }).then(r => r.json())
+        }).then(r => r.ok ? r.json() : { response: [] })
       );
 
       const results = await Promise.all(fetchPromises);
