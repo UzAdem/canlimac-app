@@ -7,6 +7,19 @@ export default async function handler(req, res) {
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
+  // İstediğiniz lig sıralamasını buraya yazabilirsiniz (Yukarıdan aşağıya doğru sıralanır)
+  const LEAGUE_ORDER = [
+    'Süper Lig',
+    'UEFA Champions League',
+    'Premier League',
+    'La Liga',
+    'Serie A',
+    'Bundesliga',
+    'Ligue 1',
+    'UEFA Europa League',
+    'Championship'
+  ];
+
   try {
     const apiRes = await fetch(`https://api.football-data.org/v4/matches?date=${targetDate}`, {
       headers: {
@@ -31,11 +44,13 @@ export default async function handler(req, res) {
     const grouped = {};
 
     data.matches.forEach(m => {
-      const leagueName = `${m.competition.emblem ? '' : '⚽ '} ${m.competition.name}`;
+      const rawLeagueName = m.competition.name;
+      const leagueDisplayName = `${m.competition.emblem ? '' : '⚽ '} ${rawLeagueName}`;
       
-      if (!grouped[leagueName]) {
-        grouped[leagueName] = {
-          league: leagueName,
+      if (!grouped[rawLeagueName]) {
+        grouped[rawLeagueName] = {
+          league: leagueDisplayName,
+          rawName: rawLeagueName,
           matches: []
         };
       }
@@ -51,7 +66,7 @@ export default async function handler(req, res) {
         minuteStr = 'MS';
       }
 
-      grouped[leagueName].matches.push({
+      grouped[rawLeagueName].matches.push({
         id: m.id,
         homeTeam: m.homeTeam.shortName || m.homeTeam.name,
         awayTeam: m.awayTeam.shortName || m.awayTeam.name,
@@ -62,9 +77,19 @@ export default async function handler(req, res) {
       });
     });
 
-    res.status(200).json(Object.values(grouped));
+    // Ligleri sizin belirlediğiniz öncelik sırasına göre dizme işlemi
+    const sortedLeagues = Object.values(grouped).sort((a, b) => {
+      const indexA = LEAGUE_ORDER.findIndex(l => a.rawName.toLowerCase().includes(l.toLowerCase()));
+      const indexB = LEAGUE_ORDER.findIndex(l => b.rawName.toLowerCase().includes(l.toLowerCase()));
+
+      const orderA = indexA === -1 ? 999 : indexA;
+      const orderB = indexB === -1 ? 999 : indexB;
+
+      return orderA - orderB;
+    });
+
+    res.status(200).json(sortedLeagues);
   } catch (error) {
     res.status(500).json({ error: 'Canlı veriler çekilirken bir sorun oluştu.' });
   }
-        }
-                                             
+}
