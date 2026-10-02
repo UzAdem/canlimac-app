@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CANLIMAÇ - Canlı Skorlar</title>
+    <title>CANLIMAÇ - Canlı Skorlar ve Fikstür</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -38,6 +38,34 @@
         .logo {
             font-size: 1.3rem;
             font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .date-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #162032;
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .date-btn {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .current-date {
+            font-weight: 700;
+            font-size: 0.95rem;
             color: var(--accent-green);
         }
 
@@ -107,12 +135,7 @@
             padding: 0 15px;
         }
 
-        .team {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: #cbd5e1;
-        }
-
+        .team { font-size: 0.95rem; font-weight: 500; color: #cbd5e1; }
         .is-live .team { color: #ffffff; font-weight: 600; }
 
         .scores {
@@ -132,11 +155,7 @@
             font-weight: 800;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-        }
+        .loading { text-align: center; padding: 40px; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -145,18 +164,45 @@
         <div class="logo">⚽ CANLIMAÇ</div>
     </header>
 
+    <div class="date-bar">
+        <button class="date-btn" onclick="changeDate(-1)">❮ Önceki</button>
+        <span class="current-date" id="dateLabel">Bugün</span>
+        <button class="date-btn" onclick="changeDate(1)">Sonraki ❯</button>
+    </div>
+
     <div class="container" id="app">
         <div class="loading">Maçlar yükleniyor...</div>
     </div>
 
     <script>
+        let currentDate = new Date();
+
+        function formatDate(d) {
+            return d.toISOString().split('T')[0];
+        }
+
+        function updateDateLabel() {
+            const today = new Date();
+            if (formatDate(currentDate) === formatDate(today)) {
+                document.getElementById('dateLabel').innerText = 'Bugün';
+            } else {
+                document.getElementById('dateLabel').innerText = currentDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+            }
+        }
+
         async function loadMatches() {
             try {
-                const response = await fetch('/api/matches');
+                updateDateLabel();
+                const response = await fetch(`/api/matches?date=${formatDate(currentDate)}`);
                 const leagues = await response.json();
                 
                 const container = document.getElementById('app');
                 container.innerHTML = '';
+
+                if (!leagues || leagues.length === 0) {
+                    container.innerHTML = '<div class="loading">Bu tarihte planlanmış maç bulunmuyor.</div>';
+                    return;
+                }
 
                 leagues.forEach(group => {
                     const leagueHeader = `<div class="league-header">${group.league}</div>`;
@@ -188,14 +234,17 @@
                     container.innerHTML += leagueHeader + `<div class="league-box">${matchesHTML}</div>`;
                 });
             } catch (err) {
-                document.getElementById('app').innerHTML = '<div class="loading">Veriler alınırken bir hata oluştu.</div>';
+                document.getElementById('app').innerHTML = '<div class="loading">Veriler alınırken bir sorun oluştu.</div>';
             }
         }
 
-        // İlk yükleme
-        loadMatches();
+        function changeDate(days) {
+            currentDate.setDate(currentDate.getDate() + days);
+            document.getElementById('app').innerHTML = '<div class="loading">Yükleniyor...</div>';
+            loadMatches();
+        }
 
-        // 30 saniyede bir otomatik güncelleme
+        loadMatches();
         setInterval(loadMatches, 30000);
     </script>
 </body>
