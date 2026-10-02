@@ -7,40 +7,31 @@ export default async function handler(req, res) {
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
-  // Kapsamak istediğimiz liglerin ID'leri
-  // 203: Süper Lig, 39: Premier League, 140: La Liga, 135: Serie A, 78: Bundesliga, 61: Ligue 1, 2: UCL, 3: UEL, 204: TFF 1. Lig
-  const LEAGUES = [203, 39, 140, 135, 78, 61, 2, 3, 204];
+  // Sadece İstediğimiz Majör Liglerin ID Liste Sınırlaması:
+  // 203: Türkiye Süper Lig
+  // 204: Türkiye TFF 1. Lig
+  // 39:  İngiltere Premier League
+  // 140: İspanya La Liga
+  // 78:  Almanya Bundesliga
+  // 135: İtalya Serie A
+  const TARGET_LEAGUES = [203, 204, 39, 140, 78, 135];
 
   try {
-    // 1. Önce genel tarih sorgusu atıyoruz
-    const apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}&timezone=Europe/Istanbul`, {
-      headers: { 'x-apisports-key': API_KEY }
-    });
+    // Tüm odak ligler için paralel istek atıyoruz (Geçmiş/Gelecek sınırı olmadan veriyi kesin getirir)
+    const fetchPromises = TARGET_LEAGUES.map(leagueId =>
+      fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
+        headers: { 'x-apisports-key': API_KEY }
+      }).then(r => r.ok ? r.json() : { response: [] })
+    );
 
+    const results = await Promise.all(fetchPromises);
     let allFixtures = [];
-    if (apiRes.ok) {
-      const data = await apiRes.json();
-      if (data.response && data.response.length > 0) {
-        allFixtures = data.response;
+
+    results.forEach(resData => {
+      if (resData.response && resData.response.length > 0) {
+        allFixtures.push(...resData.response);
       }
-    }
-
-    // 2. Genel sorgu boş dönerse (geçmiş veya çok ileri tarihlerde ücretsiz plan sınırı nedeniyle),
-    // Lig lig özel sorgu atarak geçmiş/gelecek maç verilerini çekiyoruz.
-    if (allFixtures.length === 0) {
-      const fetchPromises = LEAGUES.map(leagueId =>
-        fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
-          headers: { 'x-apisports-key': API_KEY }
-        }).then(r => r.ok ? r.json() : { response: [] })
-      );
-
-      const results = await Promise.all(fetchPromises);
-      results.forEach(resData => {
-        if (resData.response && resData.response.length > 0) {
-          allFixtures.push(...resData.response);
-        }
-      });
-    }
+    });
 
     if (allFixtures.length === 0) {
       return res.status(200).json([]);
@@ -51,7 +42,7 @@ export default async function handler(req, res) {
     allFixtures.forEach(item => {
       const leagueName = item.league.name;
       const country = item.league.country;
-      const leagueDisplayName = `${country ? country + ' - ' : ''}${leagueName}`;
+      const leagueDisplayName = `${country} - ${leagueName}`;
 
       if (!grouped[leagueDisplayName]) {
         grouped[leagueDisplayName] = {
@@ -86,6 +77,6 @@ export default async function handler(req, res) {
 
     res.status(200).json(Object.values(grouped));
   } catch (error) {
-    res.status(500).json({ error: 'Canlı veriler çekilirken bir sorun oluştu.' });
+    res.status(500).json({ error: 'Veriler çekilirken bir sorun oluştu.' });
   }
 }
