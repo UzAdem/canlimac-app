@@ -16,6 +16,36 @@ export default async function handler(req, res) {
     { slug: 'ita.1', region: 'İtalya', defaultName: 'Serie A' }
   ];
 
+  // İngilizce Ulke/Takim Isimlerini Türkçe Yapma Sözlüğü
+  const TR_TRANSLATIONS = {
+    'Belgium': 'Belçika',
+    'Turkey': 'Türkiye',
+    'Türkiye': 'Türkiye',
+    'France': 'Fransa',
+    'Italy': 'İtalya',
+    'Hungary': 'Macaristan',
+    'Georgia': 'Gürcistan',
+    'Poland': 'Polonya',
+    'Romania': 'Romanya',
+    'Bosnia-Herzegovina': 'Bosna-Hersek',
+    'Sweden': 'İsveç',
+    'Faroe Islands': 'Faroe Adaları',
+    'Slovakia': 'Slovakya',
+    'Kazakhstan': 'Kazakistan',
+    'Moldova': 'Moldova',
+    'Cyprus': 'Kıbrıs Rum Kesimi',
+    'Armenia': 'Ermenistan',
+    'Latvia': 'Letonya',
+    'Montenegro': 'Karadağ',
+    'Ukraine': 'Ukrayna',
+    'Germany': 'Almanya',
+    'Spain': 'İspanya',
+    'England': 'İngiltere',
+    'Netherlands': 'Hollanda',
+    'Portugal': 'Portekiz',
+    'Croatia': 'Hırvatistan'
+  };
+
   try {
     const fetchPromises = LEAGUES.map(league =>
       fetch(`https://site.web.api.espn.com/apis/site/v2/sports/soccer/${league.slug}/scoreboard?dates=${formattedDate}`)
@@ -33,15 +63,13 @@ export default async function handler(req, res) {
           const home = competition.competitors.find(c => c.homeAway === 'home');
           const away = competition.competitors.find(c => c.homeAway === 'away');
 
-          // Maçkolik tarzı grup / aşama adını tespit etme
+          // Ham "league-phase" gibi İngilizce terimleri temizliyoruz
           let groupDetail = '';
           if (competition.type && competition.type.text) {
-            groupDetail = ` ${competition.type.text}`;
-          } else if (event.season && event.season.slug) {
-            groupDetail = ` ${event.season.slug}`;
+            let typeText = competition.type.text.replace(/league-phase/gi, 'Lig Aşaması').replace(/group-stage/gi, 'Grup Aşaması');
+            groupDetail = ` - ${typeText}`;
           }
 
-          // Örn: "Avrupa - UEFA Uluslar Ligi Lig A Grup 1"
           const fullLeagueTitle = `${item.leagueInfo.region} - ${item.leagueInfo.defaultName}${groupDetail}`;
 
           if (!groupedMap[fullLeagueTitle]) {
@@ -67,10 +95,13 @@ export default async function handler(req, res) {
             minuteStr = 'MS';
           }
 
+          const rawHome = home.team.displayName;
+          const rawAway = away.team.displayName;
+
           groupedMap[fullLeagueTitle].matches.push({
             id: event.id,
-            homeTeam: home.team.displayName,
-            awayTeam: away.team.displayName,
+            homeTeam: TR_TRANSLATIONS[rawHome] || rawHome,
+            awayTeam: TR_TRANSLATIONS[rawAway] || rawAway,
             homeScore: home.score ?? '-',
             awayScore: away.score ?? '-',
             status: statusType,
