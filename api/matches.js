@@ -25,8 +25,7 @@ export default async function handler(req, res) {
     'Kazakhstan': 'Kazakistan', 'Moldova': 'Moldova',
     'Cyprus': 'Kıbrıs Rum Kesimi', 'Armenia': 'Ermenistan',
     'Latvia': 'Letonya', 'Montenegro': 'Karadağ', 'Ukraine': 'Ukrayna',
-    'Germany': 'Almanya', 'Spain': 'İspanya', 'England': 'İngiltere',
-    'Netherlands': 'Hollanda', 'Portugal': 'Portekiz', 'Croatia': 'Hırvatistan'
+    'Germany': 'Almanya', 'Spain': 'İspanya', 'England': 'İngiltere'
   };
 
   try {
@@ -80,15 +79,24 @@ export default async function handler(req, res) {
           const rawHome = home.team.displayName;
           const rawAway = away.team.displayName;
 
-          // Gol ve Kart Olaylarını Toplama
-          const matchEvents = (competition.details || []).map(d => ({
-            clock: d.clock ? d.clock.displayValue : '',
-            type: d.type ? d.type.text : '',
-            summary: d.athletesIn && d.athletesIn.length > 0 ? d.athletesIn[0].displayName : (d.team ? d.team.displayName : '')
-          }));
+          // Gol ve Kart Olayları Düzenlemesi (Player Name Düzeltildi)
+          const matchEvents = (competition.details || []).map(d => {
+            let playerStr = '';
+            if (d.athletes && d.athletes.length > 0) {
+              playerStr = d.athletes[0].displayName || '';
+            } else if (d.team) {
+              playerStr = d.team.displayName || '';
+            }
+            return {
+              clock: d.clock ? d.clock.displayValue : '',
+              type: d.type ? d.type.text : 'Olay',
+              summary: playerStr
+            };
+          });
 
           groupedMap[fullLeagueTitle].matches.push({
             id: event.id,
+            leagueSlug: item.leagueInfo.slug,
             homeTeam: TR_TRANSLATIONS[rawHome] || rawHome,
             awayTeam: TR_TRANSLATIONS[rawAway] || rawAway,
             homeScore: home.score ?? '0',
