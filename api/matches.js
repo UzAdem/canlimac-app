@@ -2,13 +2,11 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
 
-  // API-Sports / API-Football Anahtarınız
   const API_KEY = 'f15b9b2cf7882fafe5a7f2d4781ca8bf';
 
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
-  // Süper Lig, Milli Maçlar ve Popüler Liglerin Öncelik Sıralaması
   const LEAGUE_PRIORITY = [
     'Super Lig',
     'UEFA Champions League',
@@ -25,14 +23,15 @@ export default async function handler(req, res) {
   ];
 
   try {
-    const apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}`, {
+    // timezone=Europe/Istanbul eklenerek Türkiye saatine göre tam maç listesi çekilir
+    const apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}&timezone=Europe/Istanbul`, {
       headers: {
         'x-apisports-key': API_KEY
       }
     });
 
     if (apiRes.status === 429) {
-      return res.status(429).json({ error: 'Çok fazla istek atıldı. Lütfen birkaç saniye bekleyip tekrar deneyin.' });
+      return res.status(429).json({ error: 'Çok fazla istek atıldı. Lütfen birkaç saniye bekleyin.' });
     }
 
     if (!apiRes.ok) {
@@ -40,6 +39,12 @@ export default async function handler(req, res) {
     }
 
     const data = await apiRes.json();
+
+    // API bir hata mesajı döndüyse
+    if (data.errors && Object.keys(data.errors).length > 0) {
+      console.error('API Error:', data.errors);
+      return res.status(200).json([]);
+    }
 
     if (!data.response || data.response.length === 0) {
       return res.status(200).json([]);
@@ -64,7 +69,6 @@ export default async function handler(req, res) {
       let statusType = 'UPCOMING';
       let minuteStr = new Date(item.fixture.date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
-      // Canlı Maç Durumları (1H, 2H, HT, ET, BT, P, LIVE)
       if (['1H', '2H', 'HT', 'ET', 'BT', 'P', 'LIVE'].includes(statusShort)) {
         statusType = 'LIVE';
         minuteStr = item.fixture.status.elapsed ? `${item.fixture.status.elapsed}'` : 'CANLI';
@@ -84,7 +88,6 @@ export default async function handler(req, res) {
       });
     });
 
-    // Ligleri belirlediğimiz öncelik sırasına göre dizme
     const sortedLeagues = Object.values(grouped).sort((a, b) => {
       const indexA = LEAGUE_PRIORITY.findIndex(l => a.rawName.toLowerCase().includes(l.toLowerCase()));
       const indexB = LEAGUE_PRIORITY.findIndex(l => b.rawName.toLowerCase().includes(l.toLowerCase()));
