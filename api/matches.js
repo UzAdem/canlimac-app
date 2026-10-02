@@ -4,7 +4,6 @@ export default async function handler(req, res) {
 
   const API_KEY = 'b7c05318e6f74af0a016b3e56c5e3015';
 
-  // İstekten gelen tarihi al (Yoksa bugünün tarihini al)
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
@@ -15,11 +14,19 @@ export default async function handler(req, res) {
       }
     });
 
+    if (apiRes.status === 429) {
+      return res.status(429).json({ error: 'Çok fazla istek atıldı. Lütfen birkaç saniye bekleyip tekrar deneyin.' });
+    }
+
     if (!apiRes.ok) {
-      throw new Error('API Hatası');
+      return res.status(apiRes.status).json({ error: 'API isteği başarısız oldu.' });
     }
 
     const data = await apiRes.json();
+
+    if (!data.matches || data.matches.length === 0) {
+      return res.status(200).json([]);
+    }
 
     const grouped = {};
 
@@ -59,4 +66,5 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: 'Canlı veriler çekilirken bir sorun oluştu.' });
   }
-}
+        }
+                                             
