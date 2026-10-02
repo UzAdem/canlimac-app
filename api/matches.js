@@ -7,39 +7,43 @@ export default async function handler(req, res) {
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
-  // Sadece İstediğimiz Majör Liglerin ID Liste Sınırlaması:
+  // Göstermek istediğimiz liglerin ID listesi
   // 203: Türkiye Süper Lig
   // 204: Türkiye TFF 1. Lig
   // 39:  İngiltere Premier League
   // 140: İspanya La Liga
   // 78:  Almanya Bundesliga
   // 135: İtalya Serie A
-  const TARGET_LEAGUES = [203, 204, 39, 140, 78, 135];
+  const ALLOWED_LEAGUES = [203, 204, 39, 140, 78, 135];
 
   try {
-    // Tüm odak ligler için paralel istek atıyoruz (Geçmiş/Gelecek sınırı olmadan veriyi kesin getirir)
-    const fetchPromises = TARGET_LEAGUES.map(leagueId =>
-      fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
-        headers: { 'x-apisports-key': API_KEY }
-      }).then(r => r.ok ? r.json() : { response: [] })
-    );
-
-    const results = await Promise.all(fetchPromises);
-    let allFixtures = [];
-
-    results.forEach(resData => {
-      if (resData.response && resData.response.length > 0) {
-        allFixtures.push(...resData.response);
-      }
+    // Sadece TEK BİR istek atıyoruz (Rate Limit engeline takılmamak için)
+    const apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}&timezone=Europe/Istanbul`, {
+      headers: { 'x-apisports-key': API_KEY }
     });
 
-    if (allFixtures.length === 0) {
+    if (!apiRes.ok) {
+      return res.status(200).json([]);
+    }
+
+    const data = await apiRes.json();
+
+    if (!data.response || data.response.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // Gelen tüm maçların içinden SADECE bizim seçtiğimiz ligleri filtreliyoruz
+    const filteredMatches = data.response.filter(item => 
+      ALLOWED_LEAGUES.includes(item.league.id)
+    );
+
+    if (filteredMatches.length === 0) {
       return res.status(200).json([]);
     }
 
     const grouped = {};
 
-    allFixtures.forEach(item => {
+    filteredMatches.forEach(item => {
       const leagueName = item.league.name;
       const country = item.league.country;
       const leagueDisplayName = `${country} - ${leagueName}`;
