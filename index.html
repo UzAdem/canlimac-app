@@ -10,15 +10,11 @@
             --card-bg: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent-green: #22c55e; /* Canlı maç yeşili */
+            --accent-green: #22c55e;
             --border-color: #334155;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -43,9 +39,6 @@
             font-size: 1.3rem;
             font-weight: 800;
             color: var(--accent-green);
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .container {
@@ -54,7 +47,6 @@
             padding: 0 12px;
         }
 
-        /* Lig Başlığı */
         .league-header {
             background: #162032;
             padding: 12px;
@@ -63,9 +55,6 @@
             color: #e2e8f0;
             border-radius: 8px 8px 0 0;
             margin-top: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             border: 1px solid var(--border-color);
             border-bottom: none;
         }
@@ -76,7 +65,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* Maç Kartı */
         .match-card {
             background: var(--card-bg);
             padding: 12px 16px;
@@ -86,14 +74,8 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .match-card:last-child {
-            border-bottom: none;
-        }
-
-        /* Canlı Maç Vurgusu */
-        .match-card.is-live {
-            background: #182635; /* Canlı maçlara hafif yeşilimsi/farklı arka plan */
-        }
+        .match-card:last-child { border-bottom: none; }
+        .match-card.is-live { background: #182635; }
 
         .match-info {
             display: flex;
@@ -103,18 +85,11 @@
             font-size: 0.8rem;
         }
 
-        .time {
-            color: var(--text-muted);
-            font-weight: 600;
-        }
+        .time { color: var(--text-muted); font-weight: 600; }
 
-        /* Canlı Dakika Yeşil Efekti */
         .status-live {
             color: var(--accent-green);
             font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 4px;
             animation: pulse 1.5s infinite;
         }
 
@@ -133,19 +108,12 @@
         }
 
         .team {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-size: 0.95rem;
             font-weight: 500;
             color: #cbd5e1;
         }
 
-        /* Canlı maçtaki takım adları ve skorlar yeşil */
-        .is-live .team {
-            color: #ffffff;
-            font-weight: 600;
-        }
+        .is-live .team { color: #ffffff; font-weight: 600; }
 
         .scores {
             display: flex;
@@ -163,6 +131,12 @@
             font-size: 1.05rem;
             font-weight: 800;
         }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
     </style>
 </head>
 <body>
@@ -171,103 +145,58 @@
         <div class="logo">⚽ CANLIMAÇ</div>
     </header>
 
-    <div class="container">
-
-        <!-- 🇹🇷 TÜRKİYE SÜPER LİG -->
-        <div class="league-header">
-            🇹🇷 Türkiye Trendyol Süper Lig
-        </div>
-        <div class="league-box">
-            <!-- Canlı Maç (Yeşil) -->
-            <div class="match-card is-live">
-                <div class="match-info">
-                    <span class="status-live">67'</span>
-                </div>
-                <div class="teams">
-                    <div class="team">Galatasaray</div>
-                    <div class="team">Fenerbahçe</div>
-                </div>
-                <div class="scores">
-                    <span class="score-live">2</span>
-                    <span class="score-live">1</span>
-                </div>
-            </div>
-
-            <!-- Biten Maç -->
-            <div class="match-card">
-                <div class="match-info">
-                    <span class="time">MS</span>
-                </div>
-                <div class="teams">
-                    <div class="team">Beşiktaş</div>
-                    <div class="team">Trabzonspor</div>
-                </div>
-                <div class="scores">
-                    <span>1</span>
-                    <span>0</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 🏴󠁧󠁢󠁥󠁮󠁧󠁿 İNGİLTERE PREMİER LİG -->
-        <div class="league-header">
-            🏴󠁧󠁢󠁥󠁮󠁧󠁿 İngiltere Premier Lig
-        </div>
-        <div class="league-box">
-            <!-- Canlı Maç (Yeşil) -->
-            <div class="match-card is-live">
-                <div class="match-info">
-                    <span class="status-live">34'</span>
-                </div>
-                <div class="teams">
-                    <div class="team">Arsenal</div>
-                    <div class="team">Chelsea</div>
-                </div>
-                <div class="scores">
-                    <span class="score-live">0</span>
-                    <span class="score-live">0</span>
-                </div>
-            </div>
-
-            <!-- Başlamamış Maç -->
-            <div class="match-card">
-                <div class="match-info">
-                    <span class="time">22:00</span>
-                </div>
-                <div class="teams">
-                    <div class="team">Manchester City</div>
-                    <div class="team">Liverpool</div>
-                </div>
-                <div class="scores">
-                    <span>-</span>
-                    <span>-</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 🇪🇸 İSPANYA LA LİGA -->
-        <div class="league-header">
-            🇪🇸 İspanya La Liga
-        </div>
-        <div class="league-box">
-            <!-- Başlamamış Maç -->
-            <div class="match-card">
-                <div class="match-info">
-                    <span class="time">23:00</span>
-                </div>
-                <div class="teams">
-                    <div class="team">Real Madrid</div>
-                    <div class="team">Barcelona</div>
-                </div>
-                <div class="scores">
-                    <span>-</span>
-                    <span>-</span>
-                </div>
-            </div>
-        </div>
-
+    <div class="container" id="app">
+        <div class="loading">Maçlar yükleniyor...</div>
     </div>
 
-</body>
-                </html>
+    <script>
+        async function loadMatches() {
+            try {
+                const response = await fetch('/api/matches');
+                const leagues = await response.json();
                 
+                const container = document.getElementById('app');
+                container.innerHTML = '';
+
+                leagues.forEach(group => {
+                    const leagueHeader = `<div class="league-header">${group.league}</div>`;
+                    
+                    let matchesHTML = '';
+                    group.matches.forEach(m => {
+                        const isLive = m.status === 'LIVE';
+                        const timeClass = isLive ? 'status-live' : 'time';
+                        const scoreClass = isLive ? 'score-live' : '';
+                        const cardClass = isLive ? 'match-card is-live' : 'match-card';
+
+                        matchesHTML += `
+                            <div class="${cardClass}">
+                                <div class="match-info">
+                                    <span class="${timeClass}">${m.minute}</span>
+                                </div>
+                                <div class="teams">
+                                    <div class="team">${m.homeTeam}</div>
+                                    <div class="team">${m.awayTeam}</div>
+                                </div>
+                                <div class="scores">
+                                    <span class="${scoreClass}">${m.homeScore}</span>
+                                    <span class="${scoreClass}">${m.awayScore}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML += leagueHeader + `<div class="league-box">${matchesHTML}</div>`;
+                });
+            } catch (err) {
+                document.getElementById('app').innerHTML = '<div class="loading">Veriler alınırken bir hata oluştu.</div>';
+            }
+        }
+
+        // İlk yükleme
+        loadMatches();
+
+        // 30 saniyede bir otomatik güncelleme
+        setInterval(loadMatches, 30000);
+    </script>
+</body>
+</html>
