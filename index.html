@@ -41,6 +41,7 @@
             color: var(--accent-green);
         }
 
+        /* Tarih Barı & Takvim */
         .date-bar {
             display: flex;
             align-items: center;
@@ -50,6 +51,7 @@
             border-bottom: 1px solid var(--border-color);
             max-width: 600px;
             margin: 0 auto;
+            gap: 10px;
         }
 
         .date-btn {
@@ -63,10 +65,17 @@
             font-weight: 600;
         }
 
-        .current-date {
-            font-weight: 700;
-            font-size: 0.95rem;
+        .date-input {
+            background: var(--card-bg);
             color: var(--accent-green);
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            outline: none;
+            color-scheme: dark;
+            cursor: pointer;
         }
 
         .container {
@@ -166,7 +175,7 @@
 
     <div class="date-bar">
         <button class="date-btn" onclick="changeDate(-1)">❮ Önceki</button>
-        <span class="current-date" id="dateLabel">Bugün</span>
+        <input type="date" id="datePicker" class="date-input" onchange="onDateSelect(this.value)">
         <button class="date-btn" onclick="changeDate(1)">Sonraki ❯</button>
     </div>
 
@@ -181,21 +190,21 @@
             return d.toISOString().split('T')[0];
         }
 
-        function updateDateLabel() {
-            const today = new Date();
-            if (formatDate(currentDate) === formatDate(today)) {
-                document.getElementById('dateLabel').innerText = 'Bugün';
-            } else {
-                document.getElementById('dateLabel').innerText = currentDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
-            }
+        function updateDatePicker() {
+            document.getElementById('datePicker').value = formatDate(currentDate);
         }
 
         async function loadMatches() {
             try {
-                updateDateLabel();
+                updateDatePicker();
                 const response = await fetch(`/api/matches?date=${formatDate(currentDate)}`);
-                const leagues = await response.json();
                 
+                if (response.status === 429) {
+                    document.getElementById('app').innerHTML = '<div class="loading">Çok fazla istek atıldı. Lütfen 5 saniye bekleyin.</div>';
+                    return;
+                }
+
+                const leagues = await response.json();
                 const container = document.getElementById('app');
                 container.innerHTML = '';
 
@@ -244,8 +253,14 @@
             loadMatches();
         }
 
+        function onDateSelect(selectedDateStr) {
+            if (!selectedDateStr) return;
+            currentDate = new Date(selectedDateStr);
+            document.getElementById('app').innerHTML = '<div class="loading">Yükleniyor...</div>';
+            loadMatches();
+        }
+
         loadMatches();
-        setInterval(loadMatches, 30000);
     </script>
 </body>
 </html>
