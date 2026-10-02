@@ -7,52 +7,42 @@ export default async function handler(req, res) {
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
-  const LEAGUE_PRIORITY = [
-    'Super Lig',
-    'UEFA Champions League',
-    'UEFA Europa League',
-    'Euro Championship',
-    'World Cup',
-    'Friendlies',
-    'Premier League',
-    'La Liga',
-    'Serie A',
-    'Bundesliga',
-    '1. Lig',
-    'Cup'
-  ];
+  // Süper Lig ve Popüler Liglerin ID Listesi (Önemli Ligler)
+  // 203: Süper Lig, 39: Premier League, 140: La Liga, 135: Serie A, 78: Bundesliga, 2: Champions League, 3: Europa League, 204: TFF 1. Lig
+  const PRIORITY_LEAGUES = [203, 39, 140, 135, 78, 2, 3, 204];
 
   try {
-    // timezone=Europe/Istanbul eklenerek Türkiye saatine göre tam maç listesi çekilir
-    const apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}&timezone=Europe/Istanbul`, {
-      headers: {
-        'x-apisports-key': API_KEY
-      }
+    // 1. Önce genel günlük isteği atıyoruz
+    let apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?date=${targetDate}&timezone=Europe/Istanbul`, {
+      headers: { 'x-apisports-key': API_KEY }
     });
 
-    if (apiRes.status === 429) {
-      return res.status(429).json({ error: 'Çok fazla istek atıldı. Lütfen birkaç saniye bekleyin.' });
+    let data = await apiRes.json();
+    let allFixtures = data.response || [];
+
+    // 2. Eğer ileri bir tarihse ve genel istek boş geldiyse, popüler liglerin fikstüründen filtreleme yapıyoruz
+    if (allFixtures.length === 0) {
+      const fetchPromises = PRIORITY_LEAGUES.map(leagueId =>
+        fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
+          headers: { 'x-apisports-key': API_KEY }
+        }).then(r => r.json())
+      );
+
+      const results = await Promise.all(fetchPromises);
+      results.forEach(resData => {
+        if (resData.response && resData.response.length > 0) {
+          allFixtures.push(...resData.response);
+        }
+      });
     }
 
-    if (!apiRes.ok) {
-      return res.status(apiRes.status).json({ error: 'API isteği başarısız oldu.' });
-    }
-
-    const data = await apiRes.json();
-
-    // API bir hata mesajı döndüyse
-    if (data.errors && Object.keys(data.errors).length > 0) {
-      console.error('API Error:', data.errors);
-      return res.status(200).json([]);
-    }
-
-    if (!data.response || data.response.length === 0) {
+    if (allFixtures.length === 0) {
       return res.status(200).json([]);
     }
 
     const grouped = {};
 
-    data.response.forEach(item => {
+    allFixtures.forEach(item => {
       const leagueName = item.league.name;
       const country = item.league.country;
       const leagueDisplayName = `${country ? country + ' - ' : ''}${leagueName}`;
@@ -88,17 +78,7 @@ export default async function handler(req, res) {
       });
     });
 
-    const sortedLeagues = Object.values(grouped).sort((a, b) => {
-      const indexA = LEAGUE_PRIORITY.findIndex(l => a.rawName.toLowerCase().includes(l.toLowerCase()));
-      const indexB = LEAGUE_PRIORITY.findIndex(l => b.rawName.toLowerCase().includes(l.toLowerCase()));
-
-      const orderA = indexA === -1 ? 999 : indexA;
-      const orderB = indexB === -1 ? 999 : indexB;
-
-      return orderA - orderB;
-    });
-
-    res.status(200).json(sortedLeagues);
+    res.status(200).json(Object.values(grouped));
   } catch (error) {
     res.status(500).json({ error: 'Canlı veriler çekilirken bir sorun oluştu.' });
   }
