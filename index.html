@@ -167,6 +167,8 @@
       position: relative;
       border: 1px solid #334155;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      max-height: 80vh;
+      overflow-y: auto;
     }
 
     .close-btn {
@@ -205,27 +207,43 @@
       color: #22c55e;
     }
 
-    .tab-bar {
-      display: flex;
-      justify-content: space-around;
-      border-bottom: 1px solid #1e293b;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
+    .section-title {
       font-size: 13px;
       font-weight: bold;
       color: #22c55e;
+      margin: 15px 0 10px 0;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 5px;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #1e293b;
       font-size: 13px;
     }
 
     .detail-label {
       color: #94a3b8;
+    }
+
+    .event-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .event-minute {
+      background: #1e293b;
+      color: #22c55e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 11px;
     }
   </style>
 </head>
@@ -256,19 +274,18 @@
         <div class="modal-score" id="mScore">0 - 0</div>
       </div>
 
-      <div class="tab-bar">
-        <span>MAÇ BİLGİSİ & DETAY</span>
+      <div class="detail-row">
+        <span class="detail-label">Durum / Dakika</span>
+        <span id="mStatus" style="color:#22c55e; font-weight:bold;">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Stadyum</span>
+        <span id="mVenue">-</span>
       </div>
 
-      <div id="mBody">
-        <div class="detail-row">
-          <span class="detail-label">Durum / Dakika</span>
-          <span id="mStatus" style="color:#22c55e; font-weight:bold;">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Stadyum</span>
-          <span id="mVenue">-</span>
-        </div>
+      <div class="section-title">MAÇ OLAYLARI (GOLLER & KARTLAR)</div>
+      <div id="mEvents">
+        <div style="font-size:12px; color:#94a3b8;">Olay bilgisi bulunmuyor.</div>
       </div>
     </div>
   </div>
@@ -357,6 +374,23 @@
       document.getElementById('mStatus').innerText = match.minute;
       document.getElementById('mVenue').innerText = match.venue || 'Belirtilmedi';
 
+      // Goller ve Kartlar
+      const eventsContainer = document.getElementById('mEvents');
+      if (match.details && match.details.length > 0) {
+        let eventsHtml = '';
+        match.details.forEach(e => {
+          eventsHtml += `
+            <div class="event-item">
+              <span class="event-minute">${e.clock || '•'}</span>
+              <span><b>${e.type}</b> - ${e.summary}</span>
+            </div>
+          `;
+        });
+        eventsContainer.innerHTML = eventsHtml;
+      } else {
+        eventsContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:5px 0;">Henüz önemli bir olay (gol/kart) kaydedilmedi.</div>';
+      }
+
       document.getElementById('matchModal').style.display = 'flex';
     }
 
@@ -367,5 +401,4 @@
     fetchMatches();
   </script>
 </body>
-    </html>
-    
+</html>
