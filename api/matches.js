@@ -16,34 +16,17 @@ export default async function handler(req, res) {
     { slug: 'ita.1', region: 'İtalya', defaultName: 'Serie A' }
   ];
 
-  // İngilizce Ulke/Takim Isimlerini Türkçe Yapma Sözlüğü
   const TR_TRANSLATIONS = {
-    'Belgium': 'Belçika',
-    'Turkey': 'Türkiye',
-    'Türkiye': 'Türkiye',
-    'France': 'Fransa',
-    'Italy': 'İtalya',
-    'Hungary': 'Macaristan',
-    'Georgia': 'Gürcistan',
-    'Poland': 'Polonya',
-    'Romania': 'Romanya',
-    'Bosnia-Herzegovina': 'Bosna-Hersek',
-    'Sweden': 'İsveç',
-    'Faroe Islands': 'Faroe Adaları',
-    'Slovakia': 'Slovakya',
-    'Kazakhstan': 'Kazakistan',
-    'Moldova': 'Moldova',
-    'Cyprus': 'Kıbrıs Rum Kesimi',
-    'Armenia': 'Ermenistan',
-    'Latvia': 'Letonya',
-    'Montenegro': 'Karadağ',
-    'Ukraine': 'Ukrayna',
-    'Germany': 'Almanya',
-    'Spain': 'İspanya',
-    'England': 'İngiltere',
-    'Netherlands': 'Hollanda',
-    'Portugal': 'Portekiz',
-    'Croatia': 'Hırvatistan'
+    'Belgium': 'Belçika', 'Turkey': 'Türkiye', 'Türkiye': 'Türkiye',
+    'France': 'Fransa', 'Italy': 'İtalya', 'Hungary': 'Macaristan',
+    'Georgia': 'Gürcistan', 'Poland': 'Polonya', 'Romania': 'Romanya',
+    'Bosnia-Herzegovina': 'Bosna-Hersek', 'Sweden': 'İsveç',
+    'Faroe Islands': 'Faroe Adaları', 'Slovakia': 'Slovakya',
+    'Kazakhstan': 'Kazakistan', 'Moldova': 'Moldova',
+    'Cyprus': 'Kıbrıs Rum Kesimi', 'Armenia': 'Ermenistan',
+    'Latvia': 'Letonya', 'Montenegro': 'Karadağ', 'Ukraine': 'Ukrayna',
+    'Germany': 'Almanya', 'Spain': 'İspanya', 'England': 'İngiltere',
+    'Netherlands': 'Hollanda', 'Portugal': 'Portekiz', 'Croatia': 'Hırvatistan'
   };
 
   try {
@@ -63,7 +46,6 @@ export default async function handler(req, res) {
           const home = competition.competitors.find(c => c.homeAway === 'home');
           const away = competition.competitors.find(c => c.homeAway === 'away');
 
-          // Ham "league-phase" gibi İngilizce terimleri temizliyoruz
           let groupDetail = '';
           if (competition.type && competition.type.text) {
             let typeText = competition.type.text.replace(/league-phase/gi, 'Lig Aşaması').replace(/group-stage/gi, 'Grup Aşaması');
@@ -89,7 +71,7 @@ export default async function handler(req, res) {
 
           if (statusState === 'in') {
             statusType = 'LIVE';
-            minuteStr = `${event.status.displayClock || 'CANLI'}`;
+            minuteStr = `${event.status.displayClock || 'CANLI'}'`;
           } else if (statusState === 'post') {
             statusType = 'FINISHED';
             minuteStr = 'MS';
@@ -98,15 +80,23 @@ export default async function handler(req, res) {
           const rawHome = home.team.displayName;
           const rawAway = away.team.displayName;
 
+          // Gol ve Kart Olaylarını Toplama
+          const matchEvents = (competition.details || []).map(d => ({
+            clock: d.clock ? d.clock.displayValue : '',
+            type: d.type ? d.type.text : '',
+            summary: d.athletesIn && d.athletesIn.length > 0 ? d.athletesIn[0].displayName : (d.team ? d.team.displayName : '')
+          }));
+
           groupedMap[fullLeagueTitle].matches.push({
             id: event.id,
             homeTeam: TR_TRANSLATIONS[rawHome] || rawHome,
             awayTeam: TR_TRANSLATIONS[rawAway] || rawAway,
-            homeScore: home.score ?? '-',
-            awayScore: away.score ?? '-',
+            homeScore: home.score ?? '0',
+            awayScore: away.score ?? '0',
             status: statusType,
             minute: minuteStr,
-            venue: competition.venue ? competition.venue.fullName : ''
+            venue: competition.venue ? competition.venue.fullName : 'Belirtilmedi',
+            details: matchEvents
           });
         });
       }
