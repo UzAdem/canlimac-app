@@ -3,11 +3,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET');
 
   const { date } = req.query;
-  // Format: YYYYMMDD (Örn: 20261010)
   const formattedDate = date ? date.replace(/-/g, '') : new Date().toISOString().split('T')[0].replace(/-/g, '');
 
-  // ESPN Lig Kodları
+  // Kulüp ve Milli Takım Lig Kodları
   const LEAGUES = [
+    { slug: 'fifa.nations', name: 'UEFA Uluslar Ligi / Milli Maçlar' },
+    { slug: 'fifa.friendly', name: 'Hazırlık Maçları (Milli)' },
     { slug: 'tur.1', name: 'Türkiye - Süper Lig' },
     { slug: 'eng.1', name: 'İngiltere - Premier League' },
     { slug: 'esp.1', name: 'İspanya - La Liga' },
@@ -32,7 +33,7 @@ export default async function handler(req, res) {
           const home = competition.competitors.find(c => c.homeAway === 'home');
           const away = competition.competitors.find(c => c.homeAway === 'away');
           
-          const statusState = event.status.type.state; // 'pre', 'in', 'post'
+          const statusState = event.status.type.state;
           let statusType = 'UPCOMING';
           let minuteStr = new Date(event.date).toLocaleTimeString('tr-TR', {
             hour: '2-digit',
@@ -69,6 +70,6 @@ export default async function handler(req, res) {
 
     res.status(200).json(grouped);
   } catch (error) {
-    res.status(500).json({ error: 'ESPN verileri çekilirken bir sorun oluştu.' });
+    res.status(500).json({ error: 'Veriler çekilirken bir sorun oluştu.' });
   }
 }
