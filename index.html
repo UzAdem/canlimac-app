@@ -5,36 +5,269 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CANLIMAÇ - Canlı Skorlar</title>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #22c55e; /* Canlı maç yeşili */
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-            margin: 0;
-            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 30px;
         }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .container {
-            max-width: 500px;
-            margin: 0 auto;
+            max-width: 600px;
+            margin: 15px auto;
+            padding: 0 12px;
         }
-        h1 {
-            color: #22c55e;
-            text-align: center;
+
+        /* Lig Başlığı */
+        .league-header {
+            background: #162032;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            border-radius: 8px 8px 0 0;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
         }
-        .card {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
+
+        .league-box {
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Maç Kartı */
+        .match-card {
+            background: var(--card-bg);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .match-card:last-child {
+            border-bottom: none;
+        }
+
+        /* Canlı Maç Vurgusu */
+        .match-card.is-live {
+            background: #182635; /* Canlı maçlara hafif yeşilimsi/farklı arka plan */
+        }
+
+        .match-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 50px;
+            font-size: 0.8rem;
+        }
+
+        .time {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Canlı Dakika Yeşil Efekti */
+        .status-live {
+            color: var(--accent-green);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .teams {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 15px;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        /* Canlı maçtaki takım adları ve skorlar yeşil */
+        .is-live .team {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .scores {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            min-width: 20px;
             text-align: center;
+            color: var(--text-muted);
+        }
+
+        .score-live {
+            color: var(--accent-green);
+            font-size: 1.05rem;
+            font-weight: 800;
         }
     </style>
 </head>
 <body>
+
+    <header>
+        <div class="logo">⚽ CANLIMAÇ</div>
+    </header>
+
     <div class="container">
-        <h1>⚽ CANLIMAÇ</h1>
-        <div class="card">
-            <p>Sistem yayında! Maç verileri hazırlanıyor...</p>
+
+        <!-- 🇹🇷 TÜRKİYE SÜPER LİG -->
+        <div class="league-header">
+            🇹🇷 Türkiye Trendyol Süper Lig
         </div>
+        <div class="league-box">
+            <!-- Canlı Maç (Yeşil) -->
+            <div class="match-card is-live">
+                <div class="match-info">
+                    <span class="status-live">67'</span>
+                </div>
+                <div class="teams">
+                    <div class="team">Galatasaray</div>
+                    <div class="team">Fenerbahçe</div>
+                </div>
+                <div class="scores">
+                    <span class="score-live">2</span>
+                    <span class="score-live">1</span>
+                </div>
+            </div>
+
+            <!-- Biten Maç -->
+            <div class="match-card">
+                <div class="match-info">
+                    <span class="time">MS</span>
+                </div>
+                <div class="teams">
+                    <div class="team">Beşiktaş</div>
+                    <div class="team">Trabzonspor</div>
+                </div>
+                <div class="scores">
+                    <span>1</span>
+                    <span>0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🏴󠁧󠁢󠁥󠁮󠁧󠁿 İNGİLTERE PREMİER LİG -->
+        <div class="league-header">
+            🏴󠁧󠁢󠁥󠁮󠁧󠁿 İngiltere Premier Lig
+        </div>
+        <div class="league-box">
+            <!-- Canlı Maç (Yeşil) -->
+            <div class="match-card is-live">
+                <div class="match-info">
+                    <span class="status-live">34'</span>
+                </div>
+                <div class="teams">
+                    <div class="team">Arsenal</div>
+                    <div class="team">Chelsea</div>
+                </div>
+                <div class="scores">
+                    <span class="score-live">0</span>
+                    <span class="score-live">0</span>
+                </div>
+            </div>
+
+            <!-- Başlamamış Maç -->
+            <div class="match-card">
+                <div class="match-info">
+                    <span class="time">22:00</span>
+                </div>
+                <div class="teams">
+                    <div class="team">Manchester City</div>
+                    <div class="team">Liverpool</div>
+                </div>
+                <div class="scores">
+                    <span>-</span>
+                    <span>-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🇪🇸 İSPANYA LA LİGA -->
+        <div class="league-header">
+            🇪🇸 İspanya La Liga
+        </div>
+        <div class="league-box">
+            <!-- Başlamamış Maç -->
+            <div class="match-card">
+                <div class="match-info">
+                    <span class="time">23:00</span>
+                </div>
+                <div class="teams">
+                    <div class="team">Real Madrid</div>
+                    <div class="team">Barcelona</div>
+                </div>
+                <div class="scores">
+                    <span>-</span>
+                    <span>-</span>
+                </div>
+            </div>
+        </div>
+
     </div>
+
 </body>
-</html>
+                </html>
+                
