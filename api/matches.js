@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const { date, league } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
 
-  // Replit tarafında kullandığımız lig ID haritası
+  // Replit arayüzünde kullanılan lig slug/ID eşleşmeleri
   const LEAGUE_MAP = {
     'super-lig': 203,
     'premier-league': 39,
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   };
 
   try {
-    // Eğer ön yüzden belirli bir lig seçildiyse (Replit'teki menü mantığı)
+    // 1. Durum: Ön yüz spesifik bir lig istediğinde (&league=super-lig gibi)
     if (league && LEAGUE_MAP[league]) {
       const leagueId = LEAGUE_MAP[league];
       const apiRes = await fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
@@ -26,36 +26,50 @@ export default async function handler(req, res) {
       });
 
       const data = await apiRes.json();
-      const matches = formatMatches(data.response || []);
-      
+      const formattedMatches = formatMatches(data.response || []);
+
       return res.status(200).json([{
-        league: getLeagueTitle(league),
-        matches: matches
+        league: 'Türkiye Süper Ligi',
+        matches: formattedMatches
       }]);
     }
 
-    // Seçim yoksa öncelikli liglerin hepsini Replit usulü paralel sorgula
-    const targetLeagues = Object.values(LEAGUE_MAP);
-    const fetchPromises = targetLeagues.map(id =>
+    // 2. Durum: Ön yüz lig parametresi göndermeyip sadece tarih gönderdiğinde
+    // Önce Süper Lig (203) verisini doğrudan çekiyoruz
+    const superLigRes = await fetch(`https://v3.football.api-sports.io/fixtures?league=203&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
+      headers: { 'x-apisports-key': API_KEY }
+    });
+
+    const superLigData = await superLigRes.json();
+    const result = [];
+
+    if (superLigData.response && superLigData.response.length > 0) {
+      result.push({
+        league: 'Türkiye - Süper Lig',
+        matches: formatMatches(superLigData.response)
+      });
+    }
+
+    // Diğer ligleri de tek istek sınırına takılmadan arkadan sorgula
+    const otherLeagues = [39, 140, 78, 135];
+    const fetchPromises = otherLeagues.map(id =>
       fetch(`https://v3.football.api-sports.io/fixtures?league=${id}&season=2026&date=${targetDate}&timezone=Europe/Istanbul`, {
         headers: { 'x-apisports-key': API_KEY }
       }).then(r => r.ok ? r.json() : { response: [] })
     );
 
-    const results = await Promise.all(fetchPromises);
-    const grouped = [];
-
-    results.forEach(resData => {
+    const otherResults = await Promise.all(fetchPromises);
+    otherResults.forEach(resData => {
       if (resData.response && resData.response.length > 0) {
         const leagueName = `${resData.response[0].league.country} - ${resData.response[0].league.name}`;
-        grouped.push({
+        result.push({
           league: leagueName,
           matches: formatMatches(resData.response)
         });
       }
     });
 
-    res.status(200).json(grouped);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: 'Veriler çekilirken bir sorun oluştu.' });
   }
@@ -83,19 +97,7 @@ function formatMatches(fixtures) {
       awayScore: item.goals.away ?? '-',
       status: statusType,
       minute: minuteStr,
-      venue: item.fixture.venue.name || ''
+      venue: item.fixture.venue ? item.fixture.venue.name : ''
     };
   });
-}
-
-function getLeagueTitle(slug) {
-  const titles = {
-    'super-lig': 'Türkiye - Süper Lig',
-    'premier-league': 'İngiltere - Premier League',
-    'la-liga': 'İspanya - La Liga',
-    'bundesliga': 'Almanya - Bundesliga',
-    'serie-a': 'İtalya - Serie A',
-    'tff-1-lig': 'Türkiye - TFF 1. Lig'
-  };
-  return titles[slug] || 'Futbol';
 }
