@@ -5,10 +5,11 @@ export default async function handler(req, res) {
   const { date } = req.query;
   const formattedDate = date ? date.replace(/-/g, '') : new Date().toISOString().split('T')[0].replace(/-/g, '');
 
-  // Kulüp ve Milli Takım Lig Kodları
+  // Doğru ESPN Lig Kodları
   const LEAGUES = [
-    { slug: 'fifa.nations', name: 'UEFA Uluslar Ligi / Milli Maçlar' },
+    { slug: 'uefa.nations', name: 'UEFA Uluslar Ligi' },
     { slug: 'fifa.friendly', name: 'Hazırlık Maçları (Milli)' },
+    { slug: 'uefa.euro.q', name: 'Euro Elemeleri' },
     { slug: 'tur.1', name: 'Türkiye - Süper Lig' },
     { slug: 'eng.1', name: 'İngiltere - Premier League' },
     { slug: 'esp.1', name: 'İspanya - La Liga' },
