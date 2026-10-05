@@ -37,32 +37,51 @@ module.exports = async (req, res) => {
       });
     }
 
-    // 2. İstatistikler (Gol, Asist, Kartlar)
+    // 2. İstatistikler (Gol & Asist Krallığı)
     const leadersUrl = `https://site.web.api.espn.com/apis/site/v2/sports/soccer/${slug}/leaders`;
     const leadersRes = await fetch(leadersUrl);
-    let leadersData = {};
+    let goals = [];
+    let assists = [];
 
     if (leadersRes.ok) {
       const lJson = await leadersRes.json();
-      const categories = lJson.leaders || [];
+      const categories = lJson.leaders || lJson.categories || [];
 
       categories.forEach(cat => {
-        leadersData[cat.name] = cat.leaders.map(item => ({
-          rank: item.rank,
-          player: item.athlete.displayName,
-          team: item.athlete.team?.displayName || '',
-          value: item.displayValue
-        }));
+        const catName = (cat.name || cat.displayName || '').toLowerCase();
+        
+        // Gol Krallığı Kriterleri
+        if (catName.includes('goal') || catName.includes('scoring') || catName === 'g') {
+          goals = (cat.leaders || []).map(item => ({
+            rank: item.rank || '-',
+            player: item.athlete?.displayName || item.athlete?.fullName || 'Bilinmiyor',
+            team: item.athlete?.team?.displayName || item.team?.displayName || '',
+            value: item.displayValue || item.value || '0'
+          }));
+        }
+
+        // Asist Krallığı Kriterleri
+        if (catName.includes('assist') || catName === 'a') {
+          assists = (cat.leaders || []).map(item => ({
+            rank: item.rank || '-',
+            player: item.athlete?.displayName || item.athlete?.fullName || 'Bilinmiyor',
+            team: item.athlete?.team?.displayName || item.team?.displayName || '',
+            value: item.displayValue || item.value || '0'
+          }));
+        }
       });
     }
 
     res.status(200).json({
       standings: standingsData,
-      leaders: leadersData
+      leaders: {
+        goals: goals,
+        assists: assists
+      }
     });
 
   } catch (error) {
     res.status(500).json({ error: 'Lig detayları alınamadı.' });
   }
 };
-          
+        
