@@ -26,6 +26,7 @@
       background-color: #121926;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     header {
@@ -74,11 +75,25 @@
 
     .league-header {
       background-color: #1a2536;
-      padding: 8px 15px;
+      padding: 10px 15px;
       font-size: 13px;
       font-weight: bold;
-      color: #94a3b8;
+      color: #00e676;
       border-bottom: 1px solid #232f42;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .league-header:hover {
+      background-color: #232f42;
+    }
+
+    .league-header::after {
+      content: '➔';
+      font-size: 11px;
+      color: #94a3b8;
     }
 
     .match-card {
@@ -110,16 +125,11 @@
       align-items: center;
       gap: 6px;
       flex: 1;
-      min-width: 0; /* Taşan yazıları engeller */
+      min-width: 0;
     }
 
-    .team-box.home {
-      justify-content: flex-end;
-    }
-
-    .team-box.away {
-      justify-content: flex-start;
-    }
+    .team-box.home { justify-content: flex-end; }
+    .team-box.away { justify-content: flex-start; }
 
     .team-name {
       font-weight: 500;
@@ -145,19 +155,130 @@
       padding: 0 4px;
     }
 
-    .score-box.live {
-      color: #00e676;
-    }
-
-    .score-box.finished {
-      color: #ffffff;
-    }
+    .score-box.live { color: #00e676; }
+    .score-box.finished { color: #ffffff; }
 
     .loading, .error-msg {
       text-align: center;
       padding: 40px 20px;
       color: #94a3b8;
     }
+
+    /* MODAL (PENCERE) STİLLERİ */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 500px;
+      height: 90vh;
+      background-color: #121926;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 15px;
+      background-color: #1a2536;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #232f42;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #00e676;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .tab-buttons {
+      display: flex;
+      background-color: #16202e;
+      border-bottom: 1px solid #232f42;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      color: #00e676;
+      border-bottom: 2px solid #00e676;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    /* PUAN DURUMU TABLOSU */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th {
+      color: #94a3b8;
+      padding: 8px 4px;
+      text-align: center;
+      border-bottom: 1px solid #232f42;
+    }
+
+    th.team-col, td.team-col {
+      text-align: left;
+    }
+
+    td {
+      padding: 8px 4px;
+      text-align: center;
+      border-bottom: 1px solid #1a2536;
+    }
+
+    .stats-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background-color: #1a2536;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .stat-player { font-weight: bold; color: #fff; }
+    .stat-team { font-size: 11px; color: #94a3b8; }
+    .stat-value { font-weight: bold; color: #00e676; }
   </style>
 </head>
 <body>
@@ -179,31 +300,44 @@
     </div>
   </div>
 
+  <!-- LİG DETAY MODALI -->
+  <div class="modal-overlay" id="league-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-league-name">Lig Detayı</span>
+        <button class="close-btn" id="close-modal">&times;</button>
+      </div>
+
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('standings')">Puan Durumu</button>
+        <button class="tab-btn" onclick="switchTab('goals')">Gol Krallığı</button>
+        <button class="tab-btn" onclick="switchTab('assists')">Asist Krallığı</button>
+      </div>
+
+      <div class="modal-body" id="modal-body">
+        <div class="loading">Yükleniyor...</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let currentDate = new Date();
+    let currentLeagueData = null;
 
-    function formatDateForApi(date) {
-      return date.toISOString().slice(0, 10);
-    }
-
+    function formatDateForApi(date) { return date.toISOString().slice(0, 10); }
     function formatDateForDisplay(date) {
       const d = String(date.getDate()).padStart(2, '0');
       const m = String(date.getMonth() + 1).padStart(2, '0');
-      const y = date.getFullYear();
-      return `${d}.${m}.${y}`;
+      return `${d}.${m}.${date.getFullYear()}`;
     }
 
     async function fetchMatches() {
       const listContainer = document.getElementById('matches-list');
-      const dateDisplay = document.getElementById('date-display');
-      
-      dateDisplay.innerText = formatDateForDisplay(currentDate);
+      document.getElementById('date-display').innerText = formatDateForDisplay(currentDate);
       listContainer.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
-      const apiDate = formatDateForApi(currentDate);
-
       try {
-        const response = await fetch(`/api/matches?date=${apiDate}`);
+        const response = await fetch(`/api/matches?date=${formatDateForApi(currentDate)}`);
         const data = await response.json();
 
         if (!data || data.length === 0) {
@@ -215,29 +349,26 @@
         data.forEach(leagueGroup => {
           html += `
             <div class="league-section">
-              <div class="league-header">${leagueGroup.league}</div>
+              <div class="league-header" onclick="openLeagueModal('${leagueGroup.matches[0].leagueSlug}', '${leagueGroup.league}')">
+                ${leagueGroup.league}
+              </div>
               ${leagueGroup.matches.map(match => {
                 let scoreText = 'v';
                 let scoreClass = '';
-
                 if (match.isStarted) {
                   scoreText = `${match.homeScore} -${match.awayScore}`;
                   scoreClass = match.status === 'in' ? 'live' : 'finished';
                 }
-
-                const homeLogoHtml = match.homeLogo ? `<img class="team-logo" src="${match.homeLogo}" alt="" onerror="this.style.display='none'">` : '';
-                const awayLogoHtml = match.awayLogo ? `<img class="team-logo" src="${match.awayLogo}" alt="" onerror="this.style.display='none'">` : '';
-
                 return `
                   <div class="match-card">
                     <div class="match-time">${match.time}</div>
                     <div class="match-teams-container">
                       <div class="team-box home">
-                        <span class="team-name">${match.homeTeam}</span>${homeLogoHtml}
+                        <span class="team-name">${match.homeTeam}</span>${match.homeLogo ? `<img class="team-logo" src="${match.homeLogo}" alt="">` : ''}
                       </div>
                       <span class="score-box ${scoreClass}">${scoreText}</span>
                       <div class="team-box away">
-                        ${awayLogoHtml}
+                        ${match.awayLogo ? `<img class="team-logo" src="${match.awayLogo}" alt="">` : ''}
                         <span class="team-name">${match.awayTeam}</span>
                       </div>
                     </div>
@@ -247,22 +378,112 @@
             </div>
           `;
         });
-
         listContainer.innerHTML = html;
       } catch (error) {
-        listContainer.innerHTML = '<div class="error-msg">Maçlar çekilirken bir hata oluştu.</div>';
+        listContainer.innerHTML = '<div class="error-msg">Veriler çekilemedi.</div>';
       }
     }
 
-    document.getElementById('prev-date').addEventListener('click', () => {
-      currentDate.setDate(currentDate.getDate() - 1);
-      fetchMatches();
-    });
+    // LİG DETAY MODALI AÇMA
+    async function openLeagueModal(slug, name) {
+      const modal = document.getElementById('league-modal');
+      const body = document.getElementById('modal-body');
+      document.getElementById('modal-league-name').innerText = name;
+      modal.style.display = 'flex';
+      body.innerHTML = '<div class="loading">Yükleniyor...</div>';
 
-    document.getElementById('next-date').addEventListener('click', () => {
-      currentDate.setDate(currentDate.getDate() + 1);
-      fetchMatches();
-    });
+      try {
+        const res = await fetch(`/api/league-details?slug=${slug}`);
+        currentLeagueData = await res.json();
+        renderStandings();
+      } catch (e) {
+        body.innerHTML = '<div class="error-msg">Lig verisi alınamadı.</div>';
+      }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (tab === 'standings') renderStandings();
+      else if (tab === 'goals') renderLeaders('g', 'Gol Krallığı');
+      else if (tab === 'assists') renderLeaders('a', 'Asist Krallığı');
+    }
+
+    function renderStandings() {
+      const body = document.getElementById('modal-body');
+      if (!currentLeagueData?.standings?.length) {
+        body.innerHTML = '<div class="loading">Puan durumu bulunamadı.</div>';
+        return;
+      }
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th class="team-col">Takım</th>
+              <th>O</th>
+              <th>G</th>
+              <th>B</th>
+              <th>M</th>
+              <th>AV</th>
+              <th>P</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      currentLeagueData.standings.forEach(t => {
+        html += `
+          <tr>
+            <td>${t.rank}</td>
+            <td class="team-col">${t.team}</td>
+            <td>${t.played}</td>
+            <td>${t.wins}</td>
+            <td>${t.draws}</td>
+            <td>${t.losses}</td>
+            <td>${t.goalDifference}</td>
+            <td><strong>${t.points}</strong></td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      body.innerHTML = html;
+    }
+
+    function renderLeaders(key, title) {
+      const body = document.getElementById('modal-body');
+      const list = currentLeagueData?.leaders?.[key] || [];
+
+      if (!list.length) {
+        body.innerHTML = `<div class="loading">${title} verisi bulunamadı.</div>`;
+        return;
+      }
+
+      let html = '<div class="stats-list">';
+      list.forEach(p => {
+        html += `
+          <div class="stat-item">
+            <div>
+              <div class="stat-player">${p.rank}. ${p.player}</div>
+              <div class="stat-team">${p.team}</div>
+            </div>
+            <div class="stat-value">${p.value}</div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      body.innerHTML = html;
+    }
+
+    document.getElementById('close-modal').onclick = () => {
+      document.getElementById('league-modal').style.display = 'none';
+    };
+
+    document.getElementById('prev-date').onclick = () => { currentDate.setDate(currentDate.getDate() - 1); fetchMatches(); };
+    document.getElementById('next-date').onclick = () => { currentDate.setDate(currentDate.getDate() + 1); fetchMatches(); };
 
     fetchMatches();
   </script>
