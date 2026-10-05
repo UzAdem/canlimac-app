@@ -13,7 +13,7 @@
     }
 
     body {
-      background-color: #0f172a;
+      background-color: #0b1329;
       color: #ffffff;
       padding-bottom: 30px;
     }
@@ -27,6 +27,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      background-color: #0b1329;
       border-bottom: 1px solid #1e293b;
     }
 
@@ -36,22 +37,23 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 15px;
-      background-color: #0f172a;
+      background-color: #0b1329;
     }
 
     .btn-nav {
       background-color: #1e293b;
       color: #ffffff;
       border: 1px solid #334155;
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 6px;
       font-size: 13px;
+      font-weight: bold;
       cursor: pointer;
     }
 
     .date-display {
       color: #00e676;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
     }
 
@@ -60,18 +62,18 @@
       color: #00e676;
       font-size: 14px;
       font-weight: bold;
-      padding: 12px 15px 6px 15px;
-      background-color: #0f172a;
+      padding: 14px 15px 8px 15px;
+      background-color: #0b1329;
     }
 
-    /* Maç Satırı CSS Grid Düzeni (Ortadaki 'v' Hizalaması) */
+    /* Maç Satırı Grid Hizalaması */
     .match-card {
       display: grid;
-      grid-template-columns: 45px 1fr 30px 1fr;
+      grid-template-columns: 50px 1fr 30px 1fr;
       align-items: center;
       padding: 10px 12px;
-      background-color: #111827;
-      border-bottom: 1px solid #1f2937;
+      background-color: #111a33;
+      border-bottom: 1px solid #1a243f;
     }
 
     .match-time {
@@ -87,13 +89,13 @@
       gap: 8px;
       text-align: right;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* İp Gibi Dümdüz Alt Alta Hizalayan Merkez Skor/v Alanı */
+    /* Dümdüz Alt Alta Ortalanmış 'v' / Skor Alanı */
     .match-score {
       display: flex;
       justify-content: center;
@@ -111,7 +113,7 @@
       gap: 8px;
       text-align: left;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -128,6 +130,7 @@
       text-align: center;
       padding: 40px;
       color: #9ca3af;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -150,17 +153,17 @@
   <script>
     let currentDate = new Date();
 
-    function formatDate(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
+    function getFormattedDate(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
 
-    function formatDateDisplay(date) {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
+    function getDisplayDate(d) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
       return `${day}.${month}.${year}`;
     }
 
@@ -168,12 +171,12 @@
       const container = document.getElementById('matches-container');
       const dateText = document.getElementById('date-text');
       
-      const formatted = formatDate(currentDate);
-      dateText.textContent = formatDateDisplay(currentDate);
+      const queryDate = getFormattedDate(currentDate);
+      dateText.textContent = getDisplayDate(currentDate);
       container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
       try {
-        const response = await fetch(`/api/matches?date=${formatted}`);
+        const response = await fetch(`/api/matches?date=${queryDate}`);
         const data = await response.json();
 
         if (!data || data.length === 0) {
@@ -211,8 +214,8 @@
 
         container.innerHTML = html;
       } catch (err) {
-        console.error(err);
-        container.innerHTML = '<div class="loading">Maçlar alınırken bir hata oluştu.</div>';
+        console.error("Hata:", err);
+        container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
       }
     }
 
@@ -226,6 +229,7 @@
       fetchMatches();
     });
 
+    // İlk yükleme
     fetchMatches();
   </script>
 </body>
