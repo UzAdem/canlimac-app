@@ -249,7 +249,7 @@
       margin-top: 2px;
     }
 
-    /* MACKOLIK TARZI SEKMELER */
+    /* MACKOLIK SEKMELERI */
     .tab-buttons {
       display: flex;
       background-color: #16202e;
@@ -280,7 +280,7 @@
       padding: 15px;
     }
 
-    /* MACKOLIK ORTA ÇİZGİLİ OLAYLAR (TIMELINE) */
+    /* TIMELINE */
     .timeline {
       position: relative;
       padding: 10px 0;
@@ -428,42 +428,61 @@
     }
 
     function syncDateInput() {
-      document.getElementById('hidden-date-input').value = formatDateForApi(currentDate);
+      const hiddenInput = document.getElementById('hidden-date-input');
+      if (hiddenInput) {
+        hiddenInput.value = formatDateForApi(currentDate);
+      }
     }
 
     async function fetchMatches() {
       const listContainer = document.getElementById('matches-list');
-      document.getElementById('date-display').innerText = formatDateForDisplay(currentDate);
+      const dateDisplay = document.getElementById('date-display');
+      
+      if (dateDisplay) {
+        dateDisplay.innerText = formatDateForDisplay(currentDate);
+      }
       syncDateInput();
 
-      listContainer.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
+      if (listContainer) {
+        listContainer.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
+      }
 
       try {
         const response = await fetch(`/api/matches?date=${formatDateForApi(currentDate)}`);
+        
+        if (!response.ok) {
+          throw new Error('Ağ yanıtı başarısız');
+        }
+        
         const data = await response.json();
 
         if (!data || data.length === 0) {
-          listContainer.innerHTML = '<div class="loading">Seçilen tarihte maç bulunamadı.</div>';
+          if (listContainer) {
+            listContainer.innerHTML = '<div class="loading">Seçilen tarihte maç bulunamadı.</div>';
+          }
           return;
         }
 
         let html = '';
         data.forEach(leagueGroup => {
+          const firstMatch = leagueGroup.matches && leagueGroup.matches[0];
+          const leagueSlug = firstMatch ? firstMatch.leagueSlug : '';
+
           html += `
             <div class="league-section">
-              <div class="league-header" onclick="openLeagueModal('${leagueGroup.matches[0].leagueSlug}', '${leagueGroup.league}')">
+              <div class="league-header" onclick="openLeagueModal('${leagueSlug}', '${leagueGroup.league}')">
                 ${leagueGroup.league}
               </div>
               ${leagueGroup.matches.map(match => {
                 let scoreText = 'v';
                 let scoreClass = '';
                 if (match.isStarted) {
-                  scoreText = `${match.homeScore} -${match.awayScore}`;
+                  scoreText = `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`;
                   scoreClass = match.status === 'in' ? 'live' : 'finished';
                 }
                 return `
-                  <div class="match-card" onclick="openMatchModal('${match.id}', '${match.homeTeam}', '${match.awayTeam}', '${match.homeScore || 0}', '${match.awayScore \vert{}\vert{} 0}', '${leagueGroup.matches[0].leagueSlug}')">
-                    <div class="match-time">${match.time}</div>
+                  <div class="match-card" onclick="openMatchModal('${match.id}', '${match.homeTeam}', '${match.awayTeam}', '${match.homeScore || 0}', '${match.awayScore \vert{}\vert{} 0}', '${leagueSlug}')">
+                    <div class="match-time">${match.time || ''}</div>
                     <div class="match-teams-container">
                       <div class="team-box home">
                         <span class="team-name">${match.homeTeam}</span>${match.homeLogo ? `<img class="team-logo" src="${match.homeLogo}" alt="" onerror="this.style.display='none'">` : ''}
@@ -480,9 +499,14 @@
             </div>
           `;
         });
-        listContainer.innerHTML = html;
+        if (listContainer) {
+          listContainer.innerHTML = html;
+        }
       } catch (error) {
-        listContainer.innerHTML = '<div class="error-msg">Veriler çekilemedi.</div>';
+        console.error('Fetch Hatası:', error);
+        if (listContainer) {
+          listContainer.innerHTML = '<div class="error-msg">Veriler çekilemedi. Lütfen bağlantınızı kontrol edin.</div>';
+        }
       }
     }
 
@@ -550,11 +574,9 @@
       else if (activeTab === 'standings') renderStandings();
     }
 
-    // OLAYLAR (DETAY / TIMELINE MACKOLIK TARZI)
     function renderEvents() {
       const body = document.getElementById('modal-body');
       
-      // Örnek Olaylar Verisi (API'den gelmediğinde varsayılan çizelge)
       const events = currentMatchData?.events || [
         { minute: "14'", team: "away", type: "card", player: "S. Gudelj", detail: "Sarı Kart" },
         { minute: "30'", team: "away", type: "card", player: "S. Pavlovic", detail: "Sarı Kart" },
@@ -686,22 +708,25 @@
       body.innerHTML = html;
     }
 
-    document.getElementById('close-modal').onclick = () => {
-      document.getElementById('detail-modal').style.display = 'none';
-    };
+    // Sayfa Yüklendiğinde Güvenli Başlatma
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('close-modal').onclick = () => {
+        document.getElementById('detail-modal').style.display = 'none';
+      };
 
-    document.getElementById('hidden-date-input').addEventListener('change', (e) => {
-      if (e.target.value) {
-        const parts = e.target.value.split('-');
-        currentDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        fetchMatches();
-      }
+      document.getElementById('hidden-date-input').addEventListener('change', (e) => {
+        if (e.target.value) {
+          const parts = e.target.value.split('-');
+          currentDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          fetchMatches();
+        }
+      });
+
+      document.getElementById('prev-date').onclick = () => { currentDate.setDate(currentDate.getDate() - 1); fetchMatches(); };
+      document.getElementById('next-date').onclick = () => { currentDate.setDate(currentDate.getDate() + 1); fetchMatches(); };
+
+      fetchMatches();
     });
-
-    document.getElementById('prev-date').onclick = () => { currentDate.setDate(currentDate.getDate() - 1); fetchMatches(); };
-    document.getElementById('next-date').onclick = () => { currentDate.setDate(currentDate.getDate() + 1); fetchMatches(); };
-
-    fetchMatches();
   </script>
 </body>
 </html>
