@@ -249,6 +249,7 @@
     function renderDetail() {
       const app = document.getElementById('app');
       const m = selectedMatch;
+      const msScore = (m.homeScore !== 'null' && m.homeScore !== null) ? `${m.homeScore} - ${m.awayScore}` : '0 - 0';
 
       app.innerHTML = `
         <div class="detail-header">
@@ -257,14 +258,14 @@
         </div>
 
         <div class="match-summary-box">
-          <div id="status-detail" style="color: #a0aec0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">MS</div>
+          <div id="status-detail" style="color: #a0aec0; font-size: 13px; font-weight: bold; letter-spacing: 1px;">MS</div>
           <div class="teams-vs">
             <div class="team-box">
               <img src="${m.homeLogo}" onerror="this.style.opacity=0">
               <strong style="font-size:14px;">${m.homeTeam}</strong>
             </div>
             <div class="score-container">
-              <div class="big-score">${m.homeScore !== 'null' && m.homeScore !== null ? m.homeScore : '0'} - ${m.awayScore !== 'null' && m.awayScore !== null ? m.awayScore : '0'}</div>
+              <div class="big-score">${msScore}</div>
               <div id="iy-header-score" class="iy-score"></div>
             </div>
             <div class="team-box">
@@ -282,9 +283,10 @@
         .then(res => res.json())
         .then(data => {
           if (data.statusDetail) {
-            document.getElementById('status-detail').innerText = data.statusDetail.includes('FT') || data.statusDetail.includes('Sonu') ? 'MS' : data.statusDetail;
+            document.getElementById('status-detail').innerText = data.statusDetail;
           }
           
+          // Üst alana Maçkolik tarzı (İY 1-1) yazdırma
           if (data.homeIY !== undefined && data.awayIY !== undefined) {
             document.getElementById('iy-header-score').innerText = `(İY ${data.homeIY} - ${data.awayIY})`;
           }
@@ -332,9 +334,10 @@
             `;
           }
 
+          // En alttaki Maç Sonu çizgisi
           eventsHtml += `
             <div class="timeline-divider">
-              <span>Maç Sonu</span>
+              <span>Maç Sonu (${msScore})</span>
             </div>
           `;
 
