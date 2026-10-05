@@ -208,7 +208,7 @@
 </head>
 <body>
 
-  <!-- Header (Geri Butonu Eklendi) -->
+  <!-- Header -->
   <div class="header">
     <button class="back-btn" onclick="goHome()">&larr;</button>
     <div class="header-title">Maç Detayı</div>
@@ -233,24 +233,19 @@
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab-btn" onclick="switchTab('events')">Olaylar</button>
-    <button class="tab-btn active" onclick="switchTab('lineups')">Kadrolar</button>
+    <button class="tab-btn" onclick="switchTab(event, 'events')">Olaylar</button>
+    <button class="tab-btn active" onclick="switchTab(event, 'lineups')">Kadrolar</button>
   </div>
 
   <!-- Main Content Container -->
   <div id="tab-content" class="tab-content"></div>
 
   <script>
-    // Ana sayfaya yönlendirme fonksiyonu
+    // Direkt ana sayfaya yönlendirir
     function goHome() {
-      if (window.history.length > 1) {
-        window.history.back(); // Tarayıcı geçmişinde geri git
-      } else {
-        window.location.href = '/'; // Ana sayfaya git
-      }
+      window.location.href = 'index.html'; 
     }
 
-    // Örnek Maç Verisi
     const matchData = {
       homeTeam: "NETHERLANDS",
       awayTeam: "SERBIA",
@@ -303,17 +298,13 @@
       ]
     };
 
-    let currentTab = 'lineups';
-
-    function switchTab(tabName) {
-      currentTab = tabName;
+    function switchTab(evt, tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      evt.currentTarget.classList.add('active');
       
       if (tabName === 'events') {
-        event.target.classList.add('active');
         renderEventsTab();
       } else {
-        event.target.classList.add('active');
         renderLineupsTab();
       }
     }
@@ -330,7 +321,6 @@
         return;
       }
 
-      // İlk 11 Tablosu
       const maxStarters = Math.max(homeStarters.length, awayStarters.length);
       let startersHtml = '';
 
@@ -350,7 +340,6 @@
         `;
       }
 
-      // Yedekler Tablosu
       const maxBench = Math.max(homeBench.length, awayBench.length);
       let benchHtml = '';
 
@@ -403,7 +392,6 @@
       container.innerHTML = `<div class="events-list">${eventsHtml}</div>`;
     }
 
-    // Sayfa yüklendiğinde kadroları göster
     renderLineupsTab();
   </script>
 </body>
