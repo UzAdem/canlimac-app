@@ -5,117 +5,171 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CANLI MAÇ</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #0b1329; color: #ffffff; padding-bottom: 30px; }
-    header { background-color: #0f172a; padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; }
-    .logo { font-weight: bold; font-size: 18px; color: #22c55e; }
-    .date-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: #0f172a; margin-bottom: 15px; }
-    .date-btn { background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; }
-    .current-date { font-weight: bold; color: #22c55e; font-size: 14px; }
-    .container { max-width: 600px; margin: 0 auto; padding: 0 10px; }
-    .league-card { background-color: #162032; border-radius: 10px; margin-bottom: 15px; overflow: hidden; border: 1px solid #1e293b; }
-    .league-title { background-color: #1e293b; padding: 10px 14px; font-size: 13px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; }
-    .match-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid #1e293b; cursor: pointer; }
-    .match-row:last-child { border-bottom: none; }
-    .match-row:hover { background-color: #1e293b; }
-    .match-time { width: 50px; font-size: 12px; color: #94a3b8; font-weight: 500; }
-    .match-time.live { color: #22c55e; font-weight: bold; }
-    .teams { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-    .team-name { font-size: 14px; color: #f8fafc; }
-    .scores { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-weight: bold; font-size: 14px; color: #22c55e; min-width: 25px; }
-    .loading, .empty { text-align: center; padding: 30px; color: #94a3b8; font-size: 14px; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-    /* MODAL */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: center; }
-    .modal-content { background: #162032; color: #fff; width: 90%; max-width: 450px; border-radius: 12px; padding: 20px; position: relative; border: 1px solid #334155; max-height: 85vh; overflow-y: auto; }
-    .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; color: #cbd5e1; font-size: 24px; cursor: pointer; }
-    .modal-header { text-align: center; border-bottom: 1px solid #334155; padding-bottom: 12px; margin-bottom: 12px; }
-    .modal-league { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
-    .modal-teams { font-size: 17px; font-weight: bold; margin-bottom: 6px; }
-    .modal-score { font-size: 24px; font-weight: bold; color: #22c55e; }
-    .tab-menu { display: flex; gap: 10px; border-bottom: 1px solid #1e293b; margin-bottom: 12px; }
-    .tab-btn { padding: 8px 12px; background: none; border: none; color: #94a3b8; font-weight: bold; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; }
-    .tab-btn.active { color: #22c55e; border-bottom: 2px solid #22c55e; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e293b; font-size: 13px; }
-    .detail-label { color: #94a3b8; }
-    
-    .event-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; border-bottom: 1px solid #1e293b; }
-    .event-minute { background: #1e293b; color: #22c55e; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; min-width: 32px; text-align: center; }
-    .event-icon { font-size: 14px; }
+    body {
+      background-color: #0d131d;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+    }
 
-    /* KADRO TASARIMI */
-    .team-toggle-bar { display: flex; gap: 8px; margin-bottom: 12px; }
-    .team-toggle-btn { flex: 1; padding: 8px; background: #1e293b; border: 1px solid #334155; color: #94a3b8; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
-    .team-toggle-btn.active { background: #22c55e; color: #0f172a; border-color: #22c55e; }
+    .app-container {
+      width: 100%;
+      max-width: 500px;
+      min-height: 100vh;
+      background-color: #121926;
+      display: flex;
+      flex-direction: column;
+    }
 
-    .roster-section-title { font-size: 12px; font-weight: bold; color: #22c55e; margin: 12px 0 6px 0; text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
-    .player-row { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #1e293b; color: #e2e8f0; }
-    .jersey-num { background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    header {
+      padding: 15px;
+      background-color: #16202e;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #232f42;
+    }
+
+    header h1 {
+      font-size: 18px;
+      color: #00e676;
+      letter-spacing: 0.5px;
+    }
+
+    .date-picker {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      background-color: #1a2536;
+      border-bottom: 1px solid #232f42;
+    }
+
+    .date-picker button {
+      background-color: #232f42;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .date-display {
+      color: #00e676;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .league-section {
+      margin-bottom: 15px;
+    }
+
+    .league-header {
+      background-color: #1a2536;
+      padding: 8px 15px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #94a3b8;
+      border-bottom: 1px solid #232f42;
+    }
+
+    .match-card {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      background-color: #121926;
+      border-bottom: 1px solid #1c2738;
+      font-size: 14px;
+    }
+
+    .match-time {
+      width: 50px;
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: bold;
+    }
+
+    .match-teams-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+    }
+
+    .team {
+      flex: 1;
+      font-weight: 500;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .home-team {
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    .away-team {
+      text-align: left;
+      padding-left: 10px;
+    }
+
+    .score-box {
+      min-width: 45px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .score-box.live {
+      color: #00e676;
+    }
+
+    .score-box.finished {
+      color: #ffffff;
+    }
+
+    .loading, .error-msg {
+      text-align: center;
+      padding: 40px 20px;
+      color: #94a3b8;
+    }
   </style>
 </head>
 <body>
 
-  <header><div class="logo">⚽ CANLIMAÇ</div></header>
+  <div class="app-container">
+    <header>
+      <span>⚽</span>
+      <h1>CANLIMAÇ</h1>
+    </header>
 
-  <div class="date-bar">
-    <button class="date-btn" onclick="changeDate(-1)">❮ Önceki</button>
-    <div class="current-date" id="dateDisplay">--.--.----</div>
-    <button class="date-btn" onclick="changeDate(1)">Sonraki ❯</button>
-  </div>
+    <div class="date-picker">
+      <button id="prev-date">&lt; Önceki</button>
+      <div class="date-display" id="date-display">--.--.----</div>
+      <button id="next-date">Sonraki &gt;</button>
+    </div>
 
-  <div class="container" id="matchContainer">
-    <div class="loading">Maçlar yükleniyor...</div>
-  </div>
-
-  <!-- MODAL -->
-  <div class="modal-overlay" id="matchModal">
-    <div class="modal-content">
-      <button class="close-btn" onclick="closeModal()">✕</button>
-      
-      <div class="modal-header">
-        <div class="modal-league" id="mLeague">Lig</div>
-        <div class="modal-teams" id="mTeams">Takım vs Takım</div>
-        <div class="modal-score" id="mScore">0 - 0</div>
-      </div>
-
-      <div class="tab-menu">
-        <button class="tab-btn active" onclick="switchTab('detay')">Detay</button>
-        <button class="tab-btn" onclick="switchTab('kadro')">Kadro</button>
-      </div>
-
-      <div id="tabDetay" class="tab-content active">
-        <div class="detail-row">
-          <span class="detail-label">Durum / Dakika</span>
-          <span id="mStatus" style="color:#22c55e; font-weight:bold;">-</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Stadyum</span>
-          <span id="mVenue">-</span>
-        </div>
-
-        <div style="font-size:12px; font-weight:bold; color:#22c55e; margin:12px 0 6px 0;">MAÇ OLAYLARI (GOLLER & KARTLAR)</div>
-        <div id="mEvents"><div style="font-size:12px; color:#94a3b8;">Detaylar yükleniyor...</div></div>
-      </div>
-
-      <div id="tabKadro" class="tab-content">
-        <div id="rosterTeamBar" class="team-toggle-bar"></div>
-        <div id="mRosters"><div style="font-size:12px; color:#94a3b8;">Kadro yükleniyor...</div></div>
-      </div>
+    <div id="matches-list">
+      <div class="loading">Maçlar yükleniyor...</div>
     </div>
   </div>
 
   <script>
     let currentDate = new Date();
-    let matchesData = [];
-    let currentRosters = [];
 
     function formatDateForApi(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      return date.toISOString().slice(0, 10);
     }
 
     function formatDateForDisplay(date) {
@@ -125,225 +179,70 @@
       return `${d}.${m}.${y}`;
     }
 
-    function changeDate(days) {
-      currentDate.setDate(currentDate.getDate() + days);
-      fetchMatches();
-    }
-
     async function fetchMatches() {
-      const container = document.getElementById('matchContainer');
-      const dateDisplay = document.getElementById('dateDisplay');
+      const listContainer = document.getElementById('matches-list');
+      const dateDisplay = document.getElementById('date-display');
       
-      const apiDate = formatDateForApi(currentDate);
       dateDisplay.innerText = formatDateForDisplay(currentDate);
+      listContainer.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
-      container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
+      const apiDate = formatDateForApi(currentDate);
 
       try {
-        const res = await fetch(`/api/matches?date=${apiDate}`);
-        matchesData = await res.json();
+        const response = await fetch(`/api/matches?date=${apiDate}`);
+        const data = await response.json();
 
-        if (!matchesData || matchesData.length === 0) {
-          container.innerHTML = '<div class="empty">Bu tarihte gösterilecek maç bulunamadı.</div>';
+        if (!data || data.length === 0) {
+          listContainer.innerHTML = '<div class="loading">Seçilen tarihte maç bulunamadı.</div>';
           return;
         }
 
         let html = '';
-        matchesData.forEach((group, gIdx) => {
-          html += `<div class="league-card"><div class="league-title">${group.league}</div>`;
-          group.matches.forEach((m, mIdx) => {
-            const isLive = m.status === 'LIVE';
-            html += `
-              <div class="match-row" onclick="openDetail(${gIdx}, ${mIdx})">
-                <div class="match-time ${isLive ? 'live' : ''}">${m.minute}</div>
-                <div class="teams">
-                  <div class="team-name">${m.homeTeam}</div>
-                  <div class="team-name">${m.awayTeam}</div>
-                </div>
-                <div class="scores">
-                  <div>${m.homeScore}</div>
-                  <div>${m.awayScore}</div>
-                </div>
-              </div>
-            `;
-          });
-          html += `</div>`;
-        });
-
-        container.innerHTML = html;
-      } catch (err) {
-        container.innerHTML = '<div class="empty">Maçlar çekilirken bir hata oluştu.</div>';
-      }
-    }
-
-    async function openDetail(gIdx, mIdx) {
-      switchTab('detay');
-      const group = matchesData[gIdx];
-      const match = group.matches[mIdx];
-
-      document.getElementById('mLeague').innerText = group.league;
-      document.getElementById('mTeams').innerText = `${match.homeTeam} vs ${match.awayTeam}`;
-      document.getElementById('mScore').innerText = `${match.homeScore} - ${match.awayScore}`;
-      document.getElementById('mStatus').innerText = match.minute;
-      document.getElementById('mVenue').innerText = match.venue || 'Belirtilmedi';
-
-      const eventsContainer = document.getElementById('mEvents');
-      const rosterContainer = document.getElementById('mRosters');
-      const teamBar = document.getElementById('rosterTeamBar');
-      
-      eventsContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8;">Olaylar getiriliyor...</div>';
-      rosterContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8;">Kadro getiriliyor...</div>';
-      teamBar.innerHTML = '';
-
-      document.getElementById('matchModal').style.display = 'flex';
-
-      try {
-        const espnRes = await fetch(`https://site.web.api.espn.com/apis/site/v2/sports/soccer/${match.leagueSlug}/summary?event=${match.id}`);
-        const espnData = await espnRes.json();
-
-        // MAÇ OLAYLARI
-        let rawEvents = espnData.keyEvents || espnData.details || [];
-        let filteredEvents = rawEvents.filter(e => {
-          if (!e.type) return false;
-          const text = (e.type.text || '').toLowerCase();
-          const id = (e.type.id || '').toString();
-          return text.includes('goal') || text.includes('card') || id === '1' || id === '2' || id === '3';
-        });
-
-        if (filteredEvents.length > 0) {
-          let eventsHtml = '';
-          filteredEvents.forEach(e => {
-            let clock = e.clock ? e.clock.displayValue : '•';
-            let typeText = (e.type ? e.type.text : '').toLowerCase();
-            let icon = '⚽';
-            let eventTitle = 'Gol';
-
-            if (typeText.includes('yellow')) { icon = '🟨'; eventTitle = 'Sarı Kart'; }
-            else if (typeText.includes('red')) { icon = '🟥'; eventTitle = 'Kırmızı Kart'; }
-            else if (typeText.includes('own goal')) { icon = '⚽'; eventTitle = 'Kendi Kalesine Gol'; }
-            else if (typeText.includes('penalty')) { icon = '⚽'; eventTitle = 'Penaltı Golü'; }
-
-            let playerName = '';
-            if (e.participants && e.participants.length > 0) playerName = e.participants[0].athlete ? e.participants[0].athlete.displayName : '';
-            else if (e.athletesIn && e.athletesIn.length > 0) playerName = e.athletesIn[0].displayName;
-            else if (e.text) playerName = e.text;
-
-            eventsHtml += `
-              <div class="event-item">
-                <span class="event-minute">${clock}</span>
-                <span class="event-icon">${icon}</span>
-                <span><b>${playerName}</b> <small style="color:#94a3b8;">(${eventTitle})</small></span>
-              </div>
-            `;
-          });
-          eventsContainer.innerHTML = eventsHtml;
-        } else {
-          eventsContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:5px 0;">Bu maçta gol veya kart bulunmuyor.</div>';
-        }
-
-        // KADROLARI DÜZENLİ LİSTELEME
-        if (espnData.rosters && espnData.rosters.length > 0) {
-          currentRosters = espnData.rosters;
-          
-          let barHtml = '';
-          currentRosters.forEach((r, idx) => {
-            const teamName = r.team ? r.team.displayName : `Takım ${idx+1}`;
-            barHtml += `<button class="team-toggle-btn ${idx === 0 ? 'active' : ''}" onclick="showRosterForTeam(${idx})">${teamName}</button>`;
-          });
-          teamBar.innerHTML = barHtml;
-
-          showRosterForTeam(0);
-        } else {
-          rosterContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:10px 0;">Bu maç için henüz resmi kadro açıklanmadı.</div>';
-        }
-
-      } catch (err) {
-        eventsContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8;">Olay bilgisi alınamadı.</div>';
-        rosterContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8;">Kadro bilgisi alınamadı.</div>';
-      }
-    }
-
-    function showRosterForTeam(teamIdx) {
-      document.querySelectorAll('.team-toggle-btn').forEach((btn, idx) => {
-        if (idx === teamIdx) btn.classList.add('active');
-        else btn.classList.remove('active');
-      });
-
-      const rosterContainer = document.getElementById('mRosters');
-      const teamRoster = currentRosters[teamIdx];
-
-      if (!teamRoster || !teamRoster.roster || teamRoster.roster.length === 0) {
-        rosterContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:10px 0;">Kadro verisi bulunamadı.</div>';
-        return;
-      }
-
-      let starters = [];
-      let substitutes = [];
-
-      teamRoster.roster.forEach(p => {
-        if (p.starter) {
-          starters.push(p);
-        } else {
-          substitutes.push(p);
-        }
-      });
-
-      // Eğer starter bilgisi gelmediyse ilk 11 elemanını ayrıştır
-      if (starters.length === 0 && teamRoster.roster.length > 0) {
-        starters = teamRoster.roster.slice(0, 11);
-        substitutes = teamRoster.roster.slice(11);
-      }
-
-      let html = '';
-
-      // İLK 11
-      html += `<div class="roster-section-title">İlk 11</div>`;
-      starters.forEach(p => {
-        const jersey = p.jersey || '-';
-        const name = p.athlete ? p.athlete.displayName : 'Oyuncu';
-        html += `
-          <div class="player-row">
-            <span class="jersey-num">${jersey}</span>
-            <span>${name}</span>
-          </div>
-        `;
-      });
-
-      // YEDEKLER
-      if (substitutes.length > 0) {
-        html += `<div class="roster-section-title" style="margin-top:20px;">Yedek Oyuncular</div>`;
-        substitutes.forEach(p => {
-          const jersey = p.jersey || '-';
-          const name = p.athlete ? p.athlete.displayName : 'Oyuncu';
+        data.forEach(leagueGroup => {
           html += `
-            <div class="player-row">
-              <span class="jersey-num">${jersey}</span>
-              <span style="color:#94a3b8;">${name}</span>
+            <div class="league-section">
+              <div class="league-header">${leagueGroup.league}</div>
+              ${leagueGroup.matches.map(match => {
+                let scoreText = 'v';
+                let scoreClass = '';
+
+                if (match.isStarted) {
+                  scoreText = `${match.homeScore} -${match.awayScore}`;
+                  scoreClass = match.status === 'in' ? 'live' : 'finished';
+                }
+
+                return `
+                  <div class="match-card">
+                    <div class="match-time">${match.time}</div>
+                    <div class="match-teams-container">
+                      <span class="team home-team">${match.homeTeam}</span>
+                      <span class="score-box ${scoreClass}">${scoreText}</span>
+                      <span class="team away-team">${match.awayTeam}</span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
             </div>
           `;
         });
-      }
 
-      rosterContainer.innerHTML = html;
-    }
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-      if (tabName === 'detay') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('tabDetay').classList.add('active');
-      } else {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('tabKadro').classList.add('active');
+        listContainer.innerHTML = html;
+      } catch (error) {
+        listContainer.innerHTML = '<div class="error-msg">Maçlar çekilirken bir hata oluştu.</div>';
       }
     }
 
-    function closeModal() {
-      document.getElementById('matchModal').style.display = 'none';
-    }
+    document.getElementById('prev-date').addEventListener('click', () => {
+      currentDate.setDate(currentDate.getDate() - 1);
+      fetchMatches();
+    });
 
+    document.getElementById('next-date').addEventListener('click', () => {
+      currentDate.setDate(currentDate.getDate() + 1);
+      fetchMatches();
+    });
+
+    // Sayfa açıldığında maçları çek
     fetchMatches();
   </script>
 </body>
