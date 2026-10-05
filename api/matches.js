@@ -23,17 +23,41 @@ export default async function handler(req, res) {
     const data = await response.json();
     const groupedMatches = {};
 
+    function formatLeagueName(rawName) {
+      if (!rawName) return 'Diğer Ligler';
+      
+      let clean = rawName.replace(/^\d{4}(-\d{2,4})?-/, '');
+      clean = clean.replace(/-/g, ' ');
+
+      clean = clean.split(' ').map(word => {
+        if (!word) return '';
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(' ');
+
+      const lower = clean.toLowerCase();
+      if (lower.includes('super lig') || lower.includes('süper lig') || lower.includes('turkish super lig')) return 'Trendyol Süper Lig';
+      if (lower.includes('premier league')) return 'Premier League';
+      if (lower.includes('serie a')) return 'Serie A';
+      if (lower.includes('laliga') || lower.includes('la liga')) return 'La Liga';
+      if (lower.includes('bundesliga')) return 'Bundesliga';
+      if (lower.includes('ligue 1')) return 'Ligue 1';
+      if (lower.includes('regular season')) return 'Genel Lig / Turnuva';
+
+      return clean || 'Diğer Ligler';
+    }
+
     if (data.events && Array.isArray(data.events)) {
       data.events.forEach(event => {
         const competition = event.competitions?.[0];
         if (!competition) return;
 
-        // Lig ismini ESPN veri yapısından doğru çekme
-        const leagueName = 
+        const rawLeague = 
           event.league?.name || 
           competition.league?.name || 
           event.season?.slug || 
           'Diğer Ligler';
+
+        const leagueName = formatLeagueName(rawLeague);
 
         const homeCompetitor = competition.competitors?.find(c => c.homeAway === 'home');
         const awayCompetitor = competition.competitors?.find(c => c.homeAway === 'away');
@@ -57,7 +81,28 @@ export default async function handler(req, res) {
       });
     }
 
-    const result = Object.keys(groupedMatches).map(league => ({
+    // Özel Lig Sıralaması
+    const leagueOrder = [
+      'Trendyol Süper Lig',
+      'Premier League',
+      'Serie A',
+      'La Liga',
+      'Bundesliga',
+      'Ligue 1'
+    ];
+
+    const sortedLeagues = Object.keys(groupedMatches).sort((a, b) => {
+      const indexA = leagueOrder.indexOf(a);
+      const indexB = leagueOrder.indexOf(b);
+
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+
+      return a.localeCompare(b, 'tr');
+    });
+
+    const result = sortedLeagues.map(league => ({
       league: league,
       matches: groupedMatches[league]
     }));
