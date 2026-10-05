@@ -31,13 +31,14 @@
       border-bottom: 1px solid #1e293b;
     }
 
-    /* Tarih Seçici */
+    /* Tarih Seçici Area */
     .date-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 15px;
       background-color: #0b1329;
+      position: relative;
     }
 
     .btn-nav {
@@ -56,10 +57,35 @@
       background-color: #334155;
     }
 
+    /* Tarih Seçim Alanı (Tıklanabilir Takvim Kutusu) */
+    .date-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
     .date-display {
       color: #00e676;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px dashed #00e676;
+      background-color: rgba(0, 230, 118, 0.05);
+    }
+
+    /* Gizli Gerçek HTML Date Picker */
+    #native-date-picker {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10;
     }
 
     /* Lig Başlığı */
@@ -98,7 +124,7 @@
       text-align: right;
       font-size: 13px;
       font-weight: 600;
-      min-width: 0; /* Uzun isimlerde logoyu sıkıştırmaz */
+      min-width: 0;
     }
 
     .home-team span {
@@ -107,7 +133,7 @@
       text-overflow: ellipsis;
     }
 
-    /* 'v' Sütunu Sabit Milimetrik Eksen */
+    /* Ortadaki 'v' Sütunu */
     .match-score {
       width: 36px;
       flex-shrink: 0;
@@ -158,7 +184,13 @@
 
   <div class="date-nav">
     <button class="btn-nav" id="prev-date">&lt; Önceki</button>
-    <div class="date-display" id="date-text">--.--.----</div>
+    
+    <!-- Tıklanabilir Tarih Kutusu ve Gizli Takvim Input'u -->
+    <div class="date-wrapper">
+      <div class="date-display" id="date-text">--.--.----</div>
+      <input type="date" id="native-date-picker" />
+    </div>
+
     <button class="btn-nav" id="next-date">Sonraki &gt;</button>
   </div>
 
@@ -167,29 +199,35 @@
   </div>
 
   <script>
-    // Tarihi YYYY-MM-DD olarak tutup UTC kaymasını sıfırlıyoruz
     let activeDate = new Date();
 
-    function getISOString(dateObj) {
-      const year = dateObj.getFullYear();
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const day = String(dateObj.getDate()).padStart(2, '0');
+    function formatApiDate(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
 
-    function getFormattedDisplay(dateObj) {
-      const day = String(dateObj.getDate()).padStart(2, '0');
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const year = dateObj.getFullYear();
+    function formatDisplayDate(d) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
       return `${day}.${month}.${year}`;
+    }
+
+    function syncDatePicker() {
+      const picker = document.getElementById('native-date-picker');
+      picker.value = formatApiDate(activeDate);
     }
 
     async function fetchMatches() {
       const container = document.getElementById('matches-container');
       const dateText = document.getElementById('date-text');
       
-      const apiParamDate = getISOString(activeDate);
-      dateText.textContent = getFormattedDisplay(activeDate);
+      const apiParamDate = formatApiDate(activeDate);
+      dateText.textContent = formatDisplayDate(activeDate);
+      syncDatePicker();
+
       container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
       try {
@@ -236,6 +274,16 @@
       }
     }
 
+    // Takvimden Tarih Seçildiğinde Çalışır
+    document.getElementById('native-date-picker').addEventListener('change', (e) => {
+      if (e.target.value) {
+        const [year, month, day] = e.target.value.split('-').map(Number);
+        activeDate = new Date(year, month - 1, day);
+        fetchMatches();
+      }
+    });
+
+    // Önceki / Sonraki Butonları
     document.getElementById('prev-date').onclick = function() {
       activeDate.setDate(activeDate.getDate() - 1);
       fetchMatches();
@@ -246,7 +294,7 @@
       fetchMatches();
     };
 
-    // İlk çalıştırma
+    // Sayfa açılışı
     fetchMatches();
   </script>
 </body>
