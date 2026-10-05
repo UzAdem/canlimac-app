@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 // İNGİLİZCE - TÜRKÇE TAKIM / ÜLKE İSİMLERİ SÖZLÜĞÜ
 const teamTranslations = {
   "Cyprus": "Kıbrıs",
@@ -77,13 +75,14 @@ module.exports = async (req, res) => {
   const targetDate = req.query.date ? req.query.date.replace(/-/g, '') : new Date().toISOString().slice(0,10).replace(/-/g, '');
   
   try {
-    let result = [];
-
-    for (const league of LEAGUES) {
+    const promises = LEAGUES.map(async (league) => {
       try {
         const url = `https://site.web.api.espn.com/apis/site/v2/sports/soccer/${league.slug}/scoreboard?dates=${targetDate}`;
-        const response = await axios.get(url, { timeout: 3000 });
-        const events = response.data.events || [];
+        const response = await fetch(url);
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        const events = data.events || [];
 
         if (events.length > 0) {
           const formattedMatches = events.map(event => {
@@ -104,17 +103,21 @@ module.exports = async (req, res) => {
             };
           });
 
-          result.push({
+          return {
             league: league.name,
             matches: formattedMatches
-          });
+          };
         }
       } catch (e) {
-        // Hata durumunda devam et
+        return null;
       }
-    }
+      return null;
+    });
 
-    res.status(200).json(result);
+    const results = await Promise.all(promises);
+    const filteredResult = results.filter(item => item !== null);
+
+    res.status(200).json(filteredResult);
   } catch (error) {
     res.status(500).json({ error: 'Maç verileri çekilemedi.' });
   }
