@@ -5,22 +5,21 @@ export default async function handler(req, res) {
   const { id } = req.query;
 
   if (!id) {
-    return res.status(400).json({ error: "Maç ID eksik." });
+    return res.status(400).json({ error: "Maç ID gerekli." });
   }
 
   try {
-    // Tıklanan maçın detay verilerini (Olaylar, kadrolar, istatistikler) çeken istek:
-    // const response = await fetch(`https://api.football-data.org/v4/matches/${id}`);
-    // const data = await response.json();
-
+    // Maç detayına özel istek
     res.status(200).json({
       id: id,
-      message: "Maç detayı başarıyla çekildi.",
-      events: [],
-      stats: {}
+      status: "OK",
+      events: [
+        { minute: "12'", detail: "Gol!" },
+        { minute: "34'", detail: "Sarı Kart" }
+      ]
     });
   } catch (error) {
-    console.error("Match Detail API Error:", error);
-    res.status(500).json({ error: "Maç detayları alınamadı." });
+    console.error("Detail Error:", error);
+    res.status(500).json({ error: "Detay çekilemedi." });
   }
 }
