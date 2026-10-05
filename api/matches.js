@@ -45,7 +45,6 @@ export default async function handler(req, res) {
         const hours = String(matchDate.getHours()).padStart(2, '0');
         const minutes = String(matchDate.getMinutes()).padStart(2, '0');
 
-        // Maç henüz başlamadıysa score yerine 'v' göster
         const isStarted = event.status?.type?.state === 'in' || event.status?.type?.state === 'post';
         const homeScore = isStarted ? (home?.score ?? '0') : 'v';
         const awayScore = isStarted ? (away?.score ?? '0') : '';
@@ -75,4 +74,4 @@ export default async function handler(req, res) {
     console.error("Matches API Error:", error);
     res.status(500).json({ error: "Veriler çekilemedi." });
   }
-                    }
+}
