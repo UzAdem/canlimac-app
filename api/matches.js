@@ -1,82 +1,65 @@
 export default async function handler(req, res) {
+  // CORS Başlıkları
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Content-Type', 'application/json');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
   const { date } = req.query; // YYYY-MM-DD
   const targetDate = date || new Date().toISOString().split('T')[0];
   const formattedDate = targetDate.replace(/-/g, '');
 
-  const leagueEndpoints = [
-    { code: 'tur.1', name: 'Süper Lig' },
-    { code: 'eng.1', name: 'İngiltere Premier Lig' },
-    { code: 'esp.1', name: 'İspanya La Liga' },
-    { code: 'ita.1', name: 'İtalya Serie A' },
-    { code: 'ger.1', name: 'Almanya Bundesliga' },
-    { code: 'fra.1', name: 'Fransa Ligue 1' },
-    { code: 'uefa.champions', name: 'UEFA Şampiyonlar Ligi' },
-    { code: 'uefa.europa', name: 'UEFA Avrupa Ligi' },
-    { code: 'uefa.nations', name: 'UEFA Uluslar Ligi' },
-    { code: 'usa.1', name: 'ABD MLS' },
-    { code: 'fifa.friendly', name: 'Hazırlık Maçları' }
-  ];
-
   try {
-    const requests = leagueEndpoints.map(l => 
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${l.code}/scoreboard?dates=${formattedDate}`)
-        .then(res => res.ok ? res.json() : null)
-        .catch(() => null)
+    const response = await fetch(
+      `https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?dates=${formattedDate}`
     );
+    
+    if (!response.ok) {
+      return res.status(200).json([]);
+    }
 
-    const results = await Promise.all(requests);
-    const grouped = [];
+    const data = await response.json();
+    const groupedMatches = {};
 
-    results.forEach((data, index) => {
-      if (!data || !data.events || data.events.length === 0) return;
-
-      const leagueName = leagueEndpoints[index].name;
-      const matches = [];
-
+    if (data.events && Array.isArray(data.events)) {
       data.events.forEach(event => {
+        const leagueName = event.league?.name || 'Diğer Ligler';
         const competition = event.competitions?.[0];
-        const home = competition?.competitors?.find(c => c.homeAway === 'home');
-        const away = competition?.competitors?.find(c => c.homeAway === 'away');
+        if (!competition) return;
 
-        // Türkiye Saat Dilimine (Europe/Istanbul) Göre Saati Biçimlendirme
-        const matchDate = new Date(event.date);
-        const turkishTime = matchDate.toLocaleTimeString('tr-TR', {
-          timeZone: 'Europe/Istanbul',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
+        const homeCompetitor = competition.competitors?.find(c => c.homeAway === 'home');
+        const awayCompetitor = competition.competitors?.find(c => c.homeAway === 'away');
 
-        const isStarted = event.status?.type?.state === 'in' || event.status?.type?.state === 'post';
-        const homeScore = isStarted ? (home?.score ?? '0') : 'v';
-        const awayScore = isStarted ? (away?.score ?? '0') : '';
-
-        matches.push({
+        const matchObj = {
           id: event.id,
-          time: turkishTime,
-          homeTeam: home?.team?.displayName || 'Ev Sahibi',
-          awayTeam: away?.team?.displayName || 'Deplasman',
-          homeScore: homeScore,
-          awayScore: awayScore,
-          homeLogo: home?.team?.logo || null,
-          awayLogo: away?.team?.logo || null
-        });
+          time: new Date(event.date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+          homeTeam: homeCompetitor?.team?.displayName || 'Ev Sahibi',
+          awayTeam: awayCompetitor?.team?.displayName || 'Deplasman',
+          homeLogo: homeCompetitor?.team?.logo || '',
+          awayLogo: awayCompetitor?.team?.logo || '',
+          homeScore: homeCompetitor?.score ?? 'v',
+          awayScore: awayCompetitor?.score ?? 'v',
+          status: competition.status?.type?.shortDetail || 'MS'
+        };
+
+        if (!groupedMatches[leagueName]) {
+          groupedMatches[leagueName] = [];
+        }
+        groupedMatches[leagueName].push(matchObj);
       });
+    }
 
-      if (matches.length > 0) {
-        grouped.push({
-          league: leagueName,
-          matches: matches
-        });
-      }
-    });
+    const result = Object.keys(groupedMatches).map(league => ({
+      league: league,
+      matches: groupedMatches[league]
+    }));
 
-    res.status(200).json(grouped);
+    return res.status(200).json(result);
   } catch (error) {
-    console.error("Matches API Error:", error);
-    res.status(500).json({ error: "Veriler çekilemedi." });
+    console.error('API Error:', error);
+    return res.status(200).json([]);
   }
 }
