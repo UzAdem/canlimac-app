@@ -28,12 +28,17 @@
     }
 
     .back-btn {
-      font-size: 20px;
+      font-size: 22px;
       background: none;
       border: none;
       color: #fff;
       cursor: pointer;
       margin-right: 12px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
     }
 
     .header-title {
@@ -203,9 +208,9 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header (Geri Butonu Eklendi) -->
   <div class="header">
-    <button class="back-btn">&larr;</button>
+    <button class="back-btn" onclick="goHome()">&larr;</button>
     <div class="header-title">Maç Detayı</div>
   </div>
 
@@ -236,6 +241,15 @@
   <div id="tab-content" class="tab-content"></div>
 
   <script>
+    // Ana sayfaya yönlendirme fonksiyonu
+    function goHome() {
+      if (window.history.length > 1) {
+        window.history.back(); // Tarayıcı geçmişinde geri git
+      } else {
+        window.location.href = '/'; // Ana sayfaya git
+      }
+    }
+
     // Örnek Maç Verisi
     const matchData = {
       homeTeam: "NETHERLANDS",
@@ -258,9 +272,7 @@
           bench: [
             { jersey: 13, name: "Justin Bijlow" },
             { jersey: 5, name: "Nathan Aké" },
-            { jersey: 6, name: "Stefan de Vrij" },
-            { jersey: 11, name: "Cody Gakpo" },
-            { jersey: 9, name: "Wout Weghorst" }
+            { jersey: 6, name: "Stefan de Vrij" }
           ]
         },
         away: {
@@ -280,9 +292,7 @@
           bench: [
             { jersey: 1, name: "Predrag Rajkovic" },
             { jersey: 4, name: "Nikola Milenkovic" },
-            { jersey: 16, name: "Ivan Ilic" },
-            { jersey: 8, name: "Nemanja Gudelj" },
-            { jersey: 9, name: "Aleksandar Mitrovic" }
+            { jersey: 16, name: "Ivan Ilic" }
           ]
         }
       },
@@ -393,8 +403,8 @@
       container.innerHTML = `<div class="events-list">${eventsHtml}</div>`;
     }
 
-    // Sayfa yüklendiğinde varsayılan olarak kadroları çalıştır
+    // Sayfa yüklendiğinde kadroları göster
     renderLineupsTab();
   </script>
 </body>
-  </html>
+</html>
