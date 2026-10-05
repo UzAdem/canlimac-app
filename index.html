@@ -330,22 +330,6 @@
 
     .player-main { font-weight: bold; color: #fff; }
     .player-sub { font-size: 10px; color: #9ca3af; }
-
-    .badge-divider {
-      text-align: center;
-      margin: 20px 0;
-      position: relative;
-      z-index: 2;
-    }
-
-    .badge-divider span {
-      background-color: #1e293b;
-      color: #9ca3af;
-      font-size: 11px;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -366,7 +350,7 @@
     <div class="loading">Maçlar yükleniyor...</div>
   </div>
 
-  <!-- TAM SAYFA MACKOLİK BİREBİR MAÇ DETAY EKRANI -->
+  <!-- TAM SAYFA MAÇ DETAY EKRANI -->
   <div class="match-detail-overlay" id="detail-screen">
     
     <!-- Üst Navigasyon -->
@@ -497,43 +481,47 @@
       tabContent.innerHTML = '<div class="loading">Maç olayları yükleniyor...</div>';
 
       try {
-        const res = await fetch(`/api/match-details?matchId=${matchId}`);
+        // BURADA API ADRESİ match-detail OLARAK DÜZELTİLDİ
+        const res = await fetch(`/api/match-detail?matchId=${matchId}`);
         const data = await res.json();
 
-        // Header bilgilerini API'den güncelle
+        // Header durum güncellemesi
         if (data.header) {
           const comp = data.header.competitions?.[0];
-          document.getElementById('d-status').textContent = comp?.status?.type?.shortDetail || 'MS';
+          if (comp?.status?.type?.shortDetail) {
+            document.getElementById('d-status').textContent = comp.status.type.shortDetail;
+          }
         }
 
-        // Dikey Zaman Çizelgesi (Timeline) Oluşturma
+        // Dikey Zaman Çizelgesi (Timeline)
         let timelineHtml = '<div class="timeline-container"><div class="timeline-line"></div>';
 
-        if (data.goals && data.goals.length > 0) {
-          data.goals.forEach(event => {
-            const isHome = event.team.toLowerCase().includes(homeName.toLowerCase().slice(0, 4));
+        if (data.events && data.events.length > 0) {
+          data.events.forEach(evt => {
+            const isHome = evt.team ? evt.team.toLowerCase().includes(homeName.toLowerCase().slice(0, 3)) : true;
+            const clockDisplay = evt.clock ? evt.clock : "•";
 
             timelineHtml += `
               <div class="timeline-event">
                 <div class="event-left">
-                  ${isHome ? `<div class="event-card"><div class="player-main">${event.player} ⚽</div><div class="player-sub">${event.type}</div></div>` : ''}
+                  ${isHome ? `<div class="event-card"><div class="player-main">${evt.player || evt.detail}</div><div class="player-sub">${evt.type}</div></div>` : ''}
                 </div>
-                <div class="event-center">${event.clock}'</div>
+                <div class="event-center">${clockDisplay}</div>
                 <div class="event-right">
-                  ${!isHome ? `<div class="event-card"><div class="player-main">⚽ ${event.player}</div><div class="player-sub">${event.type}</div></div>` : ''}
+                  ${!isHome ? `<div class="event-card"><div class="player-main">${evt.player || evt.detail}</div><div class="player-sub">${evt.type}</div></div>` : ''}
                 </div>
               </div>
             `;
           });
         } else {
-          timelineHtml += `<div style="text-align:center; padding:30px; color:#9ca3af; font-size:13px;">Henüz önemli bir olay kaydedilmedi.</div>`;
+          timelineHtml += `<div style="text-align:center; padding:40px; color:#9ca3af; font-size:13px;">Bu maç için henüz olay akışı bilgisi mevcut değil.</div>`;
         }
 
         timelineHtml += '</div>';
         tabContent.innerHTML = timelineHtml;
 
       } catch (err) {
-        tabContent.innerHTML = '<div class="loading">Detay verileri çekilemedi.</div>';
+        tabContent.innerHTML = '<div class="loading">Detaylar yüklenirken bir sorun oluştu.</div>';
       }
     }
 
@@ -565,4 +553,3 @@
   </script>
 </body>
 </html>
-        
