@@ -63,10 +63,38 @@
       cursor: pointer;
     }
 
+    /* Tarih Seçici Özel Alanı */
+    .date-picker-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
     .date-display {
       color: #00e676;
       font-weight: bold;
       font-size: 15px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background-color: rgba(0, 230, 118, 0.1);
+      border: 1px solid rgba(0, 230, 118, 0.2);
+    }
+
+    .date-display:hover {
+      background-color: rgba(0, 230, 118, 0.2);
+    }
+
+    /* Gizli HTML Native Date Input */
+    #hidden-date-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      color-scheme: dark; /* Mobil takvimin koyu temada açılmasını sağlar */
     }
 
     .league-section {
@@ -164,7 +192,7 @@
       color: #94a3b8;
     }
 
-    /* MODAL (PENCERE) STİLLERİ */
+    /* MODAL STİLLERİ */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -237,7 +265,6 @@
       padding: 10px;
     }
 
-    /* PUAN DURUMU TABLOSU */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -260,26 +287,6 @@
       text-align: center;
       border-bottom: 1px solid #1a2536;
     }
-
-    .stats-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .stat-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 12px;
-      background-color: #1a2536;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-
-    .stat-player { font-weight: bold; color: #fff; }
-    .stat-team { font-size: 11px; color: #94a3b8; margin-top: 2px; }
-    .stat-value { font-weight: bold; color: #00e676; font-size: 15px; }
   </style>
 </head>
 <body>
@@ -292,7 +299,13 @@
 
     <div class="date-picker">
       <button id="prev-date">&lt; Önceki</button>
-      <div class="date-display" id="date-display">--.--.----</div>
+
+      <!-- Tıklanabilir Tarih Seçici -->
+      <div class="date-picker-wrapper">
+        <div class="date-display" id="date-display">--.--.---- 📅</div>
+        <input type="date" id="hidden-date-input">
+      </div>
+
       <button id="next-date">Sonraki &gt;</button>
     </div>
 
@@ -310,9 +323,7 @@
       </div>
 
       <div class="tab-buttons">
-        <button class="tab-btn active" onclick="switchTab(event, 'standings')">Puan Durumu</button>
-        <button class="tab-btn" onclick="switchTab(event, 'goals')">Gol Krallığı</button>
-        <button class="tab-btn" onclick="switchTab(event, 'assists')">Asist Krallığı</button>
+        <button class="tab-btn active">Puan Durumu</button>
       </div>
 
       <div class="modal-body" id="modal-body">
@@ -326,15 +337,26 @@
     let currentLeagueData = null;
 
     function formatDateForApi(date) { return date.toISOString().slice(0, 10); }
+    
     function formatDateForDisplay(date) {
       const d = String(date.getDate()).padStart(2, '0');
       const m = String(date.getMonth() + 1).padStart(2, '0');
-      return `${d}.${m}.${date.getFullYear()}`;
+      return `${d}.${m}.${date.getFullYear()} 📅`;
+    }
+
+    function syncDateInput() {
+      const hiddenInput = document.getElementById('hidden-date-input');
+      const yyyy = currentDate.getFullYear();
+      const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(currentDate.getDate()).padStart(2, '0');
+      hiddenInput.value = `${yyyy}-${mm}-${dd}`;
     }
 
     async function fetchMatches() {
       const listContainer = document.getElementById('matches-list');
       document.getElementById('date-display').innerText = formatDateForDisplay(currentDate);
+      syncDateInput();
+
       listContainer.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
       try {
@@ -385,18 +407,13 @@
       }
     }
 
-    // LİG DETAY MODALI AÇMA
+    // LİG DETAY MODALI AÇMA (Sadece Puan Durumu)
     async function openLeagueModal(slug, name) {
       const modal = document.getElementById('league-modal');
       const body = document.getElementById('modal-body');
       document.getElementById('modal-league-name').innerText = name;
       modal.style.display = 'flex';
       body.innerHTML = '<div class="loading">Yükleniyor...</div>';
-
-      // Sekmeleri sıfırla
-      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-        btn.classList.toggle('active', idx === 0);
-      });
 
       try {
         const res = await fetch(`/api/league-details?slug=${slug}`);
@@ -405,15 +422,6 @@
       } catch (e) {
         body.innerHTML = '<div class="error-msg">Lig verisi alınamadı.</div>';
       }
-    }
-
-    function switchTab(e, tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      e.target.classList.add('active');
-
-      if (tab === 'standings') renderStandings();
-      else if (tab === 'goals') renderLeaders('goals', 'Gol Krallığı');
-      else if (tab === 'assists') renderLeaders('assists', 'Asist Krallığı');
     }
 
     function renderStandings() {
@@ -459,34 +467,18 @@
       body.innerHTML = html;
     }
 
-    function renderLeaders(key, title) {
-      const body = document.getElementById('modal-body');
-      const list = currentLeagueData?.leaders?.[key] || [];
-
-      if (!list.length) {
-        body.innerHTML = `<div class="loading">${title} verisi şu anda mevcut değil.</div>`;
-        return;
-      }
-
-      let html = '<div class="stats-list">';
-      list.forEach(p => {
-        html += `
-          <div class="stat-item">
-            <div>
-              <div class="stat-player">${p.rank}. ${p.player}</div>
-              <div class="stat-team">${p.team}</div>
-            </div>
-            <div class="stat-value">${p.value}</div>
-          </div>
-        `;
-      });
-      html += '</div>';
-      body.innerHTML = html;
-    }
-
     document.getElementById('close-modal').onclick = () => {
       document.getElementById('league-modal').style.display = 'none';
     };
+
+    // TARİH SEÇİCİ EVENTİ
+    document.getElementById('hidden-date-input').addEventListener('change', (e) => {
+      if (e.target.value) {
+        const [year, month, day] = e.target.value.split('-').map(Number);
+        currentDate = new Date(year, month - 1, day);
+        fetchMatches();
+      }
+    });
 
     document.getElementById('prev-date').onclick = () => { currentDate.setDate(currentDate.getDate() - 1); fetchMatches(); };
     document.getElementById('next-date').onclick = () => { currentDate.setDate(currentDate.getDate() + 1); fetchMatches(); };
@@ -494,5 +486,4 @@
     fetchMatches();
   </script>
 </body>
-                                                                                            </html>
-                                                                                            
+</html>
