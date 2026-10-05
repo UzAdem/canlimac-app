@@ -18,7 +18,7 @@
       padding-bottom: 30px;
     }
 
-    /* Header */
+    /* Üst Bar */
     .header {
       padding: 15px;
       font-size: 18px;
@@ -31,14 +31,13 @@
       border-bottom: 1px solid #1e293b;
     }
 
-    /* Tarih Seçici Area */
+    /* Tarih Navigasyonu */
     .date-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 15px;
       background-color: #0b1329;
-      position: relative;
     }
 
     .btn-nav {
@@ -50,14 +49,8 @@
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;
-      user-select: none;
     }
 
-    .btn-nav:active {
-      background-color: #334155;
-    }
-
-    /* Tarih Seçim Alanı (Tıklanabilir Takvim Kutusu) */
     .date-wrapper {
       position: relative;
       display: flex;
@@ -76,7 +69,6 @@
       background-color: rgba(0, 230, 118, 0.05);
     }
 
-    /* Gizli Gerçek HTML Date Picker */
     #native-date-picker {
       position: absolute;
       top: 0;
@@ -88,7 +80,6 @@
       z-index: 10;
     }
 
-    /* Lig Başlığı */
     .league-title {
       color: #00e676;
       font-size: 14px;
@@ -97,14 +88,14 @@
       background-color: #0b1329;
     }
 
-    /* Maç Satırı Hizalaması */
+    /* Maç Kartı */
     .match-card {
       display: flex;
       align-items: center;
-      padding: 10px 12px;
+      padding: 12px;
       background-color: #111a33;
       border-bottom: 1px solid #1a243f;
-      width: 100%;
+      cursor: pointer;
     }
 
     .match-time {
@@ -112,30 +103,29 @@
       flex-shrink: 0;
       font-size: 12px;
       color: #9ca3af;
-      text-align: left;
     }
 
-    .home-team {
+    .home-team, .away-team {
       flex: 1;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
       gap: 6px;
-      text-align: right;
       font-size: 13px;
       font-weight: 600;
       min-width: 0;
     }
 
-    .home-team span {
+    .home-team { justify-content: flex-end; text-align: right; }
+    .away-team { justify-content: flex-start; text-align: left; }
+
+    .home-team span, .away-team span {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* Ortadaki 'v' Sütunu */
     .match-score {
-      width: 36px;
+      width: 40px;
       flex-shrink: 0;
       text-align: center;
       font-weight: bold;
@@ -143,29 +133,10 @@
       font-size: 13px;
     }
 
-    .away-team {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 6px;
-      text-align: left;
-      font-size: 13px;
-      font-weight: 600;
-      min-width: 0;
-    }
-
-    .away-team span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
     .team-logo {
       width: 18px;
       height: 18px;
       object-fit: contain;
-      flex-shrink: 0;
     }
 
     .loading {
@@ -174,28 +145,273 @@
       color: #9ca3af;
       font-size: 14px;
     }
+
+    /* --- MACKOLİK TARZI DETAY EKRANI (FULLSCREEN MODAL) --- */
+    .match-detail-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0b1329;
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* Üst Navigasyon */
+    .detail-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .brand-title {
+      font-weight: bold;
+      letter-spacing: 1px;
+      font-size: 16px;
+    }
+
+    /* Skor Panosu Header */
+    .scoreboard-header {
+      padding: 15px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(11, 19, 41, 1) 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .team-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .team-box img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      margin-bottom: 6px;
+    }
+
+    .team-box .name {
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .team-box .coach {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .score-box {
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      background-color: #1e293b;
+      color: #00e676;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .main-score {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 4px 0;
+      letter-spacing: 2px;
+    }
+
+    .ht-score {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    /* Sekme Menüsü (Tab Bar) */
+    .tabs-bar {
+      display: flex;
+      overflow-x: auto;
+      background-color: #111a33;
+      border-bottom: 1px solid #1e293b;
+      scrollbar-width: none;
+    }
+
+    .tabs-bar::-webkit-scrollbar { display: none; }
+
+    .tab-item {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #9ca3af;
+      white-space: nowrap;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-item.active {
+      color: #ffffff;
+      border-bottom: 2px solid #00e676;
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Dikey Zaman Çizelgesi (Timeline) */
+    .timeline-container {
+      padding: 20px 10px;
+      position: relative;
+    }
+
+    .timeline-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background-color: #1e293b;
+      transform: translateX(-50%);
+    }
+
+    .timeline-event {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .event-left, .event-right {
+      flex: 1;
+      font-size: 12px;
+    }
+
+    .event-left { text-align: right; padding-right: 12px; }
+    .event-right { text-align: left; padding-left: 12px; }
+
+    .event-center {
+      width: 32px;
+      height: 32px;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #00e676;
+      flex-shrink: 0;
+    }
+
+    .event-card {
+      background-color: #111a33;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      border: 1px solid #1a243f;
+    }
+
+    .player-main { font-weight: bold; color: #fff; }
+    .player-sub { font-size: 10px; color: #9ca3af; }
+
+    .badge-divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .badge-divider span {
+      background-color: #1e293b;
+      color: #9ca3af;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    ⚽ CANLIMAÇ
-  </div>
+  <!-- Ana Maç Listesi Ekranı -->
+  <div class="header">⚽ CANLIMAÇ</div>
 
   <div class="date-nav">
     <button class="btn-nav" id="prev-date">&lt; Önceki</button>
-    
-    <!-- Tıklanabilir Tarih Kutusu ve Gizli Takvim Input'u -->
     <div class="date-wrapper">
       <div class="date-display" id="date-text">--.--.----</div>
       <input type="date" id="native-date-picker" />
     </div>
-
     <button class="btn-nav" id="next-date">Sonraki &gt;</button>
   </div>
 
   <div id="matches-container">
     <div class="loading">Maçlar yükleniyor...</div>
+  </div>
+
+  <!-- TAM SAYFA MACKOLİK BİREBİR MAÇ DETAY EKRANI -->
+  <div class="match-detail-overlay" id="detail-screen">
+    
+    <!-- Üst Navigasyon -->
+    <div class="detail-nav">
+      <button class="back-btn" onclick="closeMatchDetails()">&larr;</button>
+      <div class="brand-title">canlımaç</div>
+      <div style="width: 22px;"></div>
+    </div>
+
+    <!-- Skor & Takım Başlık Panosu -->
+    <div class="scoreboard-header">
+      <div class="team-box">
+        <img id="d-home-logo" src="" alt="" />
+        <div class="name" id="d-home-name">HOLLANDA</div>
+        <div class="coach" id="d-home-coach">-</div>
+      </div>
+
+      <div class="score-box">
+        <span class="status-badge" id="d-status">MS</span>
+        <div class="main-score" id="d-score">2 - 1</div>
+        <div class="ht-score" id="d-ht-score">(İY 1-1)</div>
+      </div>
+
+      <div class="team-box">
+        <img id="d-away-logo" src="" alt="" />
+        <div class="name" id="d-away-name">SIRBİSTAN</div>
+        <div class="coach" id="d-away-coach">-</div>
+      </div>
+    </div>
+
+    <!-- Sekme Menüsü -->
+    <div class="tabs-bar">
+      <div class="tab-item active" onclick="switchTab(this, 'detay')">Detay</div>
+      <div class="tab-item" onclick="switchTab(this, 'kadro')">Kadro</div>
+      <div class="tab-item" onclick="switchTab(this, 'karne')">Karne</div>
+      <div class="tab-item" onclick="switchTab(this, 'anlatim')">Anlatım</div>
+      <div class="tab-item" onclick="switchTab(this, 'istatistik')">İstatistik</div>
+      <div class="tab-item" onclick="switchTab(this, 'karsilastirma')">Karşılaştırma</div>
+    </div>
+
+    <!-- Sekme İçerikleri -->
+    <div id="tab-content">
+      <div class="loading">Detaylar yükleniyor...</div>
+    </div>
+
   </div>
 
   <script>
@@ -216,18 +432,16 @@
     }
 
     function syncDatePicker() {
-      const picker = document.getElementById('native-date-picker');
-      picker.value = formatApiDate(activeDate);
+      document.getElementById('native-date-picker').value = formatApiDate(activeDate);
     }
 
     async function fetchMatches() {
       const container = document.getElementById('matches-container');
       const dateText = document.getElementById('date-text');
-      
       const apiParamDate = formatApiDate(activeDate);
+      
       dateText.textContent = formatDisplayDate(activeDate);
       syncDatePicker();
-
       container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
       try {
@@ -243,21 +457,16 @@
         data.forEach(group => {
           html += `<div class="league-title">${group.league}</div>`;
           group.matches.forEach(match => {
-            const scoreDisplay = match.homeScore === 'v' 
-              ? 'v' 
-              : `${match.homeScore} - ${match.awayScore}`;
+            const scoreDisplay = match.homeScore === 'v' ? 'v' : `${match.homeScore} - ${match.awayScore}`;
 
             html += `
-              <div class="match-card">
+              <div class="match-card" onclick="openMatchDetails('${match.id}', '${match.homeTeam}', '${match.awayTeam}', '${match.homeLogo}', '${match.awayLogo}', '${scoreDisplay}')">
                 <div class="match-time">${match.time}</div>
-                
                 <div class="home-team">
                   <span>${match.homeTeam}</span>
                   ${match.homeLogo ? `<img src="${match.homeLogo}" class="team-logo" alt="" />` : ''}
                 </div>
-                
                 <div class="match-score">${scoreDisplay}</div>
-                
                 <div class="away-team">
                   ${match.awayLogo ? `<img src="${match.awayLogo}" class="team-logo" alt="" />` : ''}
                   <span>${match.awayTeam}</span>
@@ -269,12 +478,78 @@
 
         container.innerHTML = html;
       } catch (err) {
-        console.error("Hata:", err);
         container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
       }
     }
 
-    // Takvimden Tarih Seçildiğinde Çalışır
+    // MAÇ DETAY EKRANINI AÇMA
+    async function openMatchDetails(matchId, homeName, awayName, homeLogo, awayLogo, score) {
+      const screen = document.getElementById('detail-screen');
+      screen.style.display = 'flex';
+
+      document.getElementById('d-home-name').textContent = homeName;
+      document.getElementById('d-away-name').textContent = awayName;
+      document.getElementById('d-home-logo').src = homeLogo || '';
+      document.getElementById('d-away-logo').src = awayLogo || '';
+      document.getElementById('d-score').textContent = score;
+
+      const tabContent = document.getElementById('tab-content');
+      tabContent.innerHTML = '<div class="loading">Maç olayları yükleniyor...</div>';
+
+      try {
+        const res = await fetch(`/api/match-details?matchId=${matchId}`);
+        const data = await res.json();
+
+        // Header bilgilerini API'den güncelle
+        if (data.header) {
+          const comp = data.header.competitions?.[0];
+          document.getElementById('d-status').textContent = comp?.status?.type?.shortDetail || 'MS';
+        }
+
+        // Dikey Zaman Çizelgesi (Timeline) Oluşturma
+        let timelineHtml = '<div class="timeline-container"><div class="timeline-line"></div>';
+
+        if (data.goals && data.goals.length > 0) {
+          data.goals.forEach(event => {
+            const isHome = event.team.toLowerCase().includes(homeName.toLowerCase().slice(0, 4));
+
+            timelineHtml += `
+              <div class="timeline-event">
+                <div class="event-left">
+                  ${isHome ? `<div class="event-card"><div class="player-main">${event.player} ⚽</div><div class="player-sub">${event.type}</div></div>` : ''}
+                </div>
+                <div class="event-center">${event.clock}'</div>
+                <div class="event-right">
+                  ${!isHome ? `<div class="event-card"><div class="player-main">⚽ ${event.player}</div><div class="player-sub">${event.type}</div></div>` : ''}
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          timelineHtml += `<div style="text-align:center; padding:30px; color:#9ca3af; font-size:13px;">Henüz önemli bir olay kaydedilmedi.</div>`;
+        }
+
+        timelineHtml += '</div>';
+        tabContent.innerHTML = timelineHtml;
+
+      } catch (err) {
+        tabContent.innerHTML = '<div class="loading">Detay verileri çekilemedi.</div>';
+      }
+    }
+
+    function closeMatchDetails() {
+      document.getElementById('detail-screen').style.display = 'none';
+    }
+
+    function switchTab(element, tabName) {
+      document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+      
+      if(tabName !== 'detay') {
+        document.getElementById('tab-content').innerHTML = `<div class="loading">${element.textContent} sekmesi hazırlanıyor...</div>`;
+      }
+    }
+
     document.getElementById('native-date-picker').addEventListener('change', (e) => {
       if (e.target.value) {
         const [year, month, day] = e.target.value.split('-').map(Number);
@@ -283,19 +558,11 @@
       }
     });
 
-    // Önceki / Sonraki Butonları
-    document.getElementById('prev-date').onclick = function() {
-      activeDate.setDate(activeDate.getDate() - 1);
-      fetchMatches();
-    };
+    document.getElementById('prev-date').onclick = () => { activeDate.setDate(activeDate.getDate() - 1); fetchMatches(); };
+    document.getElementById('next-date').onclick = () => { activeDate.setDate(activeDate.getDate() + 1); fetchMatches(); };
 
-    document.getElementById('next-date').onclick = function() {
-      activeDate.setDate(activeDate.getDate() + 1);
-      fetchMatches();
-    };
-
-    // Sayfa açılışı
     fetchMatches();
   </script>
 </body>
 </html>
+        
