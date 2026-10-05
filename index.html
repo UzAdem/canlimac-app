@@ -25,8 +25,11 @@
     .home-team, .away-team { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; overflow: hidden; }
     .home-team { justify-content: flex-end; text-align: right; }
     .away-team { justify-content: flex-start; text-align: left; }
+    
+    /* Skor veya 'v' alanı */
     .match-score { width: 50px; text-align: center; font-weight: bold; color: #00e676; font-size: 13px; flex-shrink: 0; }
-    .match-score.vs-icon { color: #00e676; font-size: 16px; font-weight: bold; }
+    .match-score.not-started { color: #9ca3af; font-weight: normal; font-size: 13px; }
+    
     .team-logo { width: 20px; height: 20px; object-fit: contain; }
 
     .message { text-align: center; padding: 40px 15px; color: #9ca3af; font-size: 14px; }
@@ -76,7 +79,7 @@
         <div class="name" id="d-home-name">Ev Sahibi</div>
       </div>
       <div class="score-box">
-        <div class="main-score" id="d-score">&#709;</div>
+        <div class="main-score" id="d-score">v</div>
       </div>
       <div class="team-box">
         <img id="d-away-logo" src="" alt="" />
@@ -130,15 +133,14 @@
         data.forEach(group => {
           html += `<div class="league-title">${group.league}</div>`;
           group.matches.forEach(match => {
-            // Başlamamış maç kontrolü
+            // Maç başlamadıysa 'v' göster
             const isNotStarted = 
               match.homeScore === 'v' || 
               match.homeScore === undefined || 
-              match.homeScore === 0 && match.awayScore === 0 && match.status !== 'MS' && !match.status?.includes("'");
+              (match.homeScore === 0 && match.awayScore === 0 && match.status !== 'MS' && !match.status?.includes("'"));
 
-            // Başlamadıysa ters ok ikonu (˅) göster
-            const scoreDisplay = isNotStarted ? '&#709;' : `${match.homeScore} - ${match.awayScore}`;
-            const scoreClass = isNotStarted ? 'match-score vs-icon' : 'match-score';
+            const scoreDisplay = isNotStarted ? 'v' : `${match.homeScore} - ${match.awayScore}`;
+            const scoreClass = isNotStarted ? 'match-score not-started' : 'match-score';
 
             const matchDataStr = encodeURIComponent(JSON.stringify({
               id: match.id,
@@ -189,7 +191,7 @@
       document.getElementById('d-away-name').textContent = match.awayTeam;
       document.getElementById('d-home-logo').src = match.homeLogo || '';
       document.getElementById('d-away-logo').src = match.awayLogo || '';
-      document.getElementById('d-score').innerHTML = match.score;
+      document.getElementById('d-score').textContent = match.score;
 
       const tabContent = document.getElementById('tab-content');
       tabContent.innerHTML = '<div class="message">Detaylar yükleniyor...</div>';
