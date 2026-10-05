@@ -372,7 +372,7 @@
     
     <!-- Üst Navigasyon -->
     <div class="detail-nav">
-      <button class="back-btn" onclick="closeMatchDetails()">&larr;</button>
+      <button class="back-btn" id="close-detail-btn">&larr;</button>
       <div class="brand-title">canlımaç</div>
       <div style="width: 22px;"></div>
     </div>
@@ -400,12 +400,12 @@
 
     <!-- Sekme Menüsü -->
     <div class="tabs-bar">
-      <div class="tab-item active" onclick="switchTab(this, 'detay')">Detay</div>
-      <div class="tab-item" onclick="switchTab(this, 'kadro')">Kadro</div>
-      <div class="tab-item" onclick="switchTab(this, 'karne')">Karne</div>
-      <div class="tab-item" onclick="switchTab(this, 'anlatim')">Anlatım</div>
-      <div class="tab-item" onclick="switchTab(this, 'istatistik')">İstatistik</div>
-      <div class="tab-item" onclick="switchTab(this, 'karsilastirma')">Karşılaştırma</div>
+      <div class="tab-item active" data-tab="detay">Detay</div>
+      <div class="tab-item" data-tab="kadro">Kadro</div>
+      <div class="tab-item" data-tab="karne">Karne</div>
+      <div class="tab-item" data-tab="anlatim">Anlatım</div>
+      <div class="tab-item" data-tab="istatistik">İstatistik</div>
+      <div class="tab-item" data-tab="karsilastirma">Karşılaştırma</div>
     </div>
 
     <!-- Sekme İçerikleri -->
@@ -416,198 +416,237 @@
   </div>
 
   <script>
-    let activeDate = new Date();
+    document.addEventListener('DOMContentLoaded', () => {
+      let activeDate = new Date();
 
-    function formatApiDate(d) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    function formatDisplayDate(d) {
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}.${month}.${year}`;
-    }
-
-    function syncDatePicker() {
-      document.getElementById('native-date-picker').value = formatApiDate(activeDate);
-    }
-
-    async function fetchMatches() {
-      const container = document.getElementById('matches-container');
-      const dateText = document.getElementById('date-text');
-      const apiParamDate = formatApiDate(activeDate);
-      
-      dateText.textContent = formatDisplayDate(activeDate);
-      syncDatePicker();
-      container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
-
-      try {
-        const response = await fetch(`/api/matches?date=${apiParamDate}`);
-        const data = await response.json();
-
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div class="loading">Bu tarihte maç bulunamadı.</div>';
-          return;
-        }
-
-        let html = '';
-        data.forEach(group => {
-          html += `<div class="league-title">${group.league}</div>`;
-          group.matches.forEach(match => {
-            const scoreDisplay = match.homeScore === 'v' ? 'v' : `${match.homeScore} - ${match.awayScore}`;
-
-            html += `
-              <div class="match-card" onclick="openMatchDetails('${match.id}', '${match.homeTeam}', '${match.awayTeam}', '${match.homeLogo}', '${match.awayLogo}', '${scoreDisplay}')">
-                <div class="match-time">${match.time}</div>
-                <div class="home-team">
-                  <span>${match.homeTeam}</span>
-                  ${match.homeLogo ? `<img src="${match.homeLogo}" class="team-logo" alt="" />` : ''}
-                </div>
-                <div class="match-score">${scoreDisplay}</div>
-                <div class="away-team">
-                  ${match.awayLogo ? `<img src="${match.awayLogo}" class="team-logo" alt="" />` : ''}
-                  <span>${match.awayTeam}</span>
-                </div>
-              </div>
-            `;
-          });
-        });
-
-        container.innerHTML = html;
-      } catch (err) {
-        container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
-      }
-    }
-
-    // İkon ve Türkçe Metin Eşleştirici
-    function getEventBadge(typeText) {
-      const type = (typeText || '').toLowerCase();
-
-      if (type.includes('goal')) {
-        return { icon: '⚽', label: 'Gol', color: '#00e676' };
-      } else if (type.includes('yellow card')) {
-        return { icon: '🟨', label: 'Sarı Kart', color: '#facc15' };
-      } else if (type.includes('red card')) {
-        return { icon: '🟥', label: 'Kırmızı Kart', color: '#ef4444' };
-      } else if (type.includes('substitution')) {
-        return { icon: '🔄', label: 'Oyuncu Değişikliği', color: '#38bdf8' };
-      } else if (type.includes('kickoff') || type.includes('first half begins')) {
-        return { icon: '🏁', label: 'Maç Başladı', isCenterBadge: true };
-      } else if (type.includes('halftime') || type.includes('first half ends')) {
-        return { icon: '⏸️', label: 'İlk Yarı Bitti', isCenterBadge: true };
-      } else if (type.includes('start 2nd half') || type.includes('second half begins')) {
-        return { icon: '▶️', label: 'İkinci Yarı Başladı', isCenterBadge: true };
+      function formatApiDate(d) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
       }
 
-      return { icon: '📌', label: typeText, color: '#9ca3af' };
-    }
+      function formatDisplayDate(d) {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}.${month}.${year}`;
+      }
 
-    // MAÇ DETAY EKRANINI AÇMA
-    async function openMatchDetails(matchId, homeName, awayName, homeLogo, awayLogo, score) {
-      const screen = document.getElementById('detail-screen');
-      screen.style.display = 'flex';
+      function syncDatePicker() {
+        const picker = document.getElementById('native-date-picker');
+        if (picker) picker.value = formatApiDate(activeDate);
+      }
 
-      document.getElementById('d-home-name').textContent = homeName;
-      document.getElementById('d-away-name').textContent = awayName;
-      document.getElementById('d-home-logo').src = homeLogo || '';
-      document.getElementById('d-away-logo').src = awayLogo || '';
-      document.getElementById('d-score').textContent = score;
+      async function fetchMatches() {
+        const container = document.getElementById('matches-container');
+        const dateText = document.getElementById('date-text');
+        const apiParamDate = formatApiDate(activeDate);
+        
+        if (dateText) dateText.textContent = formatDisplayDate(activeDate);
+        syncDatePicker();
+        if (container) container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
-      const tabContent = document.getElementById('tab-content');
-      tabContent.innerHTML = '<div class="loading">Maç olayları yükleniyor...</div>';
+        try {
+          const response = await fetch(`/api/matches?date=${apiParamDate}`);
+          const data = await response.json();
 
-      try {
-        const res = await fetch(`/api/match-detail?matchId=${matchId}`);
-        const data = await res.json();
-
-        if (data.header) {
-          const comp = data.header.competitions?.[0];
-          if (comp?.status?.type?.shortDetail) {
-            document.getElementById('d-status').textContent = comp.status.type.shortDetail;
+          if (!data || data.length === 0) {
+            if (container) container.innerHTML = '<div class="loading">Bu tarihte maç bulunamadı.</div>';
+            return;
           }
-        }
 
-        let timelineHtml = '<div class="timeline-container"><div class="timeline-line"></div>';
+          let html = '';
+          data.forEach(group => {
+            html += `<div class="league-title">${group.league}</div>`;
+            group.matches.forEach(match => {
+              const scoreDisplay = match.homeScore === 'v' ? 'v' : `${match.homeScore} - ${match.awayScore}`;
+              const matchDataStr = encodeURIComponent(JSON.stringify({
+                id: match.id,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                homeLogo: match.homeLogo,
+                awayLogo: match.awayLogo,
+                score: scoreDisplay
+              }));
 
-        if (data.events && data.events.length > 0) {
-          data.events.forEach(evt => {
-            const badge = getEventBadge(evt.type);
-            const clockDisplay = evt.clock ? evt.clock : "•";
-
-            if (badge.isCenterBadge) {
-              timelineHtml += `
-                <div class="badge-divider">
-                  <span>${badge.icon} ${badge.label}</span>
+              html += `
+                <div class="match-card" data-match="${matchDataStr}">
+                  <div class="match-time">${match.time}</div>
+                  <div class="home-team">
+                    <span>${match.homeTeam}</span>
+                    ${match.homeLogo ? `<img src="${match.homeLogo}" class="team-logo" alt="" />` : ''}
+                  </div>
+                  <div class="match-score">${scoreDisplay}</div>
+                  <div class="away-team">
+                    ${match.awayLogo ? `<img src="${match.awayLogo}" class="team-logo" alt="" />` : ''}
+                    <span>${match.awayTeam}</span>
+                  </div>
                 </div>
               `;
-              return;
-            }
-
-            const isHome = evt.team ? evt.team.toLowerCase().includes(homeName.toLowerCase().slice(0, 3)) : true;
-
-            timelineHtml += `
-              <div class="timeline-event">
-                <div class="event-left">
-                  ${isHome ? `
-                    <div class="event-card">
-                      <div class="player-main">${evt.player \vert{}\vert{} evt.detail}${badge.icon}</div>
-                      <div class="player-sub" style="color: ${badge.color}">${badge.label}</div>
-                    </div>
-                  ` : ''}
-                </div>
-                <div class="event-center">${clockDisplay}</div>
-                <div class="event-right">
-                  ${!isHome ? `
-                    <div class="event-card">
-                      <div class="player-main">${badge.icon}${evt.player || evt.detail}</div>
-                      <div class="player-sub" style="color: ${badge.color}">${badge.label}</div>
-                    </div>
-                  ` : ''}
-                </div>
-              </div>
-            `;
+            });
           });
-        } else {
-          timelineHtml += `<div style="text-align:center; padding:40px; color:#9ca3af; font-size:13px;">Bu maç için henüz olay akışı bilgisi mevcut değil.</div>`;
+
+          if (container) {
+            container.innerHTML = html;
+            container.querySelectorAll('.match-card').forEach(card => {
+              card.addEventListener('click', () => {
+                const matchData = JSON.parse(decodeURIComponent(card.getAttribute('data-match')));
+                openMatchDetails(
+                  matchData.id,
+                  matchData.homeTeam,
+                  matchData.awayTeam,
+                  matchData.homeLogo,
+                  matchData.awayLogo,
+                  matchData.score
+                );
+              });
+            });
+          }
+        } catch (err) {
+          if (container) container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
+        }
+      }
+
+      function getEventBadge(typeText) {
+        const type = (typeText || '').toLowerCase();
+
+        if (type.includes('goal')) {
+          return { icon: '⚽', label: 'Gol', color: '#00e676' };
+        } else if (type.includes('yellow card')) {
+          return { icon: '🟨', label: 'Sarı Kart', color: '#facc15' };
+        } else if (type.includes('red card')) {
+          return { icon: '🟥', label: 'Kırmızı Kart', color: '#ef4444' };
+        } else if (type.includes('substitution')) {
+          return { icon: '🔄', label: 'Oyuncu Değişikliği', color: '#38bdf8' };
+        } else if (type.includes('kickoff') || type.includes('first half begins')) {
+          return { icon: '🏁', label: 'Maç Başladı', isCenterBadge: true };
+        } else if (type.includes('halftime') || type.includes('first half ends')) {
+          return { icon: '⏸️', label: 'İlk Yarı Bitti', isCenterBadge: true };
+        } else if (type.includes('start 2nd half') || type.includes('second half begins')) {
+          return { icon: '▶️', label: 'İkinci Yarı Başladı', isCenterBadge: true };
         }
 
-        timelineHtml += '</div>';
-        tabContent.innerHTML = timelineHtml;
-
-      } catch (err) {
-        tabContent.innerHTML = '<div class="loading">Detaylar yüklenirken bir sorun oluştu.</div>';
+        return { icon: '📌', label: typeText, color: '#9ca3af' };
       }
-    }
 
-    function closeMatchDetails() {
-      document.getElementById('detail-screen').style.display = 'none';
-    }
+      async function openMatchDetails(matchId, homeName, awayName, homeLogo, awayLogo, score) {
+        const screen = document.getElementById('detail-screen');
+        if (screen) screen.style.display = 'flex';
 
-    function switchTab(element, tabName) {
-      document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-      element.classList.add('active');
-      
-      if(tabName !== 'detay') {
-        document.getElementById('tab-content').innerHTML = `<div class="loading">${element.textContent} sekmesi hazırlanıyor...</div>`;
+        document.getElementById('d-home-name').textContent = homeName;
+        document.getElementById('d-away-name').textContent = awayName;
+        document.getElementById('d-home-logo').src = homeLogo || '';
+        document.getElementById('d-away-logo').src = awayLogo || '';
+        document.getElementById('d-score').textContent = score;
+
+        const tabContent = document.getElementById('tab-content');
+        if (tabContent) tabContent.innerHTML = '<div class="loading">Maç olayları yükleniyor...</div>';
+
+        try {
+          const res = await fetch(`/api/match-detail?matchId=${matchId}`);
+          const data = await res.json();
+
+          if (data.header) {
+            const comp = data.header.competitions?.[0];
+            if (comp?.status?.type?.shortDetail) {
+              document.getElementById('d-status').textContent = comp.status.type.shortDetail;
+            }
+          }
+
+          let timelineHtml = '<div class="timeline-container"><div class="timeline-line"></div>';
+
+          if (data.events && data.events.length > 0) {
+            data.events.forEach(evt => {
+              const badge = getEventBadge(evt.type);
+              const clockDisplay = evt.clock ? evt.clock : "•";
+
+              if (badge.isCenterBadge) {
+                timelineHtml += `
+                  <div class="badge-divider">
+                    <span>${badge.icon} ${badge.label}</span>
+                  </div>
+                `;
+                return;
+              }
+
+              const isHome = evt.team ? evt.team.toLowerCase().includes(homeName.toLowerCase().slice(0, 3)) : true;
+
+              timelineHtml += `
+                <div class="timeline-event">
+                  <div class="event-left">
+                    ${isHome ? `
+                      <div class="event-card">
+                        <div class="player-main">${evt.player \vert{}\vert{} evt.detail}${badge.icon}</div>
+                        <div class="player-sub" style="color: ${badge.color}">${badge.label}</div>
+                      </div>
+                    ` : ''}
+                  </div>
+                  <div class="event-center">${clockDisplay}</div>
+                  <div class="event-right">
+                    ${!isHome ? `
+                      <div class="event-card">
+                        <div class="player-main">${badge.icon}${evt.player || evt.detail}</div>
+                        <div class="player-sub" style="color: ${badge.color}">${badge.label}</div>
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              `;
+            });
+          } else {
+            timelineHtml += `<div style="text-align:center; padding:40px; color:#9ca3af; font-size:13px;">Bu maç için henüz olay akışı bilgisi mevcut değil.</div>`;
+          }
+
+          timelineHtml += '</div>';
+          if (tabContent) tabContent.innerHTML = timelineHtml;
+
+        } catch (err) {
+          if (tabContent) tabContent.innerHTML = '<div class="loading">Detaylar yüklenirken bir sorun oluştu.</div>';
+        }
       }
-    }
 
-    document.getElementById('native-date-picker').addEventListener('change', (e) => {
-      if (e.target.value) {
-        const [year, month, day] = e.target.value.split('-').map(Number);
-        activeDate = new Date(year, month - 1, day);
-        fetchMatches();
+      function closeMatchDetails() {
+        const screen = document.getElementById('detail-screen');
+        if (screen) screen.style.display = 'none';
       }
+
+      // Etkinlik dinleyicileri
+      const closeBtn = document.getElementById('close-detail-btn');
+      if (closeBtn) closeBtn.addEventListener('click', closeMatchDetails);
+
+      const prevBtn = document.getElementById('prev-date');
+      if (prevBtn) prevBtn.addEventListener('click', () => { activeDate.setDate(activeDate.getDate() - 1); fetchMatches(); });
+
+      const nextBtn = document.getElementById('next-date');
+      if (nextBtn) nextBtn.addEventListener('click', () => { activeDate.setDate(activeDate.getDate() + 1); fetchMatches(); });
+
+      const datePicker = document.getElementById('native-date-picker');
+      if (datePicker) {
+        datePicker.addEventListener('change', (e) => {
+          if (e.target.value) {
+            const [year, month, day] = e.target.value.split('-').map(Number);
+            activeDate = new Date(year, month - 1, day);
+            fetchMatches();
+          }
+        });
+      }
+
+      document.querySelectorAll('.tab-item').forEach(el => {
+        el.addEventListener('click', () => {
+          document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+          el.classList.add('active');
+          const tabName = el.getAttribute('data-tab');
+          if (tabName !== 'detay') {
+            const tabContent = document.getElementById('tab-content');
+            if (tabContent) tabContent.innerHTML = `<div class="loading">${el.textContent} sekmesi hazırlanıyor...</div>`;
+          }
+        });
+      });
+
+      // İlk yükleme
+      fetchMatches();
     });
-
-    document.getElementById('prev-date').onclick = () => { activeDate.setDate(activeDate.getDate() - 1); fetchMatches(); };
-    document.getElementById('next-date').onclick = () => { activeDate.setDate(activeDate.getDate() + 1); fetchMatches(); };
-
-    fetchMatches();
   </script>
 </body>
 </html>
