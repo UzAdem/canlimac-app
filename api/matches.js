@@ -62,18 +62,25 @@ export default async function handler(req, res) {
         const homeCompetitor = competition.competitors?.find(c => c.homeAway === 'home');
         const awayCompetitor = competition.competitors?.find(c => c.homeAway === 'away');
 
-        const statusState = competition.status?.type?.state; // 'pre', 'in', 'post'
+        const statusState = competition.status?.type?.state;
+
+        // Maç saatini Türkiye zaman dilimine (UTC+3) göre dönüştürüyoruz
+        const matchTime = new Date(event.date).toLocaleTimeString('tr-TR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Europe/Istanbul'
+        });
 
         const matchObj = {
           id: event.id,
-          time: new Date(event.date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+          time: matchTime,
           homeTeam: homeCompetitor?.team?.displayName || 'Ev Sahibi',
           awayTeam: awayCompetitor?.team?.displayName || 'Deplasman',
           homeLogo: homeCompetitor?.team?.logo || '',
           awayLogo: awayCompetitor?.team?.logo || '',
           homeScore: homeCompetitor?.score,
           awayScore: awayCompetitor?.score,
-          state: statusState, // 'pre' = Maç Başlamadı, 'in' = Canlı, 'post' = Bitti
+          state: statusState,
           statusDetail: competition.status?.type?.shortDetail || 'MS'
         };
 
@@ -114,4 +121,4 @@ export default async function handler(req, res) {
     console.error('API Error:', error);
     return res.status(200).json([]);
   }
-            }
+}
