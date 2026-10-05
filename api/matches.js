@@ -114,11 +114,13 @@ module.exports = async (req, res) => {
               id: event.id,
               leagueSlug: league.slug,
               homeTeam: translateTeam(home.team.displayName),
+              homeLogo: home.team.logo || '',
               awayTeam: translateTeam(away.team.displayName),
+              awayLogo: away.team.logo || '',
               homeScore: isStarted ? (home.score || '0') : '',
               awayScore: isStarted ? (away.score || '0') : '',
               time: displayTime,
-              status: statusState, // 'pre', 'in', 'post'
+              status: statusState,
               isStarted: isStarted,
               venue: comp.venue ? comp.venue.fullName : ''
             };
@@ -143,3 +145,4 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: 'Maç verileri çekilemedi.' });
   }
 };
+  
