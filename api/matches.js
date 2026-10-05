@@ -91,18 +91,23 @@ module.exports = async (req, res) => {
             const away = comp.competitors.find(c => c.awayAway === 'away') || comp.competitors[1];
 
             const statusState = event.status.type.state;
-            let displayMinute = event.status.type.shortDetail;
+            let displayTime = '';
+            let isStarted = false;
 
-            // Başlamamış maçlar için başlama saatini Türkiye saatine göre alıyoruz (HH:mm)
             if (statusState === 'pre') {
               const matchDate = new Date(event.date);
-              displayMinute = matchDate.toLocaleTimeString('tr-TR', {
+              displayTime = matchDate.toLocaleTimeString('tr-TR', {
                 timeZone: 'Europe/Istanbul',
                 hour: '2-digit',
                 minute: '2-digit'
               });
+              isStarted = false;
             } else if (statusState === 'post') {
-              displayMinute = 'MS';
+              displayTime = 'MS';
+              isStarted = true;
+            } else {
+              displayTime = event.status.type.shortDetail || 'CANLI';
+              isStarted = true;
             }
 
             return {
@@ -110,10 +115,11 @@ module.exports = async (req, res) => {
               leagueSlug: league.slug,
               homeTeam: translateTeam(home.team.displayName),
               awayTeam: translateTeam(away.team.displayName),
-              homeScore: home.score || '0',
-              awayScore: away.score || '0',
-              minute: displayMinute,
-              status: statusState === 'in' ? 'LIVE' : (statusState === 'post' ? 'FINISHED' : 'PRE'),
+              homeScore: isStarted ? (home.score || '0') : '',
+              awayScore: isStarted ? (away.score || '0') : '',
+              time: displayTime,
+              status: statusState, // 'pre', 'in', 'post'
+              isStarted: isStarted,
               venue: comp.venue ? comp.venue.fullName : ''
             };
           });
