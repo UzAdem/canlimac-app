@@ -24,12 +24,13 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
-      return res.status(200).json({ events: [], statusDetail: 'Maç Sonu' });
+      return res.status(200).json({ events: [], statusDetail: 'MS' });
     }
 
     const data = await response.json();
     const headerComp = data?.header?.competitions?.[0];
-    const statusDetail = headerComp?.status?.type?.detail || 'Maç Sonu';
+    const rawStatus = headerComp?.status?.type?.detail || 'MS';
+    const statusDetail = (rawStatus.includes('FT') || rawStatus.includes('Sonu')) ? 'MS' : rawStatus;
 
     // Ev Sahibi ve Deplasman Bilgileri
     const homeComp = headerComp?.competitors?.find(c => c.homeAway === 'home');
@@ -40,30 +41,26 @@ export default async function handler(req, res) {
     const awayId = String(awayComp?.id || '');
     const awayName = awayComp?.team?.displayName || '';
 
-    // İlk Yarı Skoru Arama (Linescores veya period verisi)
-    let homeIY = undefined;
-    let awayIY = undefined;
-
-    if (homeComp?.linescores?.[0]?.value !== undefined && awayComp?.linescores?.[0]?.value !== undefined) {
-      homeIY = Math.round(homeComp.linescores[0].value);
-      awayIY = Math.round(awayComp.linescores[0].value);
-    }
-
     const rawEvents = data?.keyEvents || [];
     const events = [];
 
+    let homeIY = 0;
+    let awayIY = 0;
+
     rawEvents.forEach(item => {
       try {
-        const clock = item?.clock?.displayValue || item?.time?.displayValue || '';
+        const clock = item?.clock?.displayValue || item?.time?.displayValue || '0';
         const typeId = String(item?.type?.id || '');
         const typeText = String(item?.type?.text || '').toLowerCase();
         const text = String(item?.text || '');
 
         let icon = null;
         let typeLabel = '';
+        let isGoal = false;
 
         // Olay Türü Ayıklama
         if (typeId === '1' || typeText.includes('goal')) {
+          isGoal = true;
           if (typeText.includes('own') || text.toLowerCase().includes('own goal')) {
             icon = '⚽';
             typeLabel = 'Kendi Kalesine Gol';
@@ -85,10 +82,9 @@ export default async function handler(req, res) {
           typeLabel = 'Oyuncu Değişikliği';
         }
 
-        // Önemsiz bildirimse (raptiye vb.) atla
         if (!icon) return;
 
-        // Ev Sahibi mi Deplasman mı?
+        // Takım Tespit Etme
         const itemTeamId = String(item?.team?.id || '');
         let isHome = false;
 
@@ -100,9 +96,15 @@ export default async function handler(req, res) {
 
         const teamName = isHome ? homeName : awayName;
 
+        // İY Gol Sayımı (45 dakikaya kadar atılan goller)
+        const minute = parseInt(clock) || 0;
+        if (isGoal && minute <= 45) {
+          if (isHome) homeIY++;
+          else awayIY++;
+        }
+
         // Oyuncu İsmi Temizleme & Oyuncu Değişikliği Formatlama
         let player = '';
-        
         if (item?.participants && item.participants.length > 0) {
           const p1 = item.participants[0]?.athlete?.displayName || '';
           const p2 = item.participants[1]?.athlete?.displayName || '';
@@ -140,6 +142,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Match Detail API Error:', error);
-    return res.status(200).json({ events: [], statusDetail: 'Maç Sonu' });
+    return res.status(200).json({ events: [], statusDetail: 'MS', homeIY: 0, awayIY: 0 });
   }
 }
