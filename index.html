@@ -84,17 +84,18 @@
     .match-card {
       display: flex;
       align-items: center;
-      padding: 12px 15px;
+      padding: 12px 10px;
       background-color: #121926;
       border-bottom: 1px solid #1c2738;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .match-time {
-      width: 50px;
-      font-size: 12px;
+      width: 45px;
+      font-size: 11px;
       color: #94a3b8;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
     .match-teams-container {
@@ -104,8 +105,23 @@
       flex: 1;
     }
 
-    .team {
+    .team-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       flex: 1;
+      min-width: 0; /* Taşan yazıları engeller */
+    }
+
+    .team-box.home {
+      justify-content: flex-end;
+    }
+
+    .team-box.away {
+      justify-content: flex-start;
+    }
+
+    .team-name {
       font-weight: 500;
       color: #e2e8f0;
       white-space: nowrap;
@@ -113,22 +129,20 @@
       text-overflow: ellipsis;
     }
 
-    .home-team {
-      text-align: right;
-      padding-right: 10px;
-    }
-
-    .away-team {
-      text-align: left;
-      padding-left: 10px;
+    .team-logo {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      flex-shrink: 0;
     }
 
     .score-box {
-      min-width: 45px;
+      min-width: 38px;
       text-align: center;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
       color: #94a3b8;
+      padding: 0 4px;
     }
 
     .score-box.live {
@@ -211,13 +225,21 @@
                   scoreClass = match.status === 'in' ? 'live' : 'finished';
                 }
 
+                const homeLogoHtml = match.homeLogo ? `<img class="team-logo" src="${match.homeLogo}" alt="" onerror="this.style.display='none'">` : '';
+                const awayLogoHtml = match.awayLogo ? `<img class="team-logo" src="${match.awayLogo}" alt="" onerror="this.style.display='none'">` : '';
+
                 return `
                   <div class="match-card">
                     <div class="match-time">${match.time}</div>
                     <div class="match-teams-container">
-                      <span class="team home-team">${match.homeTeam}</span>
+                      <div class="team-box home">
+                        <span class="team-name">${match.homeTeam}</span>${homeLogoHtml}
+                      </div>
                       <span class="score-box ${scoreClass}">${scoreText}</span>
-                      <span class="team away-team">${match.awayTeam}</span>
+                      <div class="team-box away">
+                        ${awayLogoHtml}
+                        <span class="team-name">${match.awayTeam}</span>
+                      </div>
                     </div>
                   </div>
                 `;
@@ -242,7 +264,6 @@
       fetchMatches();
     });
 
-    // Sayfa açıldığında maçları çek
     fetchMatches();
   </script>
 </body>
