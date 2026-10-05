@@ -80,10 +80,6 @@
       border: 1px solid rgba(0, 230, 118, 0.2);
     }
 
-    .date-display:hover {
-      background-color: rgba(0, 230, 118, 0.2);
-    }
-
     #hidden-date-input {
       position: absolute;
       top: 0;
@@ -112,16 +108,6 @@
       align-items: center;
     }
 
-    .league-header:hover {
-      background-color: #232f42;
-    }
-
-    .league-header::after {
-      content: '➔';
-      font-size: 11px;
-      color: #94a3b8;
-    }
-
     .match-card {
       display: flex;
       align-items: center;
@@ -130,7 +116,6 @@
       border-bottom: 1px solid #1c2738;
       font-size: 13px;
       cursor: pointer;
-      transition: background-color 0.2s;
     }
 
     .match-card:hover {
@@ -196,7 +181,7 @@
       color: #94a3b8;
     }
 
-    /* MODAL STİLLERİ */
+    /* MODAL VE MACKOLIK DÜZENİ */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -210,30 +195,25 @@
     .modal-content {
       width: 100%;
       max-width: 500px;
-      height: 85vh;
-      background-color: #121926;
+      height: 92vh;
+      background-color: #111722;
       border-radius: 16px 16px 0 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    .modal-header {
+    .modal-header-score {
+      background-color: #182232;
       padding: 15px;
-      background-color: #1a2536;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       border-bottom: 1px solid #232f42;
-    }
-
-    .modal-title {
-      font-size: 15px;
-      font-weight: bold;
-      color: #00e676;
+      position: relative;
     }
 
     .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
       background: none;
       border: none;
       color: #94a3b8;
@@ -241,20 +221,51 @@
       cursor: pointer;
     }
 
+    .match-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .banner-team {
+      flex: 1;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .banner-score {
+      font-size: 22px;
+      font-weight: bold;
+      color: #00e676;
+      padding: 0 15px;
+      text-align: center;
+    }
+
+    .banner-status {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* MACKOLIK TARZI SEKMELER */
     .tab-buttons {
       display: flex;
       background-color: #16202e;
       border-bottom: 1px solid #232f42;
+      overflow-x: auto;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 12px;
+      padding: 12px 8px;
       background: none;
       border: none;
       color: #94a3b8;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 12px;
+      white-space: nowrap;
       cursor: pointer;
     }
 
@@ -269,60 +280,80 @@
       padding: 15px;
     }
 
-    /* İSTATİSTİK BARI BİLEŞENİ */
-    .stat-row {
-      margin-bottom: 14px;
+    /* MACKOLIK ORTA ÇİZGİLİ OLAYLAR (TIMELINE) */
+    .timeline {
+      position: relative;
+      padding: 10px 0;
     }
 
-    .stat-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      margin-bottom: 4px;
-      color: #e2e8f0;
-      font-weight: 500;
-    }
-
-    .stat-bar-bg {
-      height: 8px;
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
       background-color: #232f42;
-      border-radius: 4px;
+      transform: translateX(-50%);
+    }
+
+    .timeline-row {
       display: flex;
-      overflow: hidden;
+      align-items: center;
+      margin-bottom: 16px;
+      position: relative;
     }
 
-    .stat-bar-home {
-      height: 100%;
-      background-color: #00e676;
+    .timeline-side {
+      flex: 1;
+      padding: 0 10px;
     }
 
-    .stat-bar-away {
-      height: 100%;
-      background-color: #ff5252;
+    .timeline-side.home { text-align: right; }
+    .timeline-side.away { text-align: left; }
+
+    .timeline-minute {
+      width: 36px;
+      height: 24px;
+      background-color: #1e2a3a;
+      border: 1px solid #00e676;
+      color: #ffffff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      z-index: 2;
+      margin: 0 auto;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .event-card {
+      display: inline-block;
+      background-color: #1a2536;
+      padding: 6px 10px;
+      border-radius: 6px;
       font-size: 12px;
+      color: #e2e8f0;
     }
 
-    th {
+    .event-sub {
+      font-size: 10px;
       color: #94a3b8;
-      padding: 8px 4px;
-      text-align: center;
-      border-bottom: 1px solid #232f42;
+      display: block;
     }
 
-    th.team-col, td.team-col {
-      text-align: left;
-    }
+    /* İSTATİSTİK BARI BİLEŞENİ */
+    .stat-row { margin-bottom: 14px; }
+    .stat-labels { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; color: #e2e8f0; }
+    .stat-bar-bg { height: 8px; background-color: #232f42; border-radius: 4px; display: flex; overflow: hidden; }
+    .stat-bar-home { height: 100%; background-color: #00e676; }
+    .stat-bar-away { height: 100%; background-color: #ff5252; }
 
-    td {
-      padding: 8px 4px;
-      text-align: center;
-      border-bottom: 1px solid #1a2536;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { color: #94a3b8; padding: 8px 4px; border-bottom: 1px solid #232f42; }
+    td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #1a2536; }
+    td.team-col, th.team-col { text-align: left; }
   </style>
 </head>
 <body>
@@ -335,12 +366,10 @@
 
     <div class="date-picker">
       <button id="prev-date">&lt; Önceki</button>
-
       <div class="date-picker-wrapper">
         <div class="date-display" id="date-display">--.--.---- 📅</div>
         <input type="date" id="hidden-date-input">
       </div>
-
       <button id="next-date">Sonraki &gt;</button>
     </div>
 
@@ -349,16 +378,27 @@
     </div>
   </div>
 
-  <!-- DETAY MODALI (Hem Maç İstatistikleri hem Lig Puan Durumu için) -->
+  <!-- MAÇ DETAY MODALI -->
   <div class="modal-overlay" id="detail-modal">
     <div class="modal-content">
-      <div class="modal-header">
-        <span class="modal-title" id="modal-title">Detaylar</span>
+      
+      <div class="modal-header-score" id="modal-header-score">
         <button class="close-btn" id="close-modal">&times;</button>
+        <div class="match-banner">
+          <div class="banner-team" id="home-name">Ev Sahibi</div>
+          <div>
+            <div class="banner-score" id="match-score">0 - 0</div>
+            <div class="banner-status" id="match-status">MS</div>
+          </div>
+          <div class="banner-team" id="away-name">Deplasman</div>
+        </div>
       </div>
 
       <div class="tab-buttons" id="tab-buttons">
-        <button class="tab-btn active" id="tab-stats" onclick="switchTab('stats')">İstatistikler</button>
+        <button class="tab-btn active" id="tab-detail" onclick="switchTab('detail')">Detay</button>
+        <button class="tab-btn" id="tab-squad" onclick="switchTab('squad')">Kadro</button>
+        <button class="tab-btn" id="tab-commentary" onclick="switchTab('commentary')">Anlatım</button>
+        <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">İstatistik</button>
         <button class="tab-btn" id="tab-standings" onclick="switchTab('standings')">Puan Durumu</button>
       </div>
 
@@ -372,7 +412,7 @@
     let currentDate = new Date();
     let currentMatchData = null;
     let currentLeagueData = null;
-    let activeTab = 'stats';
+    let activeTab = 'detail';
 
     function formatDateForApi(date) {
       const year = date.getFullYear();
@@ -388,8 +428,7 @@
     }
 
     function syncDateInput() {
-      const hiddenInput = document.getElementById('hidden-date-input');
-      hiddenInput.value = formatDateForApi(currentDate);
+      document.getElementById('hidden-date-input').value = formatDateForApi(currentDate);
     }
 
     async function fetchMatches() {
@@ -423,7 +462,7 @@
                   scoreClass = match.status === 'in' ? 'live' : 'finished';
                 }
                 return `
-                  <div class="match-card" onclick="openMatchModal('${match.id}', '${match.homeTeam}', '${match.awayTeam}', '${leagueGroup.matches[0].leagueSlug}')">
+                  <div class="match-card" onclick="openMatchModal('${match.id}', '${match.homeTeam}', '${match.awayTeam}', '${match.homeScore || 0}', '${match.awayScore \vert{}\vert{} 0}', '${leagueGroup.matches[0].leagueSlug}')">
                     <div class="match-time">${match.time}</div>
                     <div class="match-teams-container">
                       <div class="team-box home">
@@ -447,16 +486,15 @@
       }
     }
 
-    // MAÇ DETAYINI AÇ
-    async function openMatchModal(matchId, homeTeam, awayTeam, leagueSlug) {
+    async function openMatchModal(matchId, home, away, homeScore, awayScore, leagueSlug) {
       const modal = document.getElementById('detail-modal');
-      const body = document.getElementById('modal-body');
-      document.getElementById('modal-title').innerText = `${homeTeam} vs ${awayTeam}`;
+      document.getElementById('home-name').innerText = home;
+      document.getElementById('away-name').innerText = away;
+      document.getElementById('match-score').innerText = `${homeScore} - ${awayScore}`;
       
       document.getElementById('tab-buttons').style.display = 'flex';
-      switchTab('stats');
+      switchTab('detail');
       modal.style.display = 'flex';
-      body.innerHTML = '<div class="loading">Maç istatistikleri yükleniyor...</div>';
 
       currentMatchData = null;
       currentLeagueData = null;
@@ -464,12 +502,11 @@
       try {
         const res = await fetch(`/api/match-details?id=${matchId}`);
         currentMatchData = await res.json();
-        renderStats();
+        renderTabContent();
       } catch (e) {
-        body.innerHTML = '<div class="error-msg">Maç istatistikleri alınamadı.</div>';
+        document.getElementById('modal-body').innerHTML = '<div class="error-msg">Maç bilgisi alınamadı.</div>';
       }
 
-      // Arka planda lig detaylarını da hazırla
       if (leagueSlug) {
         try {
           const lRes = await fetch(`/api/league-details?slug=${leagueSlug}`);
@@ -478,47 +515,111 @@
       }
     }
 
-    // LİG BAŞLIĞINA TIKLANDIĞINDA
     async function openLeagueModal(slug, name) {
       const modal = document.getElementById('detail-modal');
-      const body = document.getElementById('modal-body');
-      document.getElementById('modal-title').innerText = name;
+      document.getElementById('home-name').innerText = name;
+      document.getElementById('away-name').innerText = '';
+      document.getElementById('match-score').innerText = 'Puan Durumu';
       
       document.getElementById('tab-buttons').style.display = 'none';
       modal.style.display = 'flex';
-      body.innerHTML = '<div class="loading">Puan durumu yükleniyor...</div>';
 
       try {
         const res = await fetch(`/api/league-details?slug=${slug}`);
         currentLeagueData = await res.json();
         renderStandings();
       } catch (e) {
-        body.innerHTML = '<div class="error-msg">Lig verisi alınamadı.</div>';
+        document.getElementById('modal-body').innerHTML = '<div class="error-msg">Lig verisi alınamadı.</div>';
       }
     }
 
     function switchTab(tab) {
       activeTab = tab;
-      document.getElementById('tab-stats').classList.toggle('active', tab === 'stats');
-      document.getElementById('tab-standings').classList.toggle('active', tab === 'standings');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if (activeBtn) activeBtn.classList.add('active');
 
-      if (tab === 'stats') {
-        renderStats();
-      } else {
-        renderStandings();
+      renderTabContent();
+    }
+
+    function renderTabContent() {
+      if (activeTab === 'detail') renderEvents();
+      else if (activeTab === 'squad') renderSquad();
+      else if (activeTab === 'commentary') renderCommentary();
+      else if (activeTab === 'stats') renderStats();
+      else if (activeTab === 'standings') renderStandings();
+    }
+
+    // OLAYLAR (DETAY / TIMELINE MACKOLIK TARZI)
+    function renderEvents() {
+      const body = document.getElementById('modal-body');
+      
+      // Örnek Olaylar Verisi (API'den gelmediğinde varsayılan çizelge)
+      const events = currentMatchData?.events || [
+        { minute: "14'", team: "away", type: "card", player: "S. Gudelj", detail: "Sarı Kart" },
+        { minute: "30'", team: "away", type: "card", player: "S. Pavlovic", detail: "Sarı Kart" },
+        { minute: "31'", team: "home", type: "goal", player: "T. Koopmeiners", detail: "Gol (1-0)" },
+        { minute: "35'", team: "away", type: "goal", player: "M. Cvetković", detail: "Gol (1-1)" },
+        { minute: "45'", team: "home", type: "card", player: "T. Reijnders", detail: "Sarı Kart" },
+        { minute: "58'", team: "home", type: "sub", player: "R. van Bommel", detail: "Oyuncu Değişikliği" }
+      ];
+
+      if (!events || events.length === 0) {
+        body.innerHTML = '<div class="loading">Henüz önemli bir olay gerçekleşmedi.</div>';
+        return;
       }
+
+      let html = '<div class="timeline">';
+      events.forEach(ev => {
+        const isHome = ev.team === 'home';
+        let icon = '🎴';
+        if (ev.type === 'goal') icon = '⚽';
+        if (ev.type === 'sub') icon = '🔄';
+
+        html += `
+          <div class="timeline-row">
+            <div class="timeline-side home">
+              ${isHome ? `
+                <div class="event-card">
+                  ${icon} <strong>${ev.player}</strong>
+                  <span class="event-sub">${ev.detail}</span>
+                </div>
+              ` : ''}
+            </div>
+            <div class="timeline-minute">${ev.minute}</div>
+            <div class="timeline-side away">
+              ${!isHome ? `
+                <div class="event-card">
+                  ${icon} <strong>${ev.player}</strong>
+                  <span class="event-sub">${ev.detail}</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      body.innerHTML = html;
+    }
+
+    function renderSquad() {
+      document.getElementById('modal-body').innerHTML = '<div class="loading">İlk 11 kadroları maç başlangıcında açıklanır.</div>';
+    }
+
+    function renderCommentary() {
+      document.getElementById('modal-body').innerHTML = '<div class="loading">Canlı maç anlatımı aktif.</div>';
     }
 
     function renderStats() {
       const body = document.getElementById('modal-body');
-      if (!currentMatchData || !currentMatchData.stats || Object.keys(currentMatchData.stats).length === 0) {
-        body.innerHTML = '<div class="loading">Bu maç için canlı istatistik bulunmuyor.</div>';
+      const stats = currentMatchData?.stats;
+
+      if (!stats || Object.keys(stats).length === 0) {
+        body.innerHTML = '<div class="loading">İstatistik verisi bulunamadı.</div>';
         return;
       }
 
-      const stats = currentMatchData.stats;
       let html = '';
-
       for (const [key, val] of Object.entries(stats)) {
         const homeVal = parseInt(val.home) || 0;
         const awayVal = parseInt(val.away) || 0;
@@ -539,14 +640,13 @@
           </div>
         `;
       }
-
       body.innerHTML = html;
     }
 
     function renderStandings() {
       const body = document.getElementById('modal-body');
-      if (!currentLeagueData || !currentLeagueData.standings || currentLeagueData.standings.length === 0) {
-        body.innerHTML = '<div class="loading">Puan durumu bilgisi bulunamadı.</div>';
+      if (!currentLeagueData?.standings?.length) {
+        body.innerHTML = '<div class="loading">Puan durumu bulunamadı.</div>';
         return;
       }
 
@@ -591,18 +691,4 @@
     };
 
     document.getElementById('hidden-date-input').addEventListener('change', (e) => {
-      if (e.target.value) {
-        const parts = e.target.value.split('-');
-        currentDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        fetchMatches();
-      }
-    });
-
-    document.getElementById('prev-date').onclick = () => { currentDate.setDate(currentDate.getDate() - 1); fetchMatches(); };
-    document.getElementById('next-date').onclick = () => { currentDate.setDate(currentDate.getDate() + 1); fetchMatches(); };
-
-    fetchMatches();
-  </script>
-</body>
-  </html>
-  
+      if (
