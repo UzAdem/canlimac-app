@@ -691,4 +691,17 @@
     };
 
     document.getElementById('hidden-date-input').addEventListener('change', (e) => {
-      if (
+      if (e.target.value) {
+        const parts = e.target.value.split('-');
+        currentDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        fetchMatches();
+      }
+    });
+
+    document.getElementById('prev-date').onclick = () => { currentDate.setDate(currentDate.getDate() - 1); fetchMatches(); };
+    document.getElementById('next-date').onclick = () => { currentDate.setDate(currentDate.getDate() + 1); fetchMatches(); };
+
+    fetchMatches();
+  </script>
+</body>
+</html>
