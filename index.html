@@ -36,6 +36,7 @@
 
   <script>
     let currentDate = new Date();
+    let globalMatchesData = [];
 
     function formatDateForApi(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -61,20 +62,26 @@
       try {
         const res = await fetch(`/api/matches?date=${formatDateForApi(currentDate)}`);
         const data = await res.json();
+        
         if (!data || data.length === 0) {
           container.innerHTML = '<div class="loading">Bu tarihte maç bulunamadı.</div>';
           return;
         }
+
+        globalMatchesData = [];
         let html = '';
+
         data.forEach(group => {
           html += `<div class="league-title">${group.league}</div>`;
           group.matches.forEach(m => {
-            const isLive = m.state === 'in' || m.state === 'post' || m.homeScore !== undefined;
+            const index = globalMatchesData.length;
+            globalMatchesData.push(m);
+
+            const isLive = m.state === 'in' || m.state === 'post' || (m.homeScore !== undefined && m.homeScore !== null);
             const scoreText = isLive ? `${m.homeScore} - ${m.awayScore}` : 'v';
-            const hTeam = m.homeTeam.replace(/'/g, "\\'");
-            const aTeam = m.awayTeam.replace(/'/g, "\\'");
+
             html += `
-              <div class="match-item" onclick="showMatchDetail('${m.id}', '${hTeam}', '${aTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore ?? ''}', '${m.awayScore ?? ''}', '${m.time}')">
+              <div class="match-item" onclick="openMatchByIndex(${index})">
                 <div class="match-time">${m.time}</div>
                 <div class="team-box home"><span>${m.homeTeam}</span>${m.homeLogo ? `<img class="team-logo" src="${m.homeLogo}">` : ''}</div>
                 <div class="score-box ${isLive ? 'active' : ''}">${scoreText}</div>
@@ -84,19 +91,26 @@
         });
         container.innerHTML = html;
       } catch (err) {
-        container.innerHTML = '<div class="loading">Hata oluştu.</div>';
+        container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
+      }
+    }
+
+    function openMatchByIndex(idx) {
+      const m = globalMatchesData[idx];
+      if (m) {
+        showMatchDetail(m.id, m.homeTeam, m.awayTeam, m.homeLogo, m.awayLogo, m.homeScore, m.awayScore, m.time);
       }
     }
         async function showMatchDetail(id, home, away, hLogo, aLogo, hScore, aScore, time) {
       const app = document.getElementById('app');
-      const isScore = hScore !== '' && hScore !== 'undefined' && hScore !== 'null';
+      const isScore = hScore !== undefined && hScore !== null && hScore !== '';
       const scoreDisp = isScore ? `${hScore} - ${aScore}` : time;
 
       app.innerHTML = `
-        <div style="background:#0b1329; color:#fff; min-height:100vh;">
+        <div style="background:#0b1329; color:#fff; min-height:100vh; padding-bottom:30px;">
           <div style="display:flex; align-items:center; padding:15px; border-bottom:1px solid #1e293b;">
             <button onclick="restoreMainView()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; margin-right:15px;">←</button>
-            <h3 style="margin:0; flex-grow:1; text-align:center;">Maç Detayı</h3>
+            <h3 style="margin:0; flex-grow:1; text-align:center; font-size:18px;">Maç Detayı</h3>
             <div style="width:30px;"></div>
           </div>
           <div style="padding:20px 15px; text-align:center; background:#111827; border-bottom:1px solid #1f2937;">
