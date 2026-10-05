@@ -70,40 +70,46 @@
       background-color: #0b1329;
     }
 
-    /* Maç Satırı Grid Hizalaması (v Sütunu Sabit 30px) */
+    /* KESİN DÜZELTME: Sabit Genişlikli Sütun Düzeneği */
     .match-card {
-      display: grid;
-      grid-template-columns: 45px 1fr 30px 1fr;
+      display: flex;
       align-items: center;
       padding: 10px 12px;
       background-color: #111a33;
       border-bottom: 1px solid #1a243f;
+      width: 100%;
     }
 
     .match-time {
+      width: 45px;
+      flex-shrink: 0;
       font-size: 12px;
       color: #9ca3af;
       text-align: left;
     }
 
     .home-team {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 6px;
       text-align: right;
       font-size: 13px;
       font-weight: 600;
+      overflow: hidden;
+    }
+
+    .home-team span {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* İp Gibi Dümdüz Hizalanan 'v' / Skor Alanı */
+    /* Ortadaki 'v' Bütün Satırlarda Tam Ortada Sabit Durur */
     .match-score {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      width: 36px;
+      flex-shrink: 0;
       text-align: center;
       font-weight: bold;
       color: #00e676;
@@ -111,13 +117,18 @@
     }
 
     .away-team {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 8px;
+      gap: 6px;
       text-align: left;
       font-size: 13px;
       font-weight: 600;
+      overflow: hidden;
+    }
+
+    .away-team span {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -155,8 +166,8 @@
   </div>
 
   <script>
-    // Tarih yönetimini milisaniye/gün bazlı kesinleştiriyoruz
-    let selectedDate = new Date();
+    // Tarih yönetimi
+    let currentDate = new Date();
 
     function formatApiDate(date) {
       const y = date.getFullYear();
@@ -176,12 +187,12 @@
       const container = document.getElementById('matches-container');
       const dateText = document.getElementById('date-text');
       
-      const queryDate = formatApiDate(selectedDate);
-      dateText.textContent = formatDisplayDate(selectedDate);
+      const apiDateStr = formatApiDate(currentDate);
+      dateText.textContent = formatDisplayDate(currentDate);
       container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
       try {
-        const response = await fetch(`/api/matches?date=${queryDate}`);
+        const response = await fetch(`/api/matches?date=${apiDateStr}`);
         const data = await response.json();
 
         if (!data || data.length === 0) {
@@ -224,18 +235,16 @@
       }
     }
 
-    // Buton Dinleyicileri
     document.getElementById('prev-date').addEventListener('click', () => {
-      selectedDate.setDate(selectedDate.getDate() - 1);
+      currentDate.setDate(currentDate.getDate() - 1);
       fetchMatches();
     });
 
     document.getElementById('next-date').addEventListener('click', () => {
-      selectedDate.setDate(selectedDate.getDate() + 1);
+      currentDate.setDate(currentDate.getDate() + 1);
       fetchMatches();
     });
 
-    // Sayfa ilk açıldığında çalıştır
     fetchMatches();
   </script>
 </body>
