@@ -22,7 +22,6 @@
       border-bottom: 1px solid #1c2541;
       margin-bottom: 15px;
     }
-    h1 { font-size: 20px; color: #4eef90; display: flex; alignItems: center; gap: 8px; }
     .nav-btn {
       background: #1c2541;
       border: none;
@@ -100,7 +99,7 @@
     .big-score { font-size: 28px; font-weight: bold; color: #4eef90; }
     .iy-score { font-size: 12px; color: #a0aec0; margin-top: 4px; }
     
-    /* Yan yana Hizalı Olay Listesi */
+    /* Olaylar Akışı */
     .events-container {
       display: flex;
       flex-direction: column;
@@ -136,6 +135,29 @@
     .event-icon { font-size: 18px; }
     .event-player { font-size: 14px; font-weight: bold; color: #ffffff; }
     .event-sub { font-size: 12px; color: #a0aec0; margin-top: 2px; }
+
+    /* İY / MS Ayrımı Çizgileri */
+    .timeline-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #a0aec0;
+      font-size: 12px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+    .timeline-divider::before,
+    .timeline-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px dashed #2a3859;
+    }
+    .timeline-divider span {
+      padding: 4px 12px;
+      background: #1c2541;
+      border-radius: 12px;
+      color: #4eef90;
+    }
   </style>
 </head>
 <body>
@@ -144,7 +166,7 @@
 
   <script>
     let currentDate = new Date();
-    let currentView = 'list'; // 'list' veya 'detail'
+    let currentView = 'list';
     let selectedMatch = null;
 
     function formatDate(date) {
@@ -250,8 +272,11 @@
           if (data.statusDetail) {
             document.getElementById('status-detail').innerText = data.statusDetail;
           }
+          
+          let iyText = '';
           if (data.homeIY !== undefined && data.awayIY !== undefined) {
-            document.getElementById('iy-score').innerText = `(İY ${data.homeIY} - ${data.awayIY})`;
+            iyText = `(İY ${data.homeIY} - ${data.awayIY})`;
+            document.getElementById('iy-score').innerText = iyText;
           }
 
           const eventsEl = document.getElementById('events-list');
@@ -261,7 +286,23 @@
           }
 
           let eventsHtml = '';
+          let iyDividerAdded = false;
+
+          // Olayları dakikaya göre tara
           data.events.forEach(e => {
+            // Dakikayı sayıya çevir (Örn: "45+2'" -> 45)
+            const minute = parseInt(e.clock) || 0;
+
+            // İkinci yarı olayı başladığında araya "İlk Yarı Bitti" ayracı ekle
+            if (!iyDividerAdded && minute > 45) {
+              eventsHtml += `
+                <div class="timeline-divider">
+                  <span>İlk Yarı Bitti ${iyText}</span>
+                </div>
+              `;
+              iyDividerAdded = true;
+            }
+
             const sideClass = e.isHome ? 'home' : 'away';
             eventsHtml += `
               <div class="event-row ${sideClass}">
@@ -275,6 +316,14 @@
               </div>
             `;
           });
+
+          // Tüm olaylar bittiğinde en alta "Maç Sonu" ayracı ekle
+          eventsHtml += `
+            <div class="timeline-divider">
+              <span>Maç Sonu (${m.homeScore !== 'null' ? m.homeScore : '0'} - ${m.awayScore !== 'null' ? m.awayScore : '0'})</span>
+            </div>
+          `;
+
           eventsEl.innerHTML = eventsHtml;
         })
         .catch(() => {
@@ -292,7 +341,6 @@
       renderList();
     }
 
-    // İlk yükleme
     renderList();
   </script>
 </body>
