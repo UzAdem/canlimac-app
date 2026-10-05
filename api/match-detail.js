@@ -1,32 +1,28 @@
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
-
-  const { id, league } = req.query;
+  const { id } = req.query;
 
   if (!id) {
-    return res.status(400).json({ error: 'Maç ID gerekli' });
+    return res.status(400).json({ error: "Maç ID zorunludur." });
   }
 
-  const leagueSlug = league || 'uefa.nations';
-
   try {
-    const response = await fetch(`https://site.web.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/summary?event=${id}`);
-    if (!response.ok) throw new Error('Veri çekilemedi');
-    
-    const data = await response.json();
+    // Örnek Maç Detay Verisi
+    const detailData = {
+      id: id,
+      events: [
+        { minute: "14'", team: "away", type: "card", player: "S. Gudelj", detail: "Sarı Kart" },
+        { minute: "31'", team: "home", type: "goal", player: "T. Koopmeiners", detail: "Gol (1-0)" }
+      ],
+      stats: {
+        "Topla Oynama": { home: "55%", away: "45%" },
+        "Toplam Şut": { home: "12", away: "8" },
+        "Isabetli Şut": { home: "5", away: "3" }
+      }
+    };
 
-    const rosters = (data.rosters || []).map(r => ({
-      team: r.team.displayName,
-      roster: (r.roster || []).map(p => ({
-        name: p.athlete?.displayName || 'Oyuncu',
-        jersey: p.jersey || '',
-        position: p.position?.abbreviation || ''
-      }))
-    }));
-
-    res.status(200).json({ rosters });
+    res.status(200).json(detailData);
   } catch (error) {
-    res.status(500).json({ rosters: [] });
+    console.error("Detail API Error:", error);
+    res.status(500).json({ error: "Maç detayı alınamadı." });
   }
 }
