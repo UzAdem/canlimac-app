@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     const headerComp = data?.header?.competitions?.[0];
     const statusDetail = headerComp?.status?.type?.detail || 'Maç Sonu';
 
-    // Ev Sahibi ve Deplasman Takım Bilgileri
+    // Ev Sahibi ve Deplasman Bilgileri
     const homeComp = headerComp?.competitors?.find(c => c.homeAway === 'home');
     const awayComp = headerComp?.competitors?.find(c => c.homeAway === 'away');
 
@@ -40,12 +40,13 @@ export default async function handler(req, res) {
     const awayId = String(awayComp?.id || '');
     const awayName = awayComp?.team?.displayName || '';
 
-    // İlk Yarı Skoru
+    // İlk Yarı Skoru Arama (Linescores veya period verisi)
     let homeIY = undefined;
     let awayIY = undefined;
+
     if (homeComp?.linescores?.[0]?.value !== undefined && awayComp?.linescores?.[0]?.value !== undefined) {
-      homeIY = homeComp.linescores[0].value;
-      awayIY = awayComp.linescores[0].value;
+      homeIY = Math.round(homeComp.linescores[0].value);
+      awayIY = Math.round(awayComp.linescores[0].value);
     }
 
     const rawEvents = data?.keyEvents || [];
@@ -61,30 +62,33 @@ export default async function handler(req, res) {
         let icon = null;
         let typeLabel = '';
 
-        // SADECE ÖNEMLİ OLAYLARI FİLTRELE (Gereksiz raptiyeler elenir)
+        // Olay Türü Ayıklama
         if (typeId === '1' || typeText.includes('goal')) {
-          icon = '⚽';
-          typeLabel = 'Gol';
           if (typeText.includes('own') || text.toLowerCase().includes('own goal')) {
+            icon = '⚽';
             typeLabel = 'Kendi Kalesine Gol';
           } else if (typeText.includes('penalty')) {
+            icon = '⚽';
             typeLabel = 'Penaltı Golü';
+          } else {
+            icon = '⚽';
+            typeLabel = 'Gol';
           }
-        } else if (typeId === '3' || typeText.includes('yellow card') || typeText === 'yellow') {
+        } else if (typeId === '3' || typeText.includes('yellow')) {
           icon = '🟨';
           typeLabel = 'Sarı Kart';
-        } else if (typeId === '4' || typeText.includes('red card') || typeText === 'red') {
+        } else if (typeId === '4' || typeText.includes('red')) {
           icon = '🟥';
           typeLabel = 'Kırmızı Kart';
-        } else if (typeId === '2' || typeText.includes('substitution') || (text.includes('→') && !typeText.includes('goal'))) {
+        } else if (typeId === '2' || typeText.includes('sub')) {
           icon = '🔄';
           typeLabel = 'Oyuncu Değişikliği';
         }
 
-        // Önemsiz bir olay ise (raptiye vb.) listeden atla
+        // Önemsiz bildirimse (raptiye vb.) atla
         if (!icon) return;
 
-        // Ev Sahibi mi Deplasman mı kontrolü
+        // Ev Sahibi mi Deplasman mı?
         const itemTeamId = String(item?.team?.id || '');
         let isHome = false;
 
@@ -96,12 +100,22 @@ export default async function handler(req, res) {
 
         const teamName = isHome ? homeName : awayName;
 
-        let player = text;
-        if (item?.participants?.[0]?.athlete?.displayName) {
-          player = item.participants[0].athlete.displayName;
-          if (item?.participants?.[1]?.athlete?.displayName) {
-            player += ` → ${item.participants[1].athlete.displayName}`;
+        // Oyuncu İsmi Temizleme & Oyuncu Değişikliği Formatlama
+        let player = '';
+        
+        if (item?.participants && item.participants.length > 0) {
+          const p1 = item.participants[0]?.athlete?.displayName || '';
+          const p2 = item.participants[1]?.athlete?.displayName || '';
+
+          if (icon === '🔄' && p1 && p2) {
+            player = `${p1} ➔ ${p2}`;
+          } else if (p1) {
+            player = p1;
           }
+        }
+
+        if (!player) {
+          player = text;
         }
 
         events.push({
