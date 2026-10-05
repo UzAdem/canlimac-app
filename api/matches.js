@@ -11,13 +11,23 @@ export default async function handler(req, res) {
     if (response.ok) {
       const data = await response.json();
       const events = data.events || [];
+      const leaguesList = data.leagues || [];
+
+      // Lig id'lerine göre isim haritası oluşturuyoruz
+      const leagueMap = {};
+      leaguesList.forEach(l => {
+        leagueMap[l.id] = l.name || l.slug;
+      });
 
       if (events.length > 0) {
         const grouped = {};
 
         events.forEach(event => {
-          // Lig ismini doğrudan lig objesinden alıyoruz
-          const leagueName = event.league?.name || event.competitions?.[0]?.league?.name || 'Diğer Ligler';
+          const competition = event.competitions?.[0];
+          
+          // Lig adını önce yarışmadan, yoksa lig haritasından alıyoruz
+          const leagueId = competition?.league?.id || event.league?.id;
+          const leagueName = competition?.league?.name || leagueMap[leagueId] || 'Diğer Ligler';
 
           if (!grouped[leagueName]) {
             grouped[leagueName] = {
@@ -26,7 +36,6 @@ export default async function handler(req, res) {
             };
           }
 
-          const competition = event.competitions?.[0];
           const home = competition?.competitors?.find(c => c.homeAway === 'home');
           const away = competition?.competitors?.find(c => c.homeAway === 'away');
 
