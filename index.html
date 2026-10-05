@@ -104,6 +104,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      padding-bottom: 30px;
     }
     .event-row {
       display: flex;
@@ -144,7 +145,7 @@
       color: #a0aec0;
       font-size: 12px;
       font-weight: bold;
-      margin: 12px 0;
+      margin: 16px 0;
     }
     .timeline-divider::before,
     .timeline-divider::after {
@@ -153,7 +154,7 @@
       border-bottom: 1px dashed #2a3859;
     }
     .timeline-divider span {
-      padding: 4px 12px;
+      padding: 5px 14px;
       background: #1c2541;
       border-radius: 12px;
       color: #4eef90;
@@ -273,10 +274,10 @@
             document.getElementById('status-detail').innerText = data.statusDetail;
           }
           
-          let iyText = '';
+          let iyLabel = '';
           if (data.homeIY !== undefined && data.awayIY !== undefined) {
-            iyText = `(İY ${data.homeIY} - ${data.awayIY})`;
-            document.getElementById('iy-score').innerText = iyText;
+            iyLabel = ` (İY ${data.homeIY} - ${data.awayIY})`;
+            document.getElementById('iy-score').innerText = `İY ${data.homeIY} - ${data.awayIY}`;
           }
 
           const eventsEl = document.getElementById('events-list');
@@ -288,16 +289,14 @@
           let eventsHtml = '';
           let iyDividerAdded = false;
 
-          // Olayları dakikaya göre tara
           data.events.forEach(e => {
-            // Dakikayı sayıya çevir (Örn: "45+2'" -> 45)
             const minute = parseInt(e.clock) || 0;
 
-            // İkinci yarı olayı başladığında araya "İlk Yarı Bitti" ayracı ekle
+            // 45. dakikadan sonraki olaylarda İY ayracı koy
             if (!iyDividerAdded && minute > 45) {
               eventsHtml += `
                 <div class="timeline-divider">
-                  <span>İlk Yarı Bitti ${iyText}</span>
+                  <span>İlk Yarı Bitti${iyLabel}</span>
                 </div>
               `;
               iyDividerAdded = true;
@@ -317,10 +316,20 @@
             `;
           });
 
-          // Tüm olaylar bittiğinde en alta "Maç Sonu" ayracı ekle
+          // Eğer tüm olaylar 1. yarıdaysa ve ikinci yarı olayı yoksa İY ayracını en alta ekle
+          if (!iyDividerAdded) {
+            eventsHtml += `
+              <div class="timeline-divider">
+                <span>İlk Yarı Bitti${iyLabel}</span>
+              </div>
+            `;
+          }
+
+          // Maç Sonu Ayracı
+          const msScore = (m.homeScore !== 'null' && m.homeScore !== null) ? `${m.homeScore} - ${m.awayScore}` : '';
           eventsHtml += `
             <div class="timeline-divider">
-              <span>Maç Sonu (${m.homeScore !== 'null' ? m.homeScore : '0'} - ${m.awayScore !== 'null' ? m.awayScore : '0'})</span>
+              <span>Maç Sonu ${msScore ? '(' + msScore + ')' : ''}</span>
             </div>
           `;
 
