@@ -140,6 +140,7 @@
     .detail-flag { width: 44px; height: 30px; border-radius: 4px; margin-bottom: 8px; }
     .team-name { font-size: 14px; font-weight: 600; }
     .score-box { font-size: 26px; font-weight: 800; color: #2ed573; }
+    .ht-score { font-size: 12px; color: #8c9ba5; margin-top: 4px; }
 
     /* Tabs */
     .tabs {
@@ -164,6 +165,26 @@
 
     .tab-btn.active { background-color: #1b264f; color: #2ed573; }
     .tab-content { background-color: #121936; border-radius: 16px; padding: 16px; }
+
+    /* Events Layout */
+    .events-list { display: flex; flex-direction: column; gap: 10px; }
+    .event-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background-color: #1b264f;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .event-item.away { justify-content: flex-end; }
+
+    /* Lineups Layout */
+    .lineup-grid { display: grid; grid-template-columns: 1fr 1fr; row-gap: 10px; column-gap: 16px; }
+    .section-title { font-size: 12px; font-weight: 700; color: #2ed573; margin-bottom: 6px; text-transform: uppercase; }
+    .sub-title { font-size: 12px; font-weight: 700; color: #8c9ba5; margin: 16px 0 8px 0; text-transform: uppercase; grid-column: span 2; border-top: 1px solid #1b264f; padding-top: 12px; }
+    .player-row { display: flex; align-items: center; font-size: 13px; color: #e1e7ed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .jersey-num { background-color: #1b264f; color: #8c9ba5; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin: 0 6px; min-width: 22px; text-align: center; }
   </style>
 </head>
 <body>
@@ -180,49 +201,49 @@
     <div class="league-group">
       <div class="league-header">LEAGUE-PHASE</div>
       
-      <div class="match-card" onclick="openMatchDetail('Cyprus', 'https://flagcdn.com/w40/cy.png', 'Latvia', 'https://flagcdn.com/w40/lv.png', '0 - 0')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/cy.png"><span>Cyprus</span></div>
         <div class="score-badge">0 - 0</div>
         <div class="team-cell away"><span>Latvia</span><img class="flag-img" src="https://flagcdn.com/w40/lv.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Bosnia-Herzegovina', 'https://flagcdn.com/w40/ba.png', 'Poland', 'https://flagcdn.com/w40/pl.png', '20:45')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ba.png"><span>Bosnia-Herzegovina</span></div>
         <div class="time-badge">20:45</div>
         <div class="team-cell away"><span>Poland</span><img class="flag-img" src="https://flagcdn.com/w40/pl.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('France', 'https://flagcdn.com/w40/fr.png', 'Belgium', 'https://flagcdn.com/w40/be.png', '20:45')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/fr.png"><span>France</span></div>
         <div class="time-badge">20:45</div>
         <div class="team-cell away"><span>Belgium</span><img class="flag-img" src="https://flagcdn.com/w40/be.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Italy', 'https://flagcdn.com/w40/it.png', 'Türkiye', 'https://flagcdn.com/w40/tr.png', '20:45')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/it.png"><span>Italy</span></div>
         <div class="time-badge">20:45</div>
         <div class="team-cell away"><span>Türkiye</span><img class="flag-img" src="https://flagcdn.com/w40/tr.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Montenegro', 'https://flagcdn.com/w40/me.png', 'Armenia', 'https://flagcdn.com/w40/am.png', '20:45')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/me.png"><span>Montenegro</span></div>
         <div class="time-badge">20:45</div>
         <div class="team-cell away"><span>Armenia</span><img class="flag-img" src="https://flagcdn.com/w40/am.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Northern Ireland', 'https://flagcdn.com/w40/gb-nir.png', 'Georgia', 'https://flagcdn.com/w40/ge.png', '20:45')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/gb-nir.png"><span>Northern Ireland</span></div>
         <div class="time-badge">20:45</div>
         <div class="team-cell away"><span>Georgia</span><img class="flag-img" src="https://flagcdn.com/w40/ge.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Romania', 'https://flagcdn.com/w40/ro.png', 'Sweden', 'https://flagcdn.com/w40/se.png', '20:45')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ro.png"><span>Romania</span></div>
         <div class="time-badge">20:45</div>
         <div class="team-cell away"><span>Sweden</span><img class="flag-img" src="https://flagcdn.com/w40/se.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Ukraine', 'https://flagcdn.com/w40/ua.png', 'Hungary', 'https://flagcdn.com/w40/hu.png', '20:45')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ua.png"><span>Ukraine</span></div>
         <div class="time-badge">20:45</div>
         <div class="team-cell away"><span>Hungary</span><img class="flag-img" src="https://flagcdn.com/w40/hu.png"></div>
@@ -233,19 +254,19 @@
     <div class="league-group">
       <div class="league-header">2026-INTERNATIONAL-FRIENDLY</div>
       
-      <div class="match-card" onclick="openMatchDetail('Uganda', 'https://flagcdn.com/w40/ug.png', 'Congo DR', 'https://flagcdn.com/w40/cd.png', '1 - 1')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ug.png"><span>Uganda</span></div>
         <div class="score-badge">1 - 1</div>
         <div class="team-cell away"><span>Congo DR</span><img class="flag-img" src="https://flagcdn.com/w40/cd.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Mauritius', 'https://flagcdn.com/w40/mu.png', 'Sri Lanka', 'https://flagcdn.com/w40/lk.png', '17:00')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/mu.png"><span>Mauritius</span></div>
         <div class="time-badge">17:00</div>
         <div class="team-cell away"><span>Sri Lanka</span><img class="flag-img" src="https://flagcdn.com/w40/lk.png"></div>
       </div>
 
-      <div class="match-card" onclick="openMatchDetail('Rwanda', 'https://flagcdn.com/w40/rw.png', 'Kenya', 'https://flagcdn.com/w40/ke.png', '0 - 0')">
+      <div class="match-card" onclick="openMatchDetail()">
         <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/rw.png"><span>Rwanda</span></div>
         <div class="score-badge">0 - 0</div>
         <div class="team-cell away"><span>Kenya</span><img class="flag-img" src="https://flagcdn.com/w40/ke.png"></div>
@@ -261,18 +282,19 @@
     </div>
 
     <div class="scoreboard">
-      <div id="detail-status" class="match-status">MS</div>
+      <div class="match-status">MS</div>
       <div class="teams-container">
         <div class="team-box">
-          <img id="detail-home-flag" class="detail-flag" src="">
-          <div id="detail-home-name" class="team-name"></div>
+          <img class="detail-flag" src="https://flagcdn.com/w40/cy.png">
+          <div class="team-name">Cyprus</div>
         </div>
-        <div id="detail-score" class="score-box"></div>
+        <div class="score-box">0 - 0</div>
         <div class="team-box">
-          <img id="detail-away-flag" class="detail-flag" src="">
-          <div id="detail-away-name" class="team-name"></div>
+          <img class="detail-flag" src="https://flagcdn.com/w40/lv.png">
+          <div class="team-name">Latvia</div>
         </div>
       </div>
+      <div class="ht-score">İY: 0-0</div>
     </div>
 
     <div class="tabs">
@@ -284,19 +306,41 @@
   </div>
 
   <script>
-    function openMatchDetail(homeName, homeFlag, awayName, awayFlag, scoreOrTime) {
-      document.getElementById('detail-home-name').innerText = homeName;
-      document.getElementById('detail-home-flag').src = homeFlag;
-      document.getElementById('detail-away-name').innerText = awayName;
-      document.getElementById('detail-away-flag').src = awayFlag;
-      document.getElementById('detail-score').innerText = scoreOrTime;
+    const eventsData = `
+      <div class="events-list">
+        <div class="event-item">⚽ <b>12'</b> - Gol (Cyprus)</div>
+        <div class="event-item away">⚽ <b>34'</b> - Gol (Latvia)</div>
+        <div class="event-item">🟨 <b>55'</b> - Sarı Kart</div>
+      </div>
+    `;
 
-      if (scoreOrTime.includes(':')) {
-        document.getElementById('detail-status').innerText = 'Başlamadı';
-      } else {
-        document.getElementById('detail-status').innerText = 'MS';
-      }
+    const lineupsData = `
+      <div class="lineup-grid">
+        <div>
+          <div class="section-title">Cyprus</div>
+          <div class="player-row"><b>1</b><span class="jersey-num">GK</span> Joel Mall</div>
+          <div class="player-row"><b>2</b><span class="jersey-num">DF</span> A. Karo</div>
+          <div class="player-row"><b>3</b><span class="jersey-num">DF</span> N. Panagiotou</div>
+        </div>
+        <div>
+          <div class="section-title">Latvia</div>
+          <div class="player-row"><b>1</b><span class="jersey-num">GK</span> R. Matrevics</div>
+          <div class="player-row"><b>3</b><span class="jersey-num">DF</span> V. Balodis</div>
+          <div class="player-row"><b>4</b><span class="jersey-num">DF</span> K. Tobers</div>
+        </div>
+        <div class="sub-title">Yedekler</div>
+        <div>
+          <div class="player-row"><b>12</b><span class="jersey-num">GK</span> D. Demetriou</div>
+          <div class="player-row"><b>15</b><span class="jersey-num">MF</span> S. Andreou</div>
+        </div>
+        <div>
+          <div class="player-row"><b>12</b><span class="jersey-num">GK</span> K. Zviedris</div>
+          <div class="player-row"><b>14</b><span class="jersey-num">FW</span> D. Ikaunieks</div>
+        </div>
+      </div>
+    `;
 
+    function openMatchDetail() {
       document.getElementById('home-view').classList.remove('active');
       document.getElementById('detail-view').classList.add('active');
       switchTab('events');
@@ -316,8 +360,12 @@
       document.getElementById('btn-events').classList.toggle('active', tabName === 'events');
       document.getElementById('btn-lineups').classList.toggle('active', tabName === 'lineups');
       const container = document.getElementById('tab-content');
-      container.innerHTML = `<div style="text-align:center; color:#8c9ba5; padding:20px;">Detay verisi yükleniyor...</div>`;
+      if (tabName === 'events') {
+        container.innerHTML = eventsData;
+      } else {
+        container.innerHTML = lineupsData;
+      }
     }
   </script>
 </body>
-</html>
+                                 </html>
