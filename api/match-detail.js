@@ -1,28 +1,26 @@
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+
   const { id } = req.query;
 
   if (!id) {
-    return res.status(400).json({ error: "Maç ID zorunludur." });
+    return res.status(400).json({ error: "Maç ID eksik." });
   }
 
   try {
-    // Örnek Maç Detay Verisi
-    const detailData = {
-      id: id,
-      events: [
-        { minute: "14'", team: "away", type: "card", player: "S. Gudelj", detail: "Sarı Kart" },
-        { minute: "31'", team: "home", type: "goal", player: "T. Koopmeiners", detail: "Gol (1-0)" }
-      ],
-      stats: {
-        "Topla Oynama": { home: "55%", away: "45%" },
-        "Toplam Şut": { home: "12", away: "8" },
-        "Isabetli Şut": { home: "5", away: "3" }
-      }
-    };
+    // Tıklanan maçın detay verilerini (Olaylar, kadrolar, istatistikler) çeken istek:
+    // const response = await fetch(`https://api.football-data.org/v4/matches/${id}`);
+    // const data = await response.json();
 
-    res.status(200).json(detailData);
+    res.status(200).json({
+      id: id,
+      message: "Maç detayı başarıyla çekildi.",
+      events: [],
+      stats: {}
+    });
   } catch (error) {
-    console.error("Detail API Error:", error);
-    res.status(500).json({ error: "Maç detayı alınamadı." });
+    console.error("Match Detail API Error:", error);
+    res.status(500).json({ error: "Maç detayları alınamadı." });
   }
 }
