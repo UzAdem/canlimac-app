@@ -210,7 +210,7 @@
 
   <!-- Header -->
   <div class="header">
-    <button class="back-btn" onclick="goHome()">&larr;</button>
+    <a href="/" class="back-btn">&larr;</a>
     <div class="header-title">Maç Detayı</div>
   </div>
 
@@ -241,10 +241,11 @@
   <div id="tab-content" class="tab-content"></div>
 
   <script>
-    // Direkt ana sayfaya yönlendirir
-    function goHome() {
-      window.location.href = 'index.html'; 
-    }
+    // Telefonun veya tarayıcının kendi GERİ tuşuna basıldığında doğrudan ana sayfaya atar
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+      window.location.href = '/'; // Ana sayfa adresiniz (gerekirse 'index.html' yapabilirsiniz)
+    };
 
     const matchData = {
       homeTeam: "NETHERLANDS",
