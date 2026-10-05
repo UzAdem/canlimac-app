@@ -21,10 +21,8 @@ export default async function handler(req, res) {
     'France': 'Fransa', 'Italy': 'İtalya', 'Hungary': 'Macaristan',
     'Georgia': 'Gürcistan', 'Poland': 'Polonya', 'Romania': 'Romanya',
     'Bosnia-Herzegovina': 'Bosna-Hersek', 'Sweden': 'İsveç',
-    'Faroe Islands': 'Faroe Adaları', 'Slovakia': 'Slovakya',
+    'Croatia': 'Hırvatistan', 'Slovakia': 'Slovakya',
     'Kazakhstan': 'Kazakistan', 'Moldova': 'Moldova',
-    'Cyprus': 'Kıbrıs Rum Kesimi', 'Armenia': 'Ermenistan',
-    'Latvia': 'Letonya', 'Montenegro': 'Karadağ', 'Ukraine': 'Ukrayna',
     'Germany': 'Almanya', 'Spain': 'İspanya', 'England': 'İngiltere'
   };
 
@@ -79,16 +77,6 @@ export default async function handler(req, res) {
           const rawHome = home.team.displayName;
           const rawAway = away.team.displayName;
 
-          // Gol ve Kart Metinlerini Temizleme
-          const matchEvents = (competition.details || []).map(d => {
-            let desc = d.athletesIn && d.athletesIn[0] ? d.athletesIn[0].displayName : (d.team ? d.team.displayName : '');
-            return {
-              clock: d.clock ? d.clock.displayValue : '',
-              type: d.type ? d.type.text : 'Olay',
-              summary: desc
-            };
-          });
-
           groupedMap[fullLeagueTitle].matches.push({
             id: event.id,
             leagueSlug: item.leagueInfo.slug,
@@ -98,8 +86,7 @@ export default async function handler(req, res) {
             awayScore: away.score ?? '0',
             status: statusType,
             minute: minuteStr,
-            venue: competition.venue ? competition.venue.fullName : 'Belirtilmedi',
-            details: matchEvents
+            venue: competition.venue ? competition.venue.fullName : 'Belirtilmedi'
           });
         });
       }
@@ -109,4 +96,4 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: 'Veriler çekilirken bir sorun oluştu.' });
   }
-    }
+}
