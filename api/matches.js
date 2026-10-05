@@ -62,6 +62,8 @@ export default async function handler(req, res) {
         const homeCompetitor = competition.competitors?.find(c => c.homeAway === 'home');
         const awayCompetitor = competition.competitors?.find(c => c.homeAway === 'away');
 
+        const statusState = competition.status?.type?.state; // 'pre', 'in', 'post'
+
         const matchObj = {
           id: event.id,
           time: new Date(event.date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
@@ -69,9 +71,10 @@ export default async function handler(req, res) {
           awayTeam: awayCompetitor?.team?.displayName || 'Deplasman',
           homeLogo: homeCompetitor?.team?.logo || '',
           awayLogo: awayCompetitor?.team?.logo || '',
-          homeScore: homeCompetitor?.score ?? 'v',
-          awayScore: awayCompetitor?.score ?? 'v',
-          status: competition.status?.type?.shortDetail || 'MS'
+          homeScore: homeCompetitor?.score,
+          awayScore: awayCompetitor?.score,
+          state: statusState, // 'pre' = Maç Başlamadı, 'in' = Canlı, 'post' = Bitti
+          statusDetail: competition.status?.type?.shortDetail || 'MS'
         };
 
         if (!groupedMatches[leagueName]) {
@@ -81,7 +84,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Özel Lig Sıralaması
     const leagueOrder = [
       'Trendyol Süper Lig',
       'Premier League',
@@ -112,4 +114,4 @@ export default async function handler(req, res) {
     console.error('API Error:', error);
     return res.status(200).json([]);
   }
-}
+            }
