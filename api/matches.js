@@ -6,9 +6,8 @@ export default async function handler(req, res) {
   const targetDate = date || new Date().toISOString().split('T')[0];
   const formattedDate = targetDate.replace(/-/g, '');
 
-  // İstediğiniz özel sıralamaya göre lig dizilimi
   const leagueEndpoints = [
-    { code: 'tur.1', name: 'Trendyol Süper Lig' },
+    { code: 'tur.1', name: 'Süper Lig' },
     { code: 'eng.1', name: 'İngiltere Premier Lig' },
     { code: 'esp.1', name: 'İspanya La Liga' },
     { code: 'ita.1', name: 'İtalya Serie A' },
@@ -46,13 +45,18 @@ export default async function handler(req, res) {
         const hours = String(matchDate.getHours()).padStart(2, '0');
         const minutes = String(matchDate.getMinutes()).padStart(2, '0');
 
+        // Maç henüz başlamadıysa score yerine 'v' göster
+        const isStarted = event.status?.type?.state === 'in' || event.status?.type?.state === 'post';
+        const homeScore = isStarted ? (home?.score ?? '0') : 'v';
+        const awayScore = isStarted ? (away?.score ?? '0') : '';
+
         matches.push({
           id: event.id,
           time: `${hours}:${minutes}`,
           homeTeam: home?.team?.displayName || 'Ev Sahibi',
           awayTeam: away?.team?.displayName || 'Deplasman',
-          homeScore: home?.score ?? '0',
-          awayScore: away?.score ?? '0',
+          homeScore: homeScore,
+          awayScore: awayScore,
           homeLogo: home?.team?.logo || null,
           awayLogo: away?.team?.logo || null
         });
@@ -71,4 +75,4 @@ export default async function handler(req, res) {
     console.error("Matches API Error:", error);
     res.status(500).json({ error: "Veriler çekilemedi." });
   }
-}
+                    }
