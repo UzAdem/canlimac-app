@@ -1,31 +1,27 @@
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+
   const { date } = req.query;
 
   try {
-    // Örnek mock veri / API çağrısı
-    // Kendi veri kaynağınıza göre düzenleyebilirsiniz.
-    const matchesData = [
-      {
-        league: "Trendyol Süper Lig",
-        matches: [
-          {
-            id: "m1",
-            time: "20:00",
-            homeTeam: "Galatasaray",
-            awayTeam: "Fenerbahçe",
-            homeScore: 1,
-            awayScore: 1,
-            isStarted: true,
-            status: "in",
-            leagueSlug: "super-lig"
-          }
-        ]
-      }
-    ];
+    // Canlı fikstür / Lig verilerini aldığınız API veya scraping servisi:
+    // Örnek canlı veri entegrasyonu
+    const response = await fetch(`https://api.football-data.org/v4/matches?date=${date || ''}`, {
+      headers: { 'X-Auth-Token': process.env.FOOTBALL_API_KEY || '' }
+    });
 
-    res.status(200).json(matchesData);
+    if (!response.ok) {
+      // Eğer harici servis hata verirse veya tarihe ait veri yoksa
+      return res.status(200).json([]);
+    }
+
+    const data = await response.json();
+    
+    // Gelen veriyi ön yüzün beklediği formata göre döndürün
+    res.status(200).json(data);
   } catch (error) {
-    console.error("API Error:", error);
-    res.status(500).json({ error: "Maçlar yüklenirken bir hata oluştu." });
+    console.error("Matches API Error:", error);
+    res.status(500).json({ error: "Fikstür çekilirken hata oluştu." });
   }
 }
