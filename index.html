@@ -26,6 +26,7 @@
     .home-team { justify-content: flex-end; text-align: right; }
     .away-team { justify-content: flex-start; text-align: left; }
     .match-score { width: 50px; text-align: center; font-weight: bold; color: #00e676; font-size: 13px; flex-shrink: 0; }
+    .match-score.vs-icon { color: #00e676; font-size: 16px; font-weight: bold; }
     .team-logo { width: 20px; height: 20px; object-fit: contain; }
 
     .message { text-align: center; padding: 40px 15px; color: #9ca3af; font-size: 14px; }
@@ -75,7 +76,7 @@
         <div class="name" id="d-home-name">Ev Sahibi</div>
       </div>
       <div class="score-box">
-        <div class="main-score" id="d-score">0 - 0</div>
+        <div class="main-score" id="d-score">&#709;</div>
       </div>
       <div class="team-box">
         <img id="d-away-logo" src="" alt="" />
@@ -129,9 +130,15 @@
         data.forEach(group => {
           html += `<div class="league-title">${group.league}</div>`;
           group.matches.forEach(match => {
-            const scoreDisplay = (match.homeScore === 'v' || match.homeScore === undefined) 
-              ? 'v' 
-              : `${match.homeScore} - ${match.awayScore}`;
+            // Başlamamış maç kontrolü
+            const isNotStarted = 
+              match.homeScore === 'v' || 
+              match.homeScore === undefined || 
+              match.homeScore === 0 && match.awayScore === 0 && match.status !== 'MS' && !match.status?.includes("'");
+
+            // Başlamadıysa ters ok ikonu (˅) göster
+            const scoreDisplay = isNotStarted ? '&#709;' : `${match.homeScore} - ${match.awayScore}`;
+            const scoreClass = isNotStarted ? 'match-score vs-icon' : 'match-score';
 
             const matchDataStr = encodeURIComponent(JSON.stringify({
               id: match.id,
@@ -149,7 +156,7 @@
                   <span>${match.homeTeam}</span>
                   ${match.homeLogo ? `<img src="${match.homeLogo}" class="team-logo" alt="" />` : ''}
                 </div>
-                <div class="match-score">${scoreDisplay}</div>
+                <div class="${scoreClass}">${scoreDisplay}</div>
                 <div class="away-team">
                   ${match.awayLogo ? `<img src="${match.awayLogo}" class="team-logo" alt="" />` : ''}
                   <span>${match.awayTeam}</span>
@@ -161,7 +168,6 @@
 
         container.innerHTML = html;
 
-        // Maç kartı tıklama dinleyicileri
         container.querySelectorAll('.match-card').forEach(card => {
           card.addEventListener('click', () => {
             const matchData = JSON.parse(decodeURIComponent(card.getAttribute('data-match')));
@@ -183,7 +189,7 @@
       document.getElementById('d-away-name').textContent = match.awayTeam;
       document.getElementById('d-home-logo').src = match.homeLogo || '';
       document.getElementById('d-away-logo').src = match.awayLogo || '';
-      document.getElementById('d-score').textContent = match.score;
+      document.getElementById('d-score').innerHTML = match.score;
 
       const tabContent = document.getElementById('tab-content');
       tabContent.innerHTML = '<div class="message">Detaylar yükleniyor...</div>';
