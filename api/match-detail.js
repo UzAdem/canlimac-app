@@ -24,37 +24,30 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
-      return res.status(200).json({ events: [], statusDetail: 'Maç Sonu', homeIY: undefined, awayIY: undefined });
+      return res.status(200).json({ events: [], statusDetail: 'Maç Sonu' });
     }
 
     const data = await response.json();
-
     const headerComp = data?.header?.competitions?.[0];
     const statusDetail = headerComp?.status?.type?.detail || 'Maç Sonu';
+
+    // Ev Sahibi ve Deplasman Takım Bilgileri
+    const homeComp = headerComp?.competitors?.find(c => c.homeAway === 'home');
+    const awayComp = headerComp?.competitors?.find(c => c.homeAway === 'away');
+
+    const homeId = String(homeComp?.id || '');
+    const homeName = homeComp?.team?.displayName || '';
+    const awayId = String(awayComp?.id || '');
+    const awayName = awayComp?.team?.displayName || '';
 
     // İlk Yarı Skoru
     let homeIY = undefined;
     let awayIY = undefined;
-    
-    try {
-      const homeComp = headerComp?.competitors?.find(c => c.homeAway === 'home');
-      const awayComp = headerComp?.competitors?.find(c => c.homeAway === 'away');
-
-      if (homeComp?.linescores?.[0]?.value !== undefined && awayComp?.linescores?.[0]?.value !== undefined) {
-        homeIY = homeComp.linescores[0].value;
-        awayIY = awayComp.linescores[0].value;
-      }
-    } catch (e) {
-      console.log('Linescores read error:', e);
+    if (homeComp?.linescores?.[0]?.value !== undefined && awayComp?.linescores?.[0]?.value !== undefined) {
+      homeIY = homeComp.linescores[0].value;
+      awayIY = awayComp.linescores[0].value;
     }
 
-    const homeComp = headerComp?.competitors?.find(c => c.homeAway === 'home');
-    const homeId = homeComp?.id;
-    const homeName = homeComp?.team?.displayName || '';
-    const awayComp = headerComp?.competitors?.find(c => c.homeAway === 'away');
-    const awayName = awayComp?.team?.displayName || '';
-
-    // Olaylar
     const rawEvents = data?.keyEvents || [];
     const events = [];
 
@@ -65,9 +58,10 @@ export default async function handler(req, res) {
         const typeText = String(item?.type?.text || '').toLowerCase();
         const text = String(item?.text || '');
 
-        let icon = '📌';
-        let typeLabel = 'Olay';
+        let icon = null;
+        let typeLabel = '';
 
+        // SADECE ÖNEMLİ OLAYLARI FİLTRELE (Gereksiz raptiyeler elenir)
         if (typeId === '1' || typeText.includes('goal')) {
           icon = '⚽';
           typeLabel = 'Gol';
@@ -76,16 +70,62 @@ export default async function handler(req, res) {
           } else if (typeText.includes('penalty')) {
             typeLabel = 'Penaltı Golü';
           }
-        } else if (typeId === '3' || typeText.includes('yellow')) {
+        } else if (typeId === '3' || typeText.includes('yellow card') || typeText === 'yellow') {
           icon = '🟨';
           typeLabel = 'Sarı Kart';
-        } else if (typeId === '4' || typeText.includes('red')) {
+        } else if (typeId === '4' || typeText.includes('red card') || typeText === 'red') {
           icon = '🟥';
           typeLabel = 'Kırmızı Kart';
-        } else if (typeId === '2' || typeText.includes('sub') || text.includes('→')) {
+        } else if (typeId === '2' || typeText.includes('substitution') || (text.includes('→') && !typeText.includes('goal'))) {
           icon = '🔄';
           typeLabel = 'Oyuncu Değişikliği';
         }
 
-        const
-          
+        // Önemsiz bir olay ise (raptiye vb.) listeden atla
+        if (!icon) return;
+
+        // Ev Sahibi mi Deplasman mı kontrolü
+        const itemTeamId = String(item?.team?.id || '');
+        let isHome = false;
+
+        if (itemTeamId) {
+          isHome = (itemTeamId === homeId);
+        } else if (homeName && text.includes(homeName)) {
+          isHome = true;
+        }
+
+        const teamName = isHome ? homeName : awayName;
+
+        let player = text;
+        if (item?.participants?.[0]?.athlete?.displayName) {
+          player = item.participants[0].athlete.displayName;
+          if (item?.participants?.[1]?.athlete?.displayName) {
+            player += ` → ${item.participants[1].athlete.displayName}`;
+          }
+        }
+
+        events.push({
+          clock,
+          icon,
+          typeLabel,
+          player,
+          teamName,
+          isHome
+        });
+      } catch (err) {
+        console.error('Event parse error:', err);
+      }
+    });
+
+    return res.status(200).json({
+      statusDetail,
+      homeIY,
+      awayIY,
+      events
+    });
+
+  } catch (error) {
+    console.error('Match Detail API Error:', error);
+    return res.status(200).json({ events: [], statusDetail: 'Maç Sonu' });
+  }
+}
