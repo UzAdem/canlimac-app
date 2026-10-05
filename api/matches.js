@@ -2,14 +2,14 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
 
-  const { date } = req.query; // Format: YYYY-MM-DD
+  const { date } = req.query; // YYYY-MM-DD
 
   try {
-    // Sofascore / Canlı Skor API isteği (API Key gerektirmez)
-    const targetDate = date || new Date().toISOString().split('T')[0];
-    const response = await fetch(`https://api.sofascore.com/api/v1/sport/football/scheduled-events/${targetDate}`, {
+    // Nesine Bülten API
+    const response = await fetch('https://bulten.nesine.com/api/bulten/v1/getbultenfull', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json'
       }
     });
 
@@ -18,47 +18,38 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    const events = data.events || [];
+    const events = data.Events || [];
 
-    // Ön yüzün (index.html) beklediği gruplanmış lig formatı
     const grouped = {};
 
-    events.forEach(event => {
-      const leagueName = event.tournament?.name || 'Diğer Ligler';
-      const categoryName = event.tournament?.category?.name || '';
-      const fullLeagueName = categoryName ? `${categoryName} ${leagueName}` : leagueName;
+    events.forEach(item => {
+      const leagueName = item.LN || 'Diğer Ligler';
 
-      if (!grouped[fullLeagueName]) {
-        grouped[fullLeagueName] = {
-          league: fullLeagueName,
+      if (!grouped[leagueName]) {
+        grouped[leagueName] = {
+          league: leagueName,
           matches: []
         };
       }
 
-      // Maç saati formatlama (SS:DK)
-      const matchDate = new Date(event.startTimestamp * 1000);
-      const hours = String(matchDate.getHours()).padStart(2, '0');
-      const minutes = String(matchDate.getMinutes()).padStart(2, '0');
-      const timeStr = `${hours}:${minutes}`;
+      // Tarih ve Saat Ayarlama
+      const matchTime = item.D ? item.D.substring(11, 16) : '--:--';
 
-      grouped[fullLeagueName].matches.push({
-        id: event.id,
-        time: timeStr,
-        homeTeam: event.homeTeam?.name || 'Ev Sahibi',
-        awayTeam: event.awayTeam?.name || 'Deplasman',
-        homeScore: event.homeScore?.current ?? 'v',
-        awayScore: event.awayScore?.current ?? '',
-        homeLogo: event.homeTeam?.id ? `https://api.sofascore.app/api/v1/team/${event.homeTeam.id}/image` : null,
-        awayLogo: event.awayTeam?.id ? `https://api.sofascore.app/api/v1/team/${event.awayTeam.id}/image` : null,
-        isStarted: event.status?.type !== 'notstarted',
-        status: event.status?.type === 'inprogress' ? 'in' : 'finished',
-        leagueSlug: event.tournament?.slug || ''
+      grouped[leagueName].matches.push({
+        id: item.C || item.N,
+        time: matchTime,
+        homeTeam: item.HN || 'Ev Sahibi',
+        awayTeam: item.AN || 'Deplasman',
+        homeScore: item.HS ?? 'v',
+        awayScore: item.AS ?? '',
+        homeLogo: item.HID ? `https://st1.nesine.com/imgs/teams/${item.HID}.png` : null,
+        awayLogo: item.AID ? `https://st1.nesine.com/imgs/teams/${item.AID}.png` : null
       });
     });
 
     res.status(200).json(Object.values(grouped));
   } catch (error) {
-    console.error("Matches API Error:", error);
-    res.status(500).json({ error: "Fikstür verileri çekilemedi." });
+    console.error("Matches Error:", error);
+    res.status(500).json({ error: "Veriler çekilemedi." });
   }
 }
