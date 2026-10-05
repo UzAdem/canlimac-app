@@ -13,10 +13,10 @@ export default async function handler(req, res) {
       const events = data.events || [];
       const leaguesList = data.leagues || [];
 
-      // Lig id'lerine göre isim haritası oluşturuyoruz
+      // Lig id haritası
       const leagueMap = {};
       leaguesList.forEach(l => {
-        leagueMap[l.id] = l.name || l.slug;
+        if (l.id) leagueMap[l.id] = l.name;
       });
 
       if (events.length > 0) {
@@ -25,9 +25,25 @@ export default async function handler(req, res) {
         events.forEach(event => {
           const competition = event.competitions?.[0];
           
-          // Lig adını önce yarışmadan, yoksa lig haritasından alıyoruz
-          const leagueId = competition?.league?.id || event.league?.id;
-          const leagueName = competition?.league?.name || leagueMap[leagueId] || 'Diğer Ligler';
+          // Lig / Turnuva İsmi Öncelik Sıralaması
+          let leagueName = 
+            competition?.league?.name || 
+            leagueMap[competition?.league?.id] || 
+            leagueMap[event.league?.id] || 
+            event.season?.displayName ||
+            competition?.type?.text ||
+            'Diğer Ligler';
+
+          // Eğer Uluslararası Milli Maç ise anlaşılır başlık ver
+          if (leagueName === 'Diğer Ligler' || leagueName.includes('International')) {
+            if (event.name?.includes('UEFA') || event.shortName?.includes('UEFA')) {
+              leagueName = 'UEFA Nations League';
+            } else if (event.season?.slug?.includes('friendly')) {
+              leagueName = 'Uluslararası Hazırlık Maçları';
+            } else {
+              leagueName = 'Milli Maçlar / Uluslararası';
+            }
+          }
 
           if (!grouped[leagueName]) {
             grouped[leagueName] = {
