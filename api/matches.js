@@ -1,99 +1,121 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+const axios = require('axios');
 
-  const { date } = req.query;
-  const formattedDate = date ? date.replace(/-/g, '') : new Date().toISOString().split('T')[0].replace(/-/g, '');
+// İNGİLİZCE - TÜRKÇE TAKIM / ÜLKE İSİMLERİ SÖZLÜĞÜ
+const teamTranslations = {
+  "Cyprus": "Kıbrıs",
+  "Armenia": "Ermenistan",
+  "Latvia": "Letonya",
+  "Montenegro": "Karadağ",
+  "Faroe Islands": "Faroe Adaları",
+  "Ukraine": "Ukrayna",
+  "Northern Ireland": "Kuzey İrlanda",
+  "North Macedonia": "Kuzey Makedonya",
+  "Lithuania": "Litvanya",
+  "Estonia": "Estonya",
+  "Belarus": "Beyaz Rusya",
+  "Czechia": "Çekya",
+  "Czech Republic": "Çekya",
+  "Switzerland": "İsviçre",
+  "Austria": "Avusturya",
+  "Greece": "Yunanistan",
+  "Spain": "İspanya",
+  "Germany": "Almanya",
+  "England": "İngiltere",
+  "Netherlands": "Hollanda",
+  "Croatia": "Hırvatistan",
+  "Scotland": "İskoçya",
+  "Wales": "Galler",
+  "Ireland": "İrlanda",
+  "Republic of Ireland": "İrlanda",
+  "Albania": "Arnavutluk",
+  "Bulgaria": "Bulgaristan",
+  "Azerbaijan": "Azerbaycan",
+  "Georgia": "Gürcistan",
+  "Hungary": "Macaristan",
+  "Poland": "Polonya",
+  "Romania": "Romanya",
+  "Slovakia": "Slovakya",
+  "Slovenia": "Slovenya",
+  "Serbia": "Sırbistan",
+  "Denmark": "Danimarka",
+  "Finland": "Finlandiya",
+  "Norway": "Norveç",
+  "Sweden": "İsveç",
+  "Iceland": "İzlanda",
+  "Turkey": "Türkiye",
+  "Turkiye": "Türkiye",
+  "Italy": "İtalya",
+  "France": "Fransa",
+  "Belgium": "Belçika",
+  "Portugal": "Portekiz",
+  "Bosnia and Herzegovina": "Bosna-Hersek",
+  "Bosnia-Herzegovina": "Bosna-Hersek",
+  "Moldova": "Moldova",
+  "Kazakhstan": "Kazakistan",
+  "Kyrgyz Republic": "Kırgızistan",
+  "Kyrgyzstan": "Kırgızistan"
+};
 
-  const LEAGUES = [
-    { slug: 'uefa.nations', region: 'Avrupa', defaultName: 'UEFA Uluslar Ligi' },
-    { slug: 'fifa.friendly', region: 'Dünya', defaultName: 'Hazırlık Maçları' },
-    { slug: 'uefa.euro.q', region: 'Avrupa', defaultName: 'Euro Elemeleri' },
-    { slug: 'tur.1', region: 'Türkiye', defaultName: 'Süper Lig' },
-    { slug: 'eng.1', region: 'İngiltere', defaultName: 'Premier League' },
-    { slug: 'esp.1', region: 'İspanya', defaultName: 'La Liga' },
-    { slug: 'ger.1', region: 'Almanya', defaultName: 'Bundesliga' },
-    { slug: 'ita.1', region: 'İtalya', defaultName: 'Serie A' }
-  ];
-
-  const TR_TRANSLATIONS = {
-    'Belgium': 'Belçika', 'Turkey': 'Türkiye', 'Türkiye': 'Türkiye',
-    'France': 'Fransa', 'Italy': 'İtalya', 'Hungary': 'Macaristan',
-    'Georgia': 'Gürcistan', 'Poland': 'Polonya', 'Romania': 'Romanya',
-    'Bosnia-Herzegovina': 'Bosna-Hersek', 'Sweden': 'İsveç',
-    'Croatia': 'Hırvatistan', 'Slovakia': 'Slovakya',
-    'Kazakhstan': 'Kazakistan', 'Moldova': 'Moldova',
-    'Germany': 'Almanya', 'Spain': 'İspanya', 'England': 'İngiltere'
-  };
-
-  try {
-    const fetchPromises = LEAGUES.map(league =>
-      fetch(`https://site.web.api.espn.com/apis/site/v2/sports/soccer/${league.slug}/scoreboard?dates=${formattedDate}`)
-        .then(r => r.ok ? r.json() : { events: [] })
-        .then(data => ({ leagueInfo: league, events: data.events || [] }))
-    );
-
-    const results = await Promise.all(fetchPromises);
-    const groupedMap = {};
-
-    results.forEach(item => {
-      if (item.events && item.events.length > 0) {
-        item.events.forEach(event => {
-          const competition = event.competitions[0];
-          const home = competition.competitors.find(c => c.homeAway === 'home');
-          const away = competition.competitors.find(c => c.homeAway === 'away');
-
-          let groupDetail = '';
-          if (competition.type && competition.type.text) {
-            let typeText = competition.type.text.replace(/league-phase/gi, 'Lig Aşaması').replace(/group-stage/gi, 'Grup Aşaması');
-            groupDetail = ` - ${typeText}`;
-          }
-
-          const fullLeagueTitle = `${item.leagueInfo.region} - ${item.leagueInfo.defaultName}${groupDetail}`;
-
-          if (!groupedMap[fullLeagueTitle]) {
-            groupedMap[fullLeagueTitle] = {
-              league: fullLeagueTitle,
-              matches: []
-            };
-          }
-
-          const statusState = event.status.type.state;
-          let statusType = 'UPCOMING';
-          let minuteStr = new Date(event.date).toLocaleTimeString('tr-TR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Europe/Istanbul'
-          });
-
-          if (statusState === 'in') {
-            statusType = 'LIVE';
-            minuteStr = `${event.status.displayClock || 'CANLI'}'`;
-          } else if (statusState === 'post') {
-            statusType = 'FINISHED';
-            minuteStr = 'MS';
-          }
-
-          const rawHome = home.team.displayName;
-          const rawAway = away.team.displayName;
-
-          groupedMap[fullLeagueTitle].matches.push({
-            id: event.id,
-            leagueSlug: item.leagueInfo.slug,
-            homeTeam: TR_TRANSLATIONS[rawHome] || rawHome,
-            awayTeam: TR_TRANSLATIONS[rawAway] || rawAway,
-            homeScore: home.score ?? '0',
-            awayScore: away.score ?? '0',
-            status: statusType,
-            minute: minuteStr,
-            venue: competition.venue ? competition.venue.fullName : 'Belirtilmedi'
-          });
-        });
-      }
-    });
-
-    res.status(200).json(Object.values(groupedMap));
-  } catch (error) {
-    res.status(500).json({ error: 'Veriler çekilirken bir sorun oluştu.' });
-  }
+function translateTeam(name) {
+  if (!name) return name;
+  return teamTranslations[name] || name;
 }
+
+const LEAGUES = [
+  { slug: 'uefa.nations', name: 'Avrupa - UEFA Uluslar Ligi' },
+  { slug: 'tur.1', name: 'Süper Lig' },
+  { slug: 'eng.1', name: 'İngiltere Premier Lig' },
+  { slug: 'esp.1', name: 'İspanya La Liga' },
+  { slug: 'ita.1', name: 'İtalya Serie A' },
+  { slug: 'ger.1', name: 'Almanya Bundesliga' },
+  { slug: 'fra.1', name: 'Fransa Ligue 1' },
+  { slug: 'uefa.champions', name: 'UEFA Şampiyonlar Ligi' },
+  { slug: 'uefa.europa', name: 'UEFA Avrupa Ligi' }
+];
+
+module.exports = async (req, res) => {
+  const targetDate = req.query.date ? req.query.date.replace(/-/g, '') : new Date().toISOString().slice(0,10).replace(/-/g, '');
+  
+  try {
+    let result = [];
+
+    for (const league of LEAGUES) {
+      try {
+        const url = `https://site.web.api.espn.com/apis/site/v2/sports/soccer/${league.slug}/scoreboard?dates=${targetDate}`;
+        const response = await axios.get(url, { timeout: 3000 });
+        const events = response.data.events || [];
+
+        if (events.length > 0) {
+          const formattedMatches = events.map(event => {
+            const comp = event.competitions[0];
+            const home = comp.competitors.find(c => c.homeAway === 'home') || comp.competitors[0];
+            const away = comp.competitors.find(c => c.awayAway === 'away') || comp.competitors[1];
+
+            return {
+              id: event.id,
+              leagueSlug: league.slug,
+              homeTeam: translateTeam(home.team.displayName),
+              awayTeam: translateTeam(away.team.displayName),
+              homeScore: home.score || '0',
+              awayScore: away.score || '0',
+              minute: event.status.type.shortDetail,
+              status: event.status.type.state === 'in' ? 'LIVE' : 'FINISHED',
+              venue: comp.venue ? comp.venue.fullName : ''
+            };
+          });
+
+          result.push({
+            league: league.name,
+            matches: formattedMatches
+          });
+        }
+      } catch (e) {
+        // Hata durumunda devam et
+      }
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Maç verileri çekilemedi.' });
+  }
+};
