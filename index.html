@@ -5,107 +5,204 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CANLIMAÇ</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #0d131d; color: #fff; display: flex; justify-content: center; }
-    .app-container { width: 100%; max-width: 480px; min-height: 100vh; background-color: #121926; }
-    header { padding: 14px 16px; background-color: #16202e; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #232f42; }
-    header h1 { font-size: 17px; color: #00e676; font-weight: 700; }
-    
-    .date-picker { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background-color: #1a2536; border-bottom: 1px solid #232f42; }
-    .date-picker button { background-color: #232f42; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
-    .date-display { color: #00e676; font-weight: bold; font-size: 14px; padding: 6px 12px; background: rgba(0,230,118,0.1); border-radius: 6px; position: relative; }
-    .date-display input[type="date"] { position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; }
-    
-    .league-header { background-color: #1a2536; padding: 10px 16px; font-size: 13px; font-weight: bold; color: #00e676; margin-top: 10px; }
-    .match-card { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #1c2738; cursor: pointer; }
-    .match-card:active { background-color: #1a2536; }
-    .match-time { width: 45px; font-size: 12px; color: #94a3b8; }
-    .match-teams { display: flex; justify-content: space-between; flex: 1; align-items: center; font-size: 13px; font-weight: 500; }
-    .team-name { display: flex; align-items: center; gap: 6px; }
-    .team-name img { width: 16px; height: 16px; object-fit: contain; }
-    .score-box { color: #00e676; font-weight: bold; padding: 0 10px; }
-    .status-msg { text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 14px; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-    /* Detail Modal */
-    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: flex-end; z-index: 999; }
-    .modal-content { width: 100%; max-width: 480px; height: 75vh; background: #121926; border-radius: 16px 16px 0 0; padding: 20px; overflow-y: auto; position: relative; }
-    .close-btn { position: absolute; top: 12px; right: 16px; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+    body {
+      background-color: #0f172a;
+      color: #ffffff;
+      padding-bottom: 30px;
+    }
+
+    /* Header */
+    .header {
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #00e676;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    /* Tarih Seçici */
+    .date-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      background-color: #0f172a;
+    }
+
+    .btn-nav {
+      background-color: #1e293b;
+      color: #ffffff;
+      border: 1px solid #334155;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .date-display {
+      color: #00e676;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    /* Lig Başlığı */
+    .league-title {
+      color: #00e676;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 12px 15px 6px 15px;
+      background-color: #0f172a;
+    }
+
+    /* Maç Satırı CSS Grid Düzeni (Ortadaki 'v' Hizalaması) */
+    .match-card {
+      display: grid;
+      grid-template-columns: 45px 1fr 30px 1fr;
+      align-items: center;
+      padding: 10px 12px;
+      background-color: #111827;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    .match-time {
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: left;
+    }
+
+    .home-team {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      text-align: right;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* İp Gibi Dümdüz Alt Alta Hizalayan Merkez Skor/v Alanı */
+    .match-score {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-weight: bold;
+      color: #00e676;
+      font-size: 13px;
+    }
+
+    .away-team {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-logo {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #9ca3af;
+    }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <header>
-      <span>⚽</span>
-      <h1>CANLIMAÇ</h1>
-    </header>
-
-    <div class="date-picker">
-      <button id="prev-btn">&lt; Önceki</button>
-      <div class="date-display">
-        <span id="date-label">--.--.---- 📅</span>
-        <input type="date" id="date-input">
-      </div>
-      <button id="next-btn">Sonraki &gt;</button>
-    </div>
-
-    <div id="matches-container">
-      <div class="status-msg">Maçlar yükleniyor...</div>
-    </div>
+  <div class="header">
+    ⚽ CANLIMAÇ
   </div>
 
-  <div class="modal" id="detail-modal">
-    <div class="modal-content">
-      <button class="close-btn" id="close-modal">&times;</button>
-      <div id="modal-body" class="status-msg">Detaylar yükleniyor...</div>
-    </div>
+  <div class="date-nav">
+    <button class="btn-nav" id="prev-date">&lt; Önceki</button>
+    <div class="date-display" id="date-text"></div>
+    <button class="btn-nav" id="next-date">Sonraki &gt;</button>
+  </div>
+
+  <div id="matches-container">
+    <div class="loading">Maçlar yükleniyor...</div>
   </div>
 
   <script>
     let currentDate = new Date();
 
-    function formatApiDate(date) {
-      return date.toISOString().split('T')[0];
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
-    function renderDateLabel() {
-      const d = String(currentDate.getDate()).padStart(2, '0');
-      const m = String(currentDate.getMonth() + 1).padStart(2, '0');
-      const y = currentDate.getFullYear();
-      document.getElementById('date-label').innerText = `${d}.${m}.${y} 📅`;
+    function formatDateDisplay(date) {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
     }
 
     async function fetchMatches() {
       const container = document.getElementById('matches-container');
-      container.innerHTML = '<div class="status-msg">Maçlar yükleniyor...</div>';
-      renderDateLabel();
+      const dateText = document.getElementById('date-text');
+      
+      const formatted = formatDate(currentDate);
+      dateText.textContent = formatDateDisplay(currentDate);
+      container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
       try {
-        const res = await fetch(`/api/matches?date=${formatApiDate(currentDate)}`);
-        const data = await res.json();
+        const response = await fetch(`/api/matches?date=${formatted}`);
+        const data = await response.json();
 
         if (!data || data.length === 0) {
-          container.innerHTML = '<div class="status-msg">Seçilen tarihte maç bulunamadı.</div>';
+          container.innerHTML = '<div class="loading">Bu tarihte maç bulunamadı.</div>';
           return;
         }
 
         let html = '';
         data.forEach(group => {
-          html += `<div class="league-header">${group.league}</div>`;
-          group.matches?.forEach(m => {
+          html += `<div class="league-title">${group.league}</div>`;
+          group.matches.forEach(match => {
+            const scoreDisplay = match.homeScore === 'v' 
+              ? 'v' 
+              : `${match.homeScore} - ${match.awayScore}`;
+
             html += `
-              <div class="match-card" onclick="openMatchDetails('${m.id}')">
-                <div class="match-time">${m.time}</div>
-                <div class="match-teams">
-                  <span class="team-name">
-                    ${m.homeLogo ? `<img src="${m.homeLogo}" />` : ''}
-                    ${m.homeTeam}
-                  </span>
-                  <span class="score-box">${m.homeScore} ${m.awayScore ? '- ' + m.awayScore : ''}</span>
-                  <span class="team-name">
-                    ${m.awayTeam}
-                    ${m.awayLogo ? `<img src="${m.awayLogo}" />` : ''}
-                  </span>
+              <div class="match-card">
+                <div class="match-time">${match.time}</div>
+                
+                <div class="home-team">
+                  <span>${match.homeTeam}</span>
+                  ${match.homeLogo ? `<img src="${match.homeLogo}" class="team-logo" alt="" />` : ''}
+                </div>
+                
+                <div class="match-score">${scoreDisplay}</div>
+                
+                <div class="away-team">
+                  ${match.awayLogo ? `<img src="${match.awayLogo}" class="team-logo" alt="" />` : ''}
+                  <span>${match.awayTeam}</span>
                 </div>
               </div>
             `;
@@ -115,52 +212,21 @@
         container.innerHTML = html;
       } catch (err) {
         console.error(err);
-        container.innerHTML = '<div class="status-msg">Veriler çekilemedi.</div>';
+        container.innerHTML = '<div class="loading">Maçlar alınırken bir hata oluştu.</div>';
       }
     }
 
-    async function openMatchDetails(matchId) {
-      const modal = document.getElementById('detail-modal');
-      const body = document.getElementById('modal-body');
-      modal.style.display = 'flex';
-      body.innerHTML = '<div class="status-msg">Maç detayı yükleniyor...</div>';
-
-      try {
-        const res = await fetch(`/api/match-detail?id=${matchId}`);
-        const data = await res.json();
-        
-        body.innerHTML = `
-          <h3 style="margin-bottom:15px; color:#00e676;">Maç Detayı</h3>
-          <p>ID: ${data.id}</p>
-          <p>Durum: ${data.status}</p>
-        `;
-      } catch (err) {
-        body.innerHTML = '<div class="status-msg">Detay çekilemedi.</div>';
-      }
-    }
-
-    document.getElementById('close-modal').onclick = () => {
-      document.getElementById('detail-modal').style.display = 'none';
-    };
-
-    document.getElementById('prev-btn').onclick = () => {
+    document.getElementById('prev-date').addEventListener('click', () => {
       currentDate.setDate(currentDate.getDate() - 1);
       fetchMatches();
-    };
+    });
 
-    document.getElementById('next-btn').onclick = () => {
+    document.getElementById('next-date').addEventListener('click', () => {
       currentDate.setDate(currentDate.getDate() + 1);
       fetchMatches();
-    };
+    });
 
-    document.getElementById('date-input').onchange = (e) => {
-      if (e.target.value) {
-        currentDate = new Date(e.target.value);
-        fetchMatches();
-      }
-    };
-
-    document.addEventListener('DOMContentLoaded', fetchMatches);
+    fetchMatches();
   </script>
 </body>
 </html>
