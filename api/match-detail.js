@@ -19,66 +19,64 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
-      return res.status(404).json({ error: 'Match details not found' });
+      return res.status(200).json({ events: [], statusDetail: 'Maç Detayı Bulunamadı' });
     }
 
     const data = await response.json();
-    const competition = data.header?.competitions?.[0];
 
-    // İY / MS Skor Detayları
-    const periodScores = competition?.competitors?.[0]?.linescores || [];
-    const homeComp = competition?.competitors?.find(c => c.homeAway === 'home');
-    const awayComp = competition?.competitors?.find(c => c.homeAway === 'away');
+    // Maç Durumu ve İY Skoru
+    const headerComp = data.header?.competitions?.[0];
+    const statusDetail = headerComp?.status?.type?.detail || 'Maç Sonu';
 
-    const homeIY = homeComp?.linescores?.[0]?.displayValue || '0';
-    const awayIY = awayComp?.linescores?.[0]?.displayValue || '0';
+    // İlk Yarı Skoru bulma
+    let homeIY = undefined;
+    let awayIY = undefined;
+    const homeLines = headerComp?.competitors?.find(c => c.homeAway === 'home')?.linescores;
+    const awayLines = headerComp?.competitors?.find(c => c.homeAway === 'away')?.linescores;
 
-    // Olay Tipi Belirleme ve İkon Atama
-    const rawEvents = competition?.details || [];
-    const formattedEvents = rawEvents.map(item => {
-      const typeText = (item.type?.text || '').toLowerCase();
+    if (homeLines && homeLines.length > 0 && awayLines && awayLines.length > 0) {
+      homeIY = homeLines[0]?.value;
+      awayIY = awayLines[0]?.value;
+    }
+
+    // Takım bilgileri
+    const homeId = headerComp?.competitors?.find(c => c.homeAway === 'home')?.id;
+    const homeName = headerComp?.competitors?.find(c => c.homeAway === 'home')?.team?.displayName || 'Ev Sahibi';
+    const awayName = headerComp?.competitors?.find(c => c.homeAway === 'away')?.team?.displayName || 'Deplasman';
+
+    // Olayları ayrıştırma
+    const rawKeyEvents = data.keyEvents || [];
+    const events = [];
+
+    rawKeyEvents.forEach(item => {
+      const clock = item.clock?.displayValue || item.time?.displayValue || '';
+      const typeId = item.type?.id || '';
+      const text = item.text || '';
+      const typeText = item.type?.text?.toLowerCase() || '';
+
       let icon = '📌';
       let typeLabel = 'Olay';
 
-      if (typeText.includes('goal') || typeText.includes('penalty')) {
+      // Gol kontrolü
+      if (typeId === '1' || typeText.includes('goal') || typeText.includes('penalty - scored')) {
         icon = '⚽';
         typeLabel = 'Gol';
-      } else if (typeText.includes('yellow card')) {
+        if (typeText.includes('own goal') || text.toLowerCase().includes('own goal')) {
+          typeLabel = 'Kendi Kalesine Gol';
+        } else if (typeText.includes('penalty')) {
+          typeLabel = 'Penaltı Golü';
+        }
+      } 
+      // Sarı Kart
+      else if (typeId === '3' || typeText.includes('yellow card')) {
         icon = '🟨';
         typeLabel = 'Sarı Kart';
-      } else if (typeText.includes('red card')) {
+      } 
+      // Kırmızı Kart
+      else if (typeId === '4' || typeText.includes('red card')) {
         icon = '🟥';
         typeLabel = 'Kırmızı Kart';
-      } else if (typeText.includes('substitution') || typeText.includes('sub')) {
-        icon = '🔄';
-        typeLabel = 'Oyuncu Değişikliği';
-      }
-
-      const teamId = item.team?.id;
-      const isHome = teamId === homeComp?.id;
-
-      return {
-        clock: item.clock?.displayValue || '',
-        icon,
-        typeLabel,
-        isHome,
-        teamName: item.team?.displayName || '',
-        player: item.participants?.map(p => p.athlete?.displayName).join(' ➔ ') || item.text || ''
-      };
-    });
-
-    return res.status(200).json({
-      homeTeam: homeComp?.team?.displayName || 'Ev Sahibi',
-      awayTeam: awayComp?.team?.displayName || 'Deplasman',
-      homeScore: homeComp?.score || '0',
-      awayScore: awayComp?.score || '0',
-      homeIY,
-      awayIY,
-      statusDetail: competition?.status?.type?.shortDetail || 'MS',
-      events: formattedEvents
-    });
-  } catch (error) {
-    console.error('Match Details API Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-}
+      } 
+      // Oyuncu Değişikliği
+      else if (typeId === '2' || typeText.includes('substitution') || text.includes
+               
