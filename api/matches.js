@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // CORS Başlıkları
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Content-Type', 'application/json');
@@ -8,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { date } = req.query; // YYYY-MM-DD
+  const { date } = req.query;
   const targetDate = date || new Date().toISOString().split('T')[0];
   const formattedDate = targetDate.replace(/-/g, '');
 
@@ -16,7 +15,7 @@ export default async function handler(req, res) {
     const response = await fetch(
       `https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?dates=${formattedDate}`
     );
-    
+
     if (!response.ok) {
       return res.status(200).json([]);
     }
@@ -26,9 +25,15 @@ export default async function handler(req, res) {
 
     if (data.events && Array.isArray(data.events)) {
       data.events.forEach(event => {
-        const leagueName = event.league?.name || 'Diğer Ligler';
         const competition = event.competitions?.[0];
         if (!competition) return;
+
+        // Lig ismini ESPN veri yapısından doğru çekme
+        const leagueName = 
+          event.league?.name || 
+          competition.league?.name || 
+          event.season?.slug || 
+          'Diğer Ligler';
 
         const homeCompetitor = competition.competitors?.find(c => c.homeAway === 'home');
         const awayCompetitor = competition.competitors?.find(c => c.homeAway === 'away');
