@@ -41,9 +41,14 @@ export default async function handler(req, res) {
         const home = competition?.competitors?.find(c => c.homeAway === 'home');
         const away = competition?.competitors?.find(c => c.homeAway === 'away');
 
+        // Türkiye Saat Dilimine (Europe/Istanbul) Göre Saati Biçimlendirme
         const matchDate = new Date(event.date);
-        const hours = String(matchDate.getHours()).padStart(2, '0');
-        const minutes = String(matchDate.getMinutes()).padStart(2, '0');
+        const turkishTime = matchDate.toLocaleTimeString('tr-TR', {
+          timeZone: 'Europe/Istanbul',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
 
         const isStarted = event.status?.type?.state === 'in' || event.status?.type?.state === 'post';
         const homeScore = isStarted ? (home?.score ?? '0') : 'v';
@@ -51,7 +56,7 @@ export default async function handler(req, res) {
 
         matches.push({
           id: event.id,
-          time: `${hours}:${minutes}`,
+          time: turkishTime,
           homeTeam: home?.team?.displayName || 'Ev Sahibi',
           awayTeam: away?.team?.displayName || 'Deplasman',
           homeScore: homeScore,
@@ -74,4 +79,4 @@ export default async function handler(req, res) {
     console.error("Matches API Error:", error);
     res.status(500).json({ error: "Veriler çekilemedi." });
   }
-        }
+}
