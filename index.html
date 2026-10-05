@@ -143,7 +143,7 @@
       font-size: 14px;
     }
 
-    /* MODAL (DETAY PENCERESİ) */
+    /* MODAL */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -167,7 +167,7 @@
       position: relative;
       border: 1px solid #334155;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      max-height: 80vh;
+      max-height: 85vh;
       overflow-y: auto;
     }
 
@@ -185,35 +185,57 @@
     .modal-header {
       text-align: center;
       border-bottom: 1px solid #334155;
-      padding-bottom: 15px;
-      margin-bottom: 15px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
     }
 
     .modal-league {
       font-size: 12px;
       color: #94a3b8;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
     .modal-teams {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .modal-score {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: bold;
       color: #22c55e;
     }
 
-    .section-title {
-      font-size: 13px;
-      font-weight: bold;
-      color: #22c55e;
-      margin: 15px 0 10px 0;
+    .tab-menu {
+      display: flex;
+      gap: 10px;
       border-bottom: 1px solid #1e293b;
-      padding-bottom: 5px;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: #22c55e;
+      border-bottom: 2px solid #22c55e;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
 
     .detail-row {
@@ -245,6 +267,20 @@
       font-weight: bold;
       font-size: 11px;
     }
+
+    .roster-team-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #22c55e;
+      margin: 12px 0 6px 0;
+    }
+
+    .player-item {
+      font-size: 12px;
+      padding: 5px 0;
+      border-bottom: 1px solid #1e293b;
+      color: #cbd5e1;
+    }
   </style>
 </head>
 <body>
@@ -274,19 +310,35 @@
         <div class="modal-score" id="mScore">0 - 0</div>
       </div>
 
-      <div class="detail-row">
-        <span class="detail-label">Durum / Dakika</span>
-        <span id="mStatus" style="color:#22c55e; font-weight:bold;">-</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Stadyum</span>
-        <span id="mVenue">-</span>
+      <div class="tab-menu">
+        <button class="tab-btn active" onclick="switchTab('detay')">Detay</button>
+        <button class="tab-btn" onclick="switchTab('kadro')">Kadro</button>
       </div>
 
-      <div class="section-title">MAÇ OLAYLARI (GOLLER & KARTLAR)</div>
-      <div id="mEvents">
-        <div style="font-size:12px; color:#94a3b8;">Olay bilgisi bulunmuyor.</div>
+      <!-- DETAY SEKMESİ -->
+      <div id="tabDetay" class="tab-content active">
+        <div class="detail-row">
+          <span class="detail-label">Durum / Dakika</span>
+          <span id="mStatus" style="color:#22c55e; font-weight:bold;">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Stadyum</span>
+          <span id="mVenue">-</span>
+        </div>
+
+        <div style="font-size:12px; font-weight:bold; color:#22c55e; margin:12px 0 6px 0;">MAÇ OLAYLARI (GOLLER & KARTLAR)</div>
+        <div id="mEvents">
+          <div style="font-size:12px; color:#94a3b8;">Olay bilgisi bulunmuyor.</div>
+        </div>
       </div>
+
+      <!-- KADRO SEKMESİ -->
+      <div id="tabKadro" class="tab-content">
+        <div id="mRosters">
+          <div style="font-size:12px; color:#94a3b8;">Kadro bilgisi yükleniyor...</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -364,7 +416,8 @@
       }
     }
 
-    function openDetail(gIdx, mIdx) {
+    async function openDetail(gIdx, mIdx) {
+      switchTab('detay');
       const group = matchesData[gIdx];
       const match = group.matches[mIdx];
 
@@ -374,7 +427,7 @@
       document.getElementById('mStatus').innerText = match.minute;
       document.getElementById('mVenue').innerText = match.venue || 'Belirtilmedi';
 
-      // Goller ve Kartlar
+      // Goller ve Olaylar
       const eventsContainer = document.getElementById('mEvents');
       if (match.details && match.details.length > 0) {
         let eventsHtml = '';
@@ -382,16 +435,57 @@
           eventsHtml += `
             <div class="event-item">
               <span class="event-minute">${e.clock || '•'}</span>
-              <span><b>${e.type}</b> - ${e.summary}</span>
+              <span><b>${e.type}</b> ${e.summary ? '- ' + e.summary : ''}</span>
             </div>
           `;
         });
         eventsContainer.innerHTML = eventsHtml;
       } else {
-        eventsContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:5px 0;">Henüz önemli bir olay (gol/kart) kaydedilmedi.</div>';
+        eventsContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:5px 0;">Olay bilgisi bulunmuyor.</div>';
       }
 
+      // Kadro Bilgilerini Doğrudan ESPN Web API'den Çek
+      const rosterContainer = document.getElementById('mRosters');
+      rosterContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:10px 0;">Kadro getiriliyor...</div>';
+
       document.getElementById('matchModal').style.display = 'flex';
+
+      try {
+        const espnRes = await fetch(`https://site.web.api.espn.com/apis/site/v2/sports/soccer/${match.leagueSlug}/summary?event=${match.id}`);
+        const espnData = await espnRes.json();
+
+        if (espnData.rosters && espnData.rosters.length > 0) {
+          let rosterHtml = '';
+          espnData.rosters.forEach(r => {
+            rosterHtml += `<div class="roster-team-title">${r.team ? r.team.displayName : 'Takım'}</div>`;
+            if (r.roster && r.roster.length > 0) {
+              r.roster.forEach(p => {
+                rosterHtml += `<div class="player-item">#${p.jersey || '-'} ${p.athlete ? p.athlete.displayName : 'Oyuncu'} (${p.position ? p.position.abbreviation : '-'})</div>`;
+              });
+            } else {
+              rosterHtml += '<div style="font-size:12px; color:#94a3b8;">Oyuncu listesi açıklanmadı.</div>';
+            }
+          });
+          rosterContainer.innerHTML = rosterHtml;
+        } else {
+          rosterContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:10px 0;">Bu maç için resmi kadrolar henüz açıklanmadı.</div>';
+        }
+      } catch (err) {
+        rosterContainer.innerHTML = '<div style="font-size:12px; color:#94a3b8; padding:10px 0;">Kadro verisine ulaşılamadı.</div>';
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      if (tabName === 'detay') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tabDetay').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tabKadro').classList.add('active');
+      }
     }
 
     function closeModal() {
