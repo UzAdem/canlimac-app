@@ -23,6 +23,86 @@ export default async function handler(req, res) {
     const data = await response.json();
     const groupedMatches = {};
 
+    // Takım ve Ülke İsimleri Türkçe Çeviri Sözlüğü
+    const teamTranslations = {
+      'azerbaijan': 'Azerbaycan',
+      'lithuania': 'Litvanya',
+      'kosovo': 'Kosova',
+      'austria': 'Avusturya',
+      'malta': 'Malta',
+      'andorra': 'Andorra',
+      'greece': 'Yunanistan',
+      'germany': 'Almanya',
+      'netherlands': 'Hollanda',
+      'serbia': 'Sırbistan',
+      'portugal': 'Portekiz',
+      'norway': 'Norveç',
+      'republic of ireland': 'İrlanda',
+      'ireland': 'İrlanda',
+      'israel': 'İsrail',
+      'wales': 'Galler',
+      'denmark': 'Danimarka',
+      'guyana': 'Guyana',
+      'dominica': 'Dominika',
+      'bahamas': 'Bahamalar',
+      'us virgin islands': 'ABD Virjin Adaları',
+      'turks and caicos islands': 'Turks ve Caicos Adaları',
+      'british virgin islands': 'Britanya Virjin Adaları',
+      'puerto rico': 'Porto Riko',
+      'cayman islands': 'Cayman Adaları',
+      'trinidad and tobago': 'Trinidad ve Tobago',
+      'curaçao': 'Curaçao',
+      'curacao': 'Curaçao',
+      'italy': 'İtalya',
+      'turkey': 'Türkiye',
+      'turkiye': 'Türkiye',
+      'france': 'Fransa',
+      'belgium': 'Belçika',
+      'cyprus': 'Güney Kıbrıs',
+      'latvia': 'Letonya',
+      'bosnia-herzegovina': 'Bosna-Hersek',
+      'poland': 'Polonya',
+      'montenegro': 'Karadağ',
+      'armenia': 'Ermenistan',
+      'northern ireland': 'Kuzey İrlanda',
+      'georgia': 'Gürcistan',
+      'romania': 'Romanya',
+      'sweden': 'İsveç',
+      'ukraine': 'Ukrayna',
+      'hungary': 'Macaristan',
+      'spain': 'İspanya',
+      'england': 'İngiltere',
+      'croatia': 'Hırvatistan',
+      'switzerland': 'İsviçre',
+      'czech republic': 'Çekya',
+      'czechia': 'Çekya',
+      'slovakia': 'Slovakya',
+      'slovenia': 'Slovenya',
+      'bulgaria': 'Bulgaristan',
+      'albania': 'Arnavutluk',
+      'north macedonia': 'Kuzey Makedonya',
+      'finland': 'Finlandiya',
+      'iceland': 'İzlanda',
+      'estonia': 'Estonya',
+      'belarus': 'Belarus',
+      'moldova': 'Moldova',
+      'luxembourg': 'Lüksemburg',
+      'faroe islands': 'Faroe Adaları',
+      'gibraltar': 'Cebelitarık',
+      'san marino': 'San Marino',
+      'liechtenstein': 'Lihntenştayn',
+      'argentina': 'Arjantin',
+      'brazil': 'Brezilya',
+      'uruguay': 'Uruguay',
+      'colombia': 'Kolombiya'
+    };
+
+    function translateTeamName(rawName) {
+      if (!rawName) return 'Takım';
+      const lower = rawName.trim().toLowerCase();
+      return teamTranslations[lower] || rawName;
+    }
+
     function formatLeagueName(rawName) {
       if (!rawName) return 'Diğer Ligler';
       
@@ -36,7 +116,6 @@ export default async function handler(req, res) {
 
       const lower = clean.toLowerCase();
 
-      // Özel / Popüler Lig Tanımlamaları
       if (lower.includes('super lig') || lower.includes('süper lig') || lower.includes('turkish super lig')) return 'Trendyol Süper Lig';
       if (lower.includes('premier league')) return 'Premier League';
       if (lower.includes('serie a')) return 'Serie A';
@@ -44,7 +123,6 @@ export default async function handler(req, res) {
       if (lower.includes('bundesliga')) return 'Bundesliga';
       if (lower.includes('ligue 1')) return 'Ligue 1';
 
-      // Türkçe Çeviri Sözlüğü
       const translations = {
         'international friendly': 'Uluslararası Hazırlık Maçı',
         'friendly': 'Hazırlık Maçı',
@@ -64,12 +142,9 @@ export default async function handler(req, res) {
         'round of 16': 'Son 16 Turu',
         'quarter finals': 'Çeyrek Final',
         'uefa nations league': 'UEFA Uluslar Ligi',
-        'nations league': 'Uluslar Ligi',
-        'world cup': 'Dünya Kupası',
-        'european championship': 'Avrupa Şampiyonası'
+        'nations league': 'Uluslar Ligi'
       };
 
-      // Tam veya kısmi eşleşme kontrolü
       for (const [key, value] of Object.entries(translations)) {
         if (lower.includes(key)) {
           return value;
@@ -103,11 +178,15 @@ export default async function handler(req, res) {
           timeZone: 'Europe/Istanbul'
         });
 
+        // Takım isimlerini Türkçe sözlükten çeviriyoruz
+        const homeName = translateTeamName(homeCompetitor?.team?.displayName);
+        const awayName = translateTeamName(awayCompetitor?.team?.displayName);
+
         const matchObj = {
           id: event.id,
           time: matchTime,
-          homeTeam: homeCompetitor?.team?.displayName || 'Ev Sahibi',
-          awayTeam: awayCompetitor?.team?.displayName || 'Deplasman',
+          homeTeam: homeName,
+          awayTeam: awayName,
           homeLogo: homeCompetitor?.team?.logo || '',
           awayLogo: awayCompetitor?.team?.logo || '',
           homeScore: homeCompetitor?.score,
@@ -157,4 +236,5 @@ export default async function handler(req, res) {
     console.error('API Error:', error);
     return res.status(200).json([]);
   }
-                          }
+      }
+      
