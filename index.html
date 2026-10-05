@@ -1,438 +1,331 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canlı Maç</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canlı Maç App</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #0b132b;
-      color: #ffffff;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #0b1021;
+      color: #ffffff;
       padding: 16px;
-      max-width: 600px;
+      max-width: 480px;
       margin: 0 auto;
     }
-    header {
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Header & Date Navigation */
+    .header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #1c2541;
-      margin-bottom: 15px;
-    }
-    .nav-btn {
-      background: #1c2541;
-      border: none;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .date-display {
-      background: #1c2541;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: bold;
-      color: #4eef90;
-    }
-    .league-title {
-      background: #1c2541;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin: 15px 0 10px 0;
-      font-size: 14px;
-      color: #a0aec0;
-      font-weight: 600;
-    }
-    .match-card {
-      background: #131b2e;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-    .team { display: flex; align-items: center; gap: 8px; width: 40%; }
-    .team.away { justify-content: flex-end; }
-    .team img { width: 24px; height: 24px; object-fit: contain; }
-    .score {
-      font-weight: bold;
-      background: #1c2541;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 14px;
-      color: #4eef90;
-    }
-    .detail-header {
-      display: flex;
-      align-items: center;
-      gap: 15px;
       margin-bottom: 20px;
     }
+
     .back-btn {
+      font-size: 20px;
       background: none;
       border: none;
       color: #fff;
-      font-size: 24px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    .header-title { font-size: 20px; font-weight: 700; }
+
+    .date-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .date-btn {
+      background-color: #121936;
+      border: none;
+      color: #8c9ba5;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
       cursor: pointer;
     }
-    .match-summary-box {
-      background: #131b2e;
-      border-radius: 12px;
+
+    .current-date {
+      background-color: #121936;
+      color: #2ed573;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    /* League Groups & Matches */
+    .league-group { margin-bottom: 20px; }
+    .league-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: #8c9ba5;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .match-card {
+      background-color: #121936;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 40%;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .team-cell.away { justify-content: flex-end; text-align: right; }
+
+    .flag-img {
+      width: 22px;
+      height: 15px;
+      border-radius: 2px;
+      object-fit: cover;
+    }
+
+    .score-badge {
+      background-color: #1b264f;
+      color: #2ed573;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .time-badge {
+      background-color: #1b264f;
+      color: #2ed573;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    /* Detail Views */
+    .scoreboard {
+      background-color: #121936;
+      border-radius: 16px;
       padding: 20px;
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
-    .teams-vs {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      margin-top: 10px;
-    }
-    .team-box { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 35%; }
-    .team-box img { width: 48px; height: 48px; }
-    
-    .score-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .big-score { font-size: 28px; font-weight: bold; color: #4eef90; line-height: 1.2; }
-    .iy-score { font-size: 13px; color: #a0aec0; margin-top: 4px; font-weight: 500; }
-    
-    /* Sekme Yapısı */
+
+    .match-status { font-size: 13px; color: #8c9ba5; font-weight: 600; margin-bottom: 12px; }
+    .teams-container { display: flex; justify-content: space-around; align-items: center; margin-bottom: 8px; }
+    .team-box { display: flex; flex-direction: column; align-items: center; width: 35%; }
+    .detail-flag { width: 44px; height: 30px; border-radius: 4px; margin-bottom: 8px; }
+    .team-name { font-size: 14px; font-weight: 600; }
+    .score-box { font-size: 26px; font-weight: 800; color: #2ed573; }
+    .ht-score { font-size: 12px; color: #8c9ba5; margin-top: 4px; }
+
+    /* Tabs */
     .tabs {
       display: flex;
-      background: #131b2e;
-      border-radius: 8px;
+      background-color: #121936;
+      border-radius: 10px;
       padding: 4px;
-      margin-bottom: 15px;
+      margin-bottom: 16px;
     }
+
     .tab-btn {
       flex: 1;
       padding: 10px;
       border: none;
-      background: transparent;
-      color: #a0aec0;
-      font-weight: bold;
+      background: none;
+      color: #8c9ba5;
       font-size: 14px;
-      border-radius: 6px;
+      font-weight: 600;
+      border-radius: 8px;
       cursor: pointer;
     }
-    .tab-btn.active {
-      background: #1c2541;
-      color: #4eef90;
-    }
 
-    /* Olaylar */
-    .events-container { display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; }
-    .event-row { display: flex; width: 100%; align-items: center; }
-    .event-row.home { justify-content: flex-start; }
-    .event-row.away { justify-content: flex-end; }
-    
-    .event-card {
+    .tab-btn.active { background-color: #1b264f; color: #2ed573; }
+    .tab-content { background-color: #121936; border-radius: 16px; padding: 16px; }
+
+    /* Events Layout */
+    .events-list { display: flex; flex-direction: column; gap: 10px; }
+    .event-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      background: #131b2e;
-      padding: 10px 14px;
+      padding: 10px 12px;
+      background-color: #1b264f;
       border-radius: 10px;
-      max-width: 80%;
-    }
-    .event-row.home .event-card { border-left: 4px solid #4eef90; flex-direction: row; text-align: left; }
-    .event-row.away .event-card { border-right: 4px solid #3b82f6; flex-direction: row-reverse; text-align: right; }
-    .event-icon { font-size: 18px; }
-    .event-player { font-size: 14px; font-weight: bold; color: #ffffff; }
-    .event-sub { font-size: 12px; color: #a0aec0; margin-top: 2px; }
-
-    .timeline-divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      color: #a0aec0;
-      font-size: 12px;
-      font-weight: bold;
-      margin: 16px 0;
-    }
-    .timeline-divider::before, .timeline-divider::after {
-      content: ''; flex: 1; border-bottom: 1px dashed #2a3859;
-    }
-    .timeline-divider span {
-      padding: 5px 14px; background: #1c2541; border-radius: 12px; color: #4eef90;
-    }
-
-    /* Kadro Yapısı */
-    .lineup-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      background: #131b2e;
-      padding: 12px;
-      border-radius: 12px;
-    }
-    .lineup-column { display: flex; flex-direction: column; gap: 8px; }
-    .lineup-column.away { text-align: right; }
-    .section-title {
-      font-size: 12px;
-      text-transform: uppercase;
-      color: #4eef90;
-      font-weight: bold;
-      padding: 6px 0;
-      border-bottom: 1px solid #1c2541;
-      margin-bottom: 4px;
-    }
-    .player-row {
       font-size: 13px;
-      padding: 4px 0;
-      color: #e2e8f0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
-    .lineup-column.away .player-row { justify-content: flex-end; }
-    .jersey-num {
-      font-size: 11px;
-      color: #a0aec0;
-      background: #1c2541;
-      padding: 2px 5px;
-      border-radius: 4px;
-      min-width: 20px;
-      text-align: center;
-    }
+    .event-item.away { justify-content: flex-end; }
+
+    /* Lineups Layout */
+    .lineup-grid { display: grid; grid-template-columns: 1fr 1fr; row-gap: 10px; column-gap: 16px; }
+    .section-title { font-size: 12px; font-weight: 700; color: #2ed573; margin-bottom: 6px; text-transform: uppercase; }
+    .sub-title { font-size: 12px; font-weight: 700; color: #8c9ba5; margin: 16px 0 8px 0; text-transform: uppercase; grid-column: span 2; border-top: 1px solid #1b264f; padding-top: 12px; }
+    .player-row { display: flex; align-items: center; font-size: 13px; color: #e1e7ed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .jersey-num { background-color: #1b264f; color: #8c9ba5; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin: 0 6px; min-width: 22px; text-align: center; }
   </style>
 </head>
 <body>
 
-  <div id="app">Yükleniyor...</div>
+  <!-- 1. ANA SAYFA -->
+  <div id="home-view" class="view active">
+    <div class="date-nav">
+      <button class="date-btn">&lt; Önceki</button>
+      <div class="current-date">05.10.2026</div>
+      <button class="date-btn">Sonraki &gt;</button>
+    </div>
+
+    <!-- LEAGUE PHASE -->
+    <div class="league-group">
+      <div class="league-header">LEAGUE-PHASE</div>
+      
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/cy.png"><span>Cyprus</span></div>
+        <div class="score-badge">0 - 0</div>
+        <div class="team-cell away"><span>Latvia</span><img class="flag-img" src="https://flagcdn.com/w40/lv.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ba.png"><span>Bosnia-Herzegovina</span></div>
+        <div class="time-badge">20:45</div>
+        <div class="team-cell away"><span>Poland</span><img class="flag-img" src="https://flagcdn.com/w40/pl.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/fr.png"><span>France</span></div>
+        <div class="time-badge">20:45</div>
+        <div class="team-cell away"><span>Belgium</span><img class="flag-img" src="https://flagcdn.com/w40/be.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/it.png"><span>Italy</span></div>
+        <div class="time-badge">20:45</div>
+        <div class="team-cell away"><span>Türkiye</span><img class="flag-img" src="https://flagcdn.com/w40/tr.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/me.png"><span>Montenegro</span></div>
+        <div class="time-badge">20:45</div>
+        <div class="team-cell away"><span>Armenia</span><img class="flag-img" src="https://flagcdn.com/w40/am.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/gb-nir.png"><span>Northern Ireland</span></div>
+        <div class="time-badge">20:45</div>
+        <div class="team-cell away"><span>Georgia</span><img class="flag-img" src="https://flagcdn.com/w40/ge.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ro.png"><span>Romania</span></div>
+        <div class="time-badge">20:45</div>
+        <div class="team-cell away"><span>Sweden</span><img class="flag-img" src="https://flagcdn.com/w40/se.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ua.png"><span>Ukraine</span></div>
+        <div class="time-badge">20:45</div>
+        <div class="team-cell away"><span>Hungary</span><img class="flag-img" src="https://flagcdn.com/w40/hu.png"></div>
+      </div>
+    </div>
+
+    <!-- INTERNATIONAL FRIENDLY -->
+    <div class="league-group">
+      <div class="league-header">2026-INTERNATIONAL-FRIENDLY</div>
+      
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/ug.png"><span>Uganda</span></div>
+        <div class="score-badge">1 - 1</div>
+        <div class="team-cell away"><span>Congo DR</span><img class="flag-img" src="https://flagcdn.com/w40/cd.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/mu.png"><span>Mauritius</span></div>
+        <div class="time-badge">17:00</div>
+        <div class="team-cell away"><span>Sri Lanka</span><img class="flag-img" src="https://flagcdn.com/w40/lk.png"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-cell"><img class="flag-img" src="https://flagcdn.com/w40/rw.png"><span>Rwanda</span></div>
+        <div class="score-badge">0 - 0</div>
+        <div class="team-cell away"><span>Kenya</span><img class="flag-img" src="https://flagcdn.com/w40/ke.png"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MAÇ DETAY EKRANI -->
+  <div id="detail-view" class="view">
+    <div class="header">
+      <button class="back-btn" onclick="goHome()">&larr;</button>
+      <div class="header-title">Maç Detayı</div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="match-status">MS</div>
+      <div class="teams-container">
+        <div class="team-box">
+          <img class="detail-flag" src="https://flagcdn.com/w40/it.png">
+          <div class="team-name">Italy</div>
+        </div>
+        <div class="score-box">20:45</div>
+        <div class="team-box">
+          <img class="detail-flag" src="https://flagcdn.com/w40/tr.png">
+          <div class="team-name">Türkiye</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button id="btn-events" class="tab-btn active" onclick="switchTab('events')">Olaylar</button>
+      <button id="btn-lineups" class="tab-btn" onclick="switchTab('lineups')">Kadrolar</button>
+    </div>
+
+    <div id="tab-content" class="tab-content"></div>
+  </div>
 
   <script>
-    let currentDate = new Date();
-    let selectedMatch = null;
-    let matchData = null;
-
-    function formatDate(date) {
-      const d = new Date(date);
-      let month = '' + (d.getMonth() + 1);
-      let day = '' + d.getDate();
-      const year = d.getFullYear();
-      if (month.length < 2) month = '0' + month;
-      if (day.length < 2) day = '0' + day;
-      return [year, month, day].join('-');
+    function openMatchDetail() {
+      document.getElementById('home-view').classList.remove('active');
+      document.getElementById('detail-view').classList.add('active');
+      history.pushState({ page: 'detail' }, '');
     }
 
-    function renderList() {
-      const dateStr = formatDate(currentDate);
-      const app = document.getElementById('app');
-      
-      app.innerHTML = `
-        <header>
-          <button class="nav-btn" onclick="changeDate(-1)">&lt; Önceki</button>
-          <div class="date-display">${dateStr.split('-').reverse().join('.')}</div>
-          <button class="nav-btn" onclick="changeDate(1)">Sonraki &gt;</button>
-        </header>
-        <div id="matches-list">Yükleniyor...</div>
-      `;
-
-      fetch(`/api/matches?date=${dateStr}`)
-        .then(res => res.json())
-        .then(data => {
-          const listEl = document.getElementById('matches-list');
-          if (!data || data.length === 0) {
-            listEl.innerHTML = '<div style="text-align:center; padding: 40px; color:#a0aec0;">Bu tarihte maç bulunamadı.</div>';
-            return;
-          }
-
-          let html = '';
-          data.forEach(group => {
-            html += `<div class="league-title">${group.league}</div>`;
-            group.matches.forEach(m => {
-              const scoreText = m.state === 'pre' ? m.time : `${m.homeScore} - ${m.awayScore}`;
-              html += `
-                <div class="match-card" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}')">
-                  <div class="team">
-                    <img src="${m.homeLogo}" onerror="this.style.opacity=0">
-                    <span>${m.homeTeam}</span>
-                  </div>
-                  <div class="score">${scoreText}</div>
-                  <div class="team away">
-                    <span>${m.awayTeam}</span>
-                    <img src="${m.awayLogo}" onerror="this.style.opacity=0">
-                  </div>
-                </div>
-              `;
-            });
-          });
-          listEl.innerHTML = html;
-        })
-        .catch(() => {
-          document.getElementById('matches-list').innerHTML = '<div style="text-align:center; padding:40px; color:#ef4444;">Maçlar yüklenirken hata oluştu.</div>';
-        });
+    function goHome() {
+      document.getElementById('detail-view').classList.remove('active');
+      document.getElementById('home-view').classList.add('active');
     }
 
-    function openDetail(id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore) {
-      selectedMatch = { id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore };
-      renderDetail();
+    window.onpopstate = function () {
+      goHome();
+    };
+
+    function switchTab(tabName) {
+      document.getElementById('btn-events').classList.toggle('active', tabName === 'events');
+      document.getElementById('btn-lineups').classList.toggle('active', tabName === 'lineups');
+      const container = document.getElementById('tab-content');
+      container.innerHTML = `<div style="text-align:center; color:#8c9ba5; padding:20px;">Henüz başlama saati gelmedi.</div>`;
     }
-
-    function renderDetail() {
-      const app = document.getElementById('app');
-      const m = selectedMatch;
-      const msScore = (m.homeScore !== 'null' && m.homeScore !== null) ? `${m.homeScore} - ${m.awayScore}` : '0 - 0';
-
-      app.innerHTML = `
-        <div class="detail-header">
-          <button class="back-btn" onclick="goBack()">&larr;</button>
-          <h2>Maç Detayı</h2>
-        </div>
-
-        <div class="match-summary-box">
-          <div id="status-detail" style="color: #a0aec0; font-size: 13px; font-weight: bold; letter-spacing: 1px;">MS</div>
-          <div class="teams-vs">
-            <div class="team-box">
-              <img src="${m.homeLogo}" onerror="this.style.opacity=0">
-              <strong style="font-size:14px;">${m.homeTeam}</strong>
-            </div>
-            <div class="score-container">
-              <div class="big-score">${msScore}</div>
-              <div id="iy-header-score" class="iy-score"></div>
-            </div>
-            <div class="team-box">
-              <img src="${m.awayLogo}" onerror="this.style.opacity=0">
-              <strong style="font-size:14px;">${m.awayTeam}</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="tabs">
-          <button id="tab-events-btn" class="tab-btn active" onclick="switchTab('events')">Olaylar</button>
-          <button id="tab-lineups-btn" class="tab-btn" onclick="switchTab('lineups')">Kadrolar</button>
-        </div>
-
-        <div id="tab-content">Yükleniyor...</div>
-      `;
-
-      fetch(`/api/match-detail?id=${m.id}`)
-        .then(res => res.json())
-        .then(data => {
-          matchData = data;
-          if (data.statusDetail) {
-            document.getElementById('status-detail').innerText = data.statusDetail;
-          }
-          if (data.homeIY !== undefined && data.awayIY !== undefined) {
-            document.getElementById('iy-header-score').innerText = `(İY ${data.homeIY} - ${data.awayIY})`;
-          }
-          switchTab('events');
-        })
-        .catch(() => {
-          document.getElementById('tab-content').innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Detaylar yüklenirken hata oluştu.</div>';
-        });
-    }
-
-    function switchTab(tab) {
-      document.getElementById('tab-events-btn').classList.toggle('active', tab === 'events');
-      document.getElementById('tab-lineups-btn').classList.toggle('active', tab === 'lineups');
-
-      const contentEl = document.getElementById('tab-content');
-      if (!matchData) return;
-
-      if (tab === 'events') {
-        renderEventsTab(contentEl);
-      } else {
-        renderLineupsTab(contentEl);
-      }
-    }
-
-    function renderEventsTab(container) {
-      if (!matchData.events || matchData.events.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#a0aec0; padding:20px;">Bu maça ait öne çıkan olay bulunamadı.</div>';
-        return;
-      }
-
-      let eventsHtml = '<div class="events-container">';
-      let iyDividerAdded = false;
-
-      matchData.events.forEach(e => {
-        const minute = parseInt(e.clock) || 0;
-
-        if (!iyDividerAdded && minute > 45) {
-          eventsHtml += `<div class="timeline-divider"><span>İlk Yarı Bitti</span></div>`;
-          iyDividerAdded = true;
-        }
-
-        const sideClass = e.isHome ? 'home' : 'away';
-        eventsHtml += `
-          <div class="event-row ${sideClass}">
-            <div class="event-card">
-              <span class="event-icon">${e.icon}</span>
-              <div>
-                <div class="event-player">${e.player}</div>
-                <div class="event-sub">${e.clock}" • ${e.typeLabel}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      if (!iyDividerAdded) {
-        eventsHtml += `<div class="timeline-divider"><span>İlk Yarı Bitti</span></div>`;
-      }
-
-      eventsHtml += '</div>';
-      container.innerHTML = eventsHtml;
-    }
-
-    function renderLineupsTab(container) {
-      const homeStarters = matchData?.lineups?.home?.starters || [];
-      const awayStarters = matchData?.lineups?.away?.starters || [];
-
-      if (homeStarters.length === 0 && awayStarters.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#a0aec0; padding:20px;">Kadro bilgisi henüz açıklanmadı.</div>';
-        return;
-      }
-
-      const maxStarters = Math.max(homeStarters.length, awayStarters.length);
-      let startersHtml = '';
-
-      for (let i = 0; i < maxStarters; i++) {
-        const h = homeStarters[i];
-        const a = awayStarters[i];
-
-        const hNum = h?.jersey ? `<span class="jersey-num">${h.jersey}</span>` : '';
-        const hName = h ? `${hNum} <span>${h.name}</span>` : '';
-
-        const aNum = a?.jersey ? `<span class="jersey-num">${a.jersey}</span>` : '';
-        const aName = a ? `<span>${a.name}</span> ${aNum}` : '';
-
-        startersHtml += `
-          <div class="player-row">${hName}</div>
-          <div class="player-row" style="justify-content: flex-end;">${aName}</div>
-        `;
-      }
-
-      container.innerHTML = `
-        <div class="lineup-grid">
-          <div class="section-title">${selectedMatch.homeTeam}</div>
-          <div class="section-title" style="text-align: right;">${selectedMatch.awayTeam}</div>
-          ${startersHtml}
-        </div>
-      `;
-    }
-
-    function changeDate(days) {
-      currentDate.setDate(currentDate.getDate() + days);
-      renderList();
-    }
-
-    function goBack() {
-      renderList();
-    }
-
-    renderList();
   </script>
 </body>
 </html>
