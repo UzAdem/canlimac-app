@@ -5,159 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Canlı Maç</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    body {
-      background-color: #0b1329;
-      color: #ffffff;
-      min-height: 100vh;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px;
-      background-color: #0b1329;
-      border-bottom: 1px solid #1e293b;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #22c55e;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .date-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 15px;
-      background-color: #0b1329;
-    }
-    .btn-nav {
-      background-color: #1e293b;
-      color: #fff;
-      border: 1px solid #334155;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .date-badge {
-      border: 1px dashed #22c55e;
-      color: #22c55e;
-      padding: 6px 16px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-    .league-title {
-      color: #22c55e;
-      font-size: 15px;
-      font-weight: bold;
-      padding: 12px 15px;
-      background-color: #0d1730;
-      border-bottom: 1px solid #1e293b;
-    }
-    .match-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 15px;
-      border-bottom: 1px solid #1e293b;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
-    }
-    .match-item:active {
-      background-color: #162238;
-    }
-    .match-time {
-      width: 50px;
-      font-size: 12px;
-      color: #94a3b8;
-    }
-    .team-box {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .team-box.home {
-      justify-content: flex-end;
-      text-align: right;
-    }
-    .team-box.away {
-      justify-content: flex-start;
-      text-align: left;
-    }
-    .team-logo {
-      width: 22px;
-      height: 22px;
-      object-fit: contain;
-      margin: 0 8px;
-    }
-    .score-box {
-      width: 50px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 14px;
-      color: #94a3b8;
-    }
-    .score-box.active {
-      color: #22c55e;
-    }
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #94a3b8;
-    }
-    </style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background-color: #0b1329; color: #fff; min-height: 100vh; }
+    .header { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; color: #22c55e; font-size: 18px; font-weight: bold; }
+    .date-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; }
+    .btn-nav { background: #1e293b; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; }
+    .date-badge { border: 1px dashed #22c55e; color: #22c55e; padding: 6px 16px; border-radius: 6px; font-weight: bold; }
+    .league-title { color: #22c55e; font-size: 15px; font-weight: bold; padding: 12px 15px; background: #0d1730; border-bottom: 1px solid #1e293b; }
+    .match-item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #1e293b; cursor: pointer; }
+    .match-time { width: 50px; font-size: 12px; color: #94a3b8; }
+    .team-box { flex: 1; display: flex; align-items: center; font-size: 14px; font-weight: 600; }
+    .team-box.home { justify-content: flex-end; text-align: right; }
+    .team-box.away { justify-content: flex-start; text-align: left; }
+    .team-logo { width: 22px; height: 22px; margin: 0 8px; object-fit: contain; }
+    .score-box { width: 50px; text-align: center; font-weight: bold; color: #94a3b8; }
+    .score-box.active { color: #22c55e; }
+    .loading { text-align: center; padding: 40px; color: #94a3b8; }
+  </style>
 </head>
 <body>
-
   <div id="app">
-    <div class="header">
-      <div class="header-title">
-        <span>⚽</span> CANLIMAÇ
-      </div>
-    </div>
-
+    <div class="header">⚽ CANLIMAÇ</div>
     <div class="date-nav">
       <button class="btn-nav" onclick="changeDate(-1)">&lt; Önceki</button>
       <div id="current-date-display" class="date-badge">--.--.----</div>
       <button class="btn-nav" onclick="changeDate(1)">Sonraki &gt;</button>
     </div>
-
-    <div id="matches-container">
-      <div class="loading">Maçlar yükleniyor...</div>
-    </div>
+    <div id="matches-container"><div class="loading">Maçlar yükleniyor...</div></div>
   </div>
 
   <script>
     let currentDate = new Date();
 
-    function formatDateForApi(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+    function formatDateForApi(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    function formatDateForDisplay(date) {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}.${month}.${year}`;
+    function formatDateForDisplay(d) {
+      return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
     }
 
     function updateDateDisplay() {
@@ -173,105 +58,73 @@
     async function loadMatches() {
       const container = document.getElementById('matches-container');
       container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
-      
-      const apiDate = formatDateForApi(currentDate);
-
       try {
-        const res = await fetch(`/api/matches?date=${apiDate}`);
+        const res = await fetch(`/api/matches?date=${formatDateForApi(currentDate)}`);
         const data = await res.json();
-
         if (!data || data.length === 0) {
           container.innerHTML = '<div class="loading">Bu tarihte maç bulunamadı.</div>';
           return;
         }
-
         let html = '';
         data.forEach(group => {
           html += `<div class="league-title">${group.league}</div>`;
           group.matches.forEach(m => {
-            const isFinishedOrLive = m.state === 'in' || m.state === 'post' || (m.homeScore !== undefined && m.homeScore !== null);
-            const scoreText = isFinishedOrLive ? `${m.homeScore} - ${m.awayScore}` : 'v';
-            
-            // JSON serileştirme hatalarını önlemek için güvenli metin kaçırma
-            const homeTeamEscaped = m.homeTeam.replace(/'/g, "\\'");
-            const awayTeamEscaped = m.awayTeam.replace(/'/g, "\\'");
-
+            const isLive = m.state === 'in' || m.state === 'post' || m.homeScore !== undefined;
+            const scoreText = isLive ? `${m.homeScore} - ${m.awayScore}` : 'v';
+            const hTeam = m.homeTeam.replace(/'/g, "\\'");
+            const aTeam = m.awayTeam.replace(/'/g, "\\'");
             html += `
-              <div class="match-item" onclick="showMatchDetail('${m.id}', '${homeTeamEscaped}', '${awayTeamEscaped}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore ?? ''}', '${m.awayScore ?? ''}', '${m.time}')">
+              <div class="match-item" onclick="showMatchDetail('${m.id}', '${hTeam}', '${aTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore ?? ''}', '${m.awayScore ?? ''}', '${m.time}')">
                 <div class="match-time">${m.time}</div>
-                <div class="team-box home">
-                  <span>${m.homeTeam}</span>
-                  ${m.homeLogo ? `<img class="team-logo" src="${m.homeLogo}" alt="" />` : ''}
-                </div>
-                <div class="score-box ${isFinishedOrLive ? 'active' : ''}">${scoreText}</div>
-                <div class="team-box away">
-                  ${m.awayLogo ? `<img class="team-logo" src="${m.awayLogo}" alt="" />` : ''}
-                  <span>${m.awayTeam}</span>
-                </div>
-              </div>
-            `;
+                <div class="team-box home"><span>${m.homeTeam}</span>${m.homeLogo ? `<img class="team-logo" src="${m.homeLogo}">` : ''}</div>
+                <div class="score-box ${isLive ? 'active' : ''}">${scoreText}</div>
+                <div class="team-box away">${m.awayLogo ? `<img class="team-logo" src="${m.awayLogo}">` : ''}<span>${m.awayTeam}</span></div>
+              </div>`;
           });
         });
-
         container.innerHTML = html;
       } catch (err) {
-        console.error(err);
-        container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
+        container.innerHTML = '<div class="loading">Hata oluştu.</div>';
       }
     }
-
-    async function showMatchDetail(matchId, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore, time) {
+        async function showMatchDetail(id, home, away, hLogo, aLogo, hScore, aScore, time) {
       const app = document.getElementById('app');
-      
-      const isScoreValid = homeScore !== '' && homeScore !== 'undefined' && homeScore !== 'null';
-      const scoreDisplay = isScoreValid ? `${homeScore} - ${awayScore}` : time;
+      const isScore = hScore !== '' && hScore !== 'undefined' && hScore !== 'null';
+      const scoreDisp = isScore ? `${hScore} - ${aScore}` : time;
 
       app.innerHTML = `
-        <div style="background-color: #0b1329; color: #fff; min-height: 100vh; padding-bottom: 30px;">
-          <!-- Üst Bar -->
-          <div style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; background-color: #0b1329; position: sticky; top: 0; z-index: 10;">
-            <button onclick="restoreMainView()" style="background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; margin-right: 15px;">←</button>
-            <h3 style="margin: 0; flex-grow: 1; text-align: center; font-size: 18px;">Maç Detayı</h3>
-            <div style="width: 37px;"></div>
+        <div style="background:#0b1329; color:#fff; min-height:100vh;">
+          <div style="display:flex; align-items:center; padding:15px; border-bottom:1px solid #1e293b;">
+            <button onclick="restoreMainView()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; margin-right:15px;">←</button>
+            <h3 style="margin:0; flex-grow:1; text-align:center;">Maç Detayı</h3>
+            <div style="width:30px;"></div>
           </div>
-
-          <!-- Skor Kartı -->
-          <div style="padding: 20px 15px; text-align: center; background-color: #111827; border-bottom: 1px solid #1f2937;">
-            <div id="status-detail" style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">Yükleniyor...</div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div style="width: 38%; text-align: center;">
-                ${homeLogo ? `<img src="${homeLogo}" style="width: 48px; height: 48px; object-fit: contain;" />` : ''}
-                <div style="margin-top: 8px; font-weight: bold; font-size: 15px;">${homeTeam}</div>
+          <div style="padding:20px 15px; text-align:center; background:#111827; border-bottom:1px solid #1f2937;">
+            <div id="status-detail" style="font-size:13px; color:#9ca3af; margin-bottom:8px;">Yükleniyor...</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="width:38%; text-align:center;">
+                ${hLogo ? `<img src="${hLogo}" style="width:48px; height:48px; object-fit:contain;">` : ''}
+                <div style="margin-top:8px; font-weight:bold; font-size:15px;">${home}</div>
               </div>
-
-              <div style="width: 24%; text-align: center;">
-                <div style="font-size: 26px; font-weight: bold; color: #22c55e; line-height: 1.1;">
-                  ${scoreDisplay}
-                </div>
-                <div id="iy-score" style="font-size: 12px; color: #9ca3af; margin-top: 6px;"></div>
+              <div style="width:24%; text-align:center;">
+                <div style="font-size:26px; font-weight:bold; color:#22c55e;">${scoreDisp}</div>
+                <div id="iy-score" style="font-size:12px; color:#9ca3af; margin-top:6px;"></div>
               </div>
-
-              <div style="width: 38%; text-align: center;">
-                ${awayLogo ? `<img src="${awayLogo}" style="width: 48px; height: 48px; object-fit: contain;" />` : ''}
-                <div style="margin-top: 8px; font-weight: bold; font-size: 15px;">${awayTeam}</div>
+              <div style="width:38%; text-align:center;">
+                ${aLogo ? `<img src="${aLogo}" style="width:48px; height:48px; object-fit:contain;">` : ''}
+                <div style="margin-top:8px; font-weight:bold; font-size:15px;">${away}</div>
               </div>
             </div>
           </div>
-
-          <!-- Maç Olayları -->
-          <div style="padding: 20px 15px;">
-            <h4 style="color: #22c55e; border-bottom: 1px solid #1f2937; padding-bottom: 10px; margin-top: 0; font-size: 16px;">
-              Maç Olayları
-            </h4>
-            <div id="events-container" style="text-align: center; padding: 30px; color: #9ca3af;">
-              Detaylar yükleniyor...
-            </div>
+          <div style="padding:20px 15px;">
+            <h4 style="color:#22c55e; border-bottom:1px solid #1f2937; padding-bottom:10px; margin-top:0;">Maç Olayları</h4>
+            <div id="events-container" style="text-align:center; padding:30px; color:#9ca3af;">Detaylar yükleniyor...</div>
           </div>
         </div>
       `;
 
       try {
-        const res = await fetch(`/api/match-detail?id=${matchId}`);
+        const res = await fetch(`/api/match-detail?id=${id}`);
         const data = await res.json();
 
         document.getElementById('status-detail').innerText = data.statusDetail || 'Maç Sonu';
@@ -282,52 +135,30 @@
         const eventsContainer = document.getElementById('events-container');
 
         if (data.events && data.events.length > 0) {
-          eventsContainer.innerHTML = data.events.map(event => `
-            <div style="display: flex; align-items: center; background-color: #111827; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; ${event.isHome ? 'border-left: 4px solid #22c55e;' : 'border-right: 4px solid #3b82f6;'}">
-              <div style="width: 60px; font-weight: bold; color: #22c55e; font-size: 14px; display: flex; align-items: center; gap: 6px;">
-                <span>${event.clock}'</span>
-                <span style="font-size: 16px;">${event.icon}</span>
+          eventsContainer.innerHTML = data.events.map(e => `
+            <div style="display:flex; align-items:center; background:#111827; padding:10px 12px; border-radius:8px; margin-bottom:10px; ${e.isHome ? 'border-left:4px solid #22c55e;' : 'border-right:4px solid #3b82f6;'}">
+              <div style="width:60px; font-weight:bold; color:#22c55e; font-size:14px; display:flex; align-items:center; gap:6px;">
+                <span>${e.clock}'</span>
+                <span style="font-size:16px;">${e.icon}</span>
               </div>
-              <div style="flex-grow: 1; text-align: left; font-size: 13px; color: #e5e7eb;">
-                <div style="font-weight: 600;">${event.player || event.typeLabel}</div>
-                <div style="font-size: 11px; color: #9ca3af; margin-top: 2px;">${event.teamName} • ${event.typeLabel}</div>
+              <div style="flex-grow:1; text-align:left; font-size:13px; color:#e5e7eb;">
+                <div style="font-weight:600;">${e.player || e.typeLabel}</div>
+                <div style="font-size:11px; color:#9ca3af; margin-top:2px;">${e.teamName} • ${e.typeLabel}</div>
               </div>
             </div>
           `).join('');
         } else {
-          eventsContainer.innerHTML = `<div style="color: #6b7280; font-size: 14px;">Bu maç için henüz öne çıkan bir olay (gol, kart, değişiklik) kaydedilmedi.</div>`;
+          eventsContainer.innerHTML = `<div style="color:#6b7280; font-size:14px;">Bu maç için henüz olay kaydedilmedi.</div>`;
         }
       } catch (err) {
-        console.error(err);
-        document.getElementById('events-container').innerHTML = `<div style="color: #ef4444; font-size: 14px;">Detaylar çekilirken bir hata oluştu.</div>`;
+        document.getElementById('events-container').innerHTML = `<div style="color:#ef4444;">Detay çekilirken hata oluştu.</div>`;
       }
     }
 
     function restoreMainView() {
-      document.body.innerHTML = `
-        <div id="app">
-          <div class="header">
-            <div class="header-title">
-              <span>⚽</span> CANLIMAÇ
-            </div>
-          </div>
-
-          <div class="date-nav">
-            <button class="btn-nav" onclick="changeDate(-1)">&lt; Önceki</button>
-            <div id="current-date-display" class="date-badge">--.--.----</div>
-            <button class="btn-nav" onclick="changeDate(1)">Sonraki &gt;</button>
-          </div>
-
-          <div id="matches-container">
-            <div class="loading">Maçlar yükleniyor...</div>
-          </div>
-        </div>
-      `;
-      updateDateDisplay();
-      loadMatches();
+      location.reload();
     }
 
-    // İlk Yükleme
     updateDateDisplay();
     loadMatches();
   </script>
