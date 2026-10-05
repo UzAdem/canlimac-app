@@ -6,12 +6,8 @@ export default async function handler(req, res) {
   const targetDate = date || new Date().toISOString().split('T')[0];
 
   try {
-    // Vercel uyuşmazlığı olmayan açık spor servisi
-    const response = await fetch(`https://api.sofascore.com/api/v1/sport/football/scheduled-events/${targetDate}`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
+    // Vercel / Cloudflare engeli olmayan ücretsiz ve açık maç API'si
+    const response = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${targetDate}&s=Soccer`);
 
     if (!response.ok) {
       return res.status(200).json([]);
@@ -20,13 +16,14 @@ export default async function handler(req, res) {
     const data = await response.json();
     const events = data.events || [];
 
+    if (events.length === 0) {
+      return res.status(200).json([]);
+    }
+
     const grouped = {};
 
     events.forEach(event => {
-      // Lig İsmi
-      const category = event.tournament?.category?.name || '';
-      const tournament = event.tournament?.name || 'Diğer Ligler';
-      const leagueName = category ? `${category} - ${tournament}` : tournament;
+      const leagueName = event.strLeague || 'Diğer Ligler';
 
       if (!grouped[leagueName]) {
         grouped[leagueName] = {
@@ -36,19 +33,17 @@ export default async function handler(req, res) {
       }
 
       // Saat Formatı (SS:DK)
-      const matchDate = new Date(event.startTimestamp * 1000);
-      const hours = String(matchDate.getHours()).padStart(2, '0');
-      const minutes = String(matchDate.getMinutes()).padStart(2, '0');
+      const timeStr = event.strTime ? event.strTime.substring(0, 5) : '--:--';
 
       grouped[leagueName].matches.push({
-        id: event.id,
-        time: `${hours}:${minutes}`,
-        homeTeam: event.homeTeam?.name || 'Ev Sahibi',
-        awayTeam: event.awayTeam?.name || 'Deplasman',
-        homeScore: event.homeScore?.current ?? 'v',
-        awayScore: event.awayScore?.current ?? '',
-        homeLogo: event.homeTeam?.id ? `https://api.sofascore.app/api/v1/team/${event.homeTeam.id}/image` : null,
-        awayLogo: event.awayTeam?.id ? `https://api.sofascore.app/api/v1/team/${event.awayTeam.id}/image` : null
+        id: event.idEvent,
+        time: timeStr,
+        homeTeam: event.strHomeTeam || 'Ev Sahibi',
+        awayTeam: event.strAwayTeam || 'Deplasman',
+        homeScore: event.intHomeScore ?? 'v',
+        awayScore: event.intAwayScore ?? '',
+        homeLogo: event.strHomeTeamBadge || null,
+        awayLogo: event.strAwayTeamBadge || null
       });
     });
 
