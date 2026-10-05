@@ -6,23 +6,22 @@ export default async function handler(req, res) {
   const targetDate = date || new Date().toISOString().split('T')[0];
   const formattedDate = targetDate.replace(/-/g, '');
 
-  // Takip edilecek liglerin ESPN kodları ve Türkçe isimleri
+  // İstediğiniz özel sıralamaya göre lig dizilimi
   const leagueEndpoints = [
+    { code: 'tur.1', name: 'Trendyol Süper Lig' },
     { code: 'eng.1', name: 'İngiltere Premier Lig' },
     { code: 'esp.1', name: 'İspanya La Liga' },
-    { code: 'tur.1', name: 'Trendyol Süper Lig' },
     { code: 'ita.1', name: 'İtalya Serie A' },
     { code: 'ger.1', name: 'Almanya Bundesliga' },
     { code: 'fra.1', name: 'Fransa Ligue 1' },
-    { code: 'usa.1', name: 'ABD MLS' },
     { code: 'uefa.champions', name: 'UEFA Şampiyonlar Ligi' },
     { code: 'uefa.europa', name: 'UEFA Avrupa Ligi' },
     { code: 'uefa.nations', name: 'UEFA Uluslar Ligi' },
+    { code: 'usa.1', name: 'ABD MLS' },
     { code: 'fifa.friendly', name: 'Hazırlık Maçları' }
   ];
 
   try {
-    // Tüm ligleri eşzamanlı çekiyoruz
     const requests = leagueEndpoints.map(l => 
       fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${l.code}/scoreboard?dates=${formattedDate}`)
         .then(res => res.ok ? res.json() : null)
@@ -72,4 +71,4 @@ export default async function handler(req, res) {
     console.error("Matches API Error:", error);
     res.status(500).json({ error: "Veriler çekilemedi." });
   }
-          }
+}
