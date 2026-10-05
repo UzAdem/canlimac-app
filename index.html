@@ -104,7 +104,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      padding-bottom: 30px;
+      padding-bottom: 40px;
     }
     .event-row {
       display: flex;
@@ -274,9 +274,9 @@
             document.getElementById('status-detail').innerText = data.statusDetail;
           }
           
-          let iyLabel = '';
+          let iyScoreText = '';
           if (data.homeIY !== undefined && data.awayIY !== undefined) {
-            iyLabel = ` (İY ${data.homeIY} - ${data.awayIY})`;
+            iyScoreText = ` (İY ${data.homeIY} - ${data.awayIY})`;
             document.getElementById('iy-score').innerText = `İY ${data.homeIY} - ${data.awayIY}`;
           }
 
@@ -292,11 +292,10 @@
           data.events.forEach(e => {
             const minute = parseInt(e.clock) || 0;
 
-            // 45. dakikadan sonraki olaylarda İY ayracı koy
             if (!iyDividerAdded && minute > 45) {
               eventsHtml += `
                 <div class="timeline-divider">
-                  <span>İlk Yarı Bitti${iyLabel}</span>
+                  <span>İlk Yarı Bitti${iyScoreText}</span>
                 </div>
               `;
               iyDividerAdded = true;
@@ -316,16 +315,14 @@
             `;
           });
 
-          // Eğer tüm olaylar 1. yarıdaysa ve ikinci yarı olayı yoksa İY ayracını en alta ekle
           if (!iyDividerAdded) {
             eventsHtml += `
               <div class="timeline-divider">
-                <span>İlk Yarı Bitti${iyLabel}</span>
+                <span>İlk Yarı Bitti${iyScoreText}</span>
               </div>
             `;
           }
 
-          // Maç Sonu Ayracı
           const msScore = (m.homeScore !== 'null' && m.homeScore !== null) ? `${m.homeScore} - ${m.awayScore}` : '';
           eventsHtml += `
             <div class="timeline-divider">
