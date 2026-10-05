@@ -51,6 +51,10 @@
       cursor: pointer;
     }
 
+    .btn-nav:active {
+      background-color: #334155;
+    }
+
     .date-display {
       color: #00e676;
       font-size: 15px;
@@ -66,10 +70,10 @@
       background-color: #0b1329;
     }
 
-    /* Maç Satırı Grid Hizalaması */
+    /* Maç Satırı Grid Hizalaması (v Sütunu Sabit 30px) */
     .match-card {
       display: grid;
-      grid-template-columns: 50px 1fr 30px 1fr;
+      grid-template-columns: 45px 1fr 30px 1fr;
       align-items: center;
       padding: 10px 12px;
       background-color: #111a33;
@@ -95,7 +99,7 @@
       text-overflow: ellipsis;
     }
 
-    /* Dümdüz Alt Alta Ortalanmış 'v' / Skor Alanı */
+    /* İp Gibi Dümdüz Hizalanan 'v' / Skor Alanı */
     .match-score {
       display: flex;
       justify-content: center;
@@ -142,7 +146,7 @@
 
   <div class="date-nav">
     <button class="btn-nav" id="prev-date">&lt; Önceki</button>
-    <div class="date-display" id="date-text"></div>
+    <div class="date-display" id="date-text">--.--.----</div>
     <button class="btn-nav" id="next-date">Sonraki &gt;</button>
   </div>
 
@@ -151,28 +155,29 @@
   </div>
 
   <script>
-    let currentDate = new Date();
+    // Tarih yönetimini milisaniye/gün bazlı kesinleştiriyoruz
+    let selectedDate = new Date();
 
-    function getFormattedDate(d) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+    function formatApiDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
-    function getDisplayDate(d) {
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}.${month}.${year}`;
+    function formatDisplayDate(date) {
+      const d = String(date.getDate()).padStart(2, '0');
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const y = date.getFullYear();
+      return `${d}.${m}.${y}`;
     }
 
     async function fetchMatches() {
       const container = document.getElementById('matches-container');
       const dateText = document.getElementById('date-text');
       
-      const queryDate = getFormattedDate(currentDate);
-      dateText.textContent = getDisplayDate(currentDate);
+      const queryDate = formatApiDate(selectedDate);
+      dateText.textContent = formatDisplayDate(selectedDate);
       container.innerHTML = '<div class="loading">Maçlar yükleniyor...</div>';
 
       try {
@@ -214,22 +219,23 @@
 
         container.innerHTML = html;
       } catch (err) {
-        console.error("Hata:", err);
+        console.error("Fetch Hatası:", err);
         container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
       }
     }
 
+    // Buton Dinleyicileri
     document.getElementById('prev-date').addEventListener('click', () => {
-      currentDate.setDate(currentDate.getDate() - 1);
+      selectedDate.setDate(selectedDate.getDate() - 1);
       fetchMatches();
     });
 
     document.getElementById('next-date').addEventListener('click', () => {
-      currentDate.setDate(currentDate.getDate() + 1);
+      selectedDate.setDate(selectedDate.getDate() + 1);
       fetchMatches();
     });
 
-    // İlk yükleme
+    // Sayfa ilk açıldığında çalıştır
     fetchMatches();
   </script>
 </body>
