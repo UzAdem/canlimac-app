@@ -29,16 +29,13 @@
 
     .back-btn {
       font-size: 22px;
-      background: none;
-      border: none;
       color: #fff;
-      cursor: pointer;
+      text-decoration: none;
       margin-right: 12px;
       padding: 4px 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      text-decoration: none;
     }
 
     .header-title {
@@ -109,78 +106,11 @@
       margin-top: 4px;
     }
 
-    /* Tab Buttons */
-    .tabs {
-      display: flex;
-      background-color: #121936;
-      border-radius: 10px;
-      padding: 4px;
-      margin-bottom: 16px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      background: none;
-      color: #8c9ba5;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .tab-btn.active {
-      background-color: #1b264f;
-      color: #2ed573;
-    }
-
     /* Content Area */
     .tab-content {
       background-color: #121936;
       border-radius: 16px;
       padding: 16px;
-    }
-
-    /* Lineup Grid */
-    .lineup-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      row-gap: 12px;
-      column-gap: 16px;
-    }
-
-    .section-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #2ed573;
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .player-row {
-      display: flex;
-      align-items: center;
-      font-size: 13px;
-      color: #e1e7ed;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .jersey-num {
-      background-color: #1b264f;
-      color: #8c9ba5;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin: 0 6px;
-      min-width: 22px;
-      text-align: center;
-      display: inline-block;
     }
 
     .events-list {
@@ -194,7 +124,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px;
+      padding: 12px;
       background-color: #1b264f;
       border-radius: 8px;
     }
@@ -231,67 +161,11 @@
     <div class="ht-score">(İY 1 - 1)</div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab-btn" onclick="switchTab(event, 'events')">Olaylar</button>
-    <button class="tab-btn active" onclick="switchTab(event, 'lineups')">Kadrolar</button>
-  </div>
-
-  <!-- Main Content Container -->
+  <!-- Main Content Container (Sadece Olaylar) -->
   <div id="tab-content" class="tab-content"></div>
 
   <script>
-    // Telefonun veya tarayıcının kendi GERİ tuşuna basıldığında doğrudan ana sayfaya atar
-    history.pushState(null, null, location.href);
-    window.onpopstate = function () {
-      window.location.href = '/'; // Ana sayfa adresiniz (gerekirse 'index.html' yapabilirsiniz)
-    };
-
     const matchData = {
-      homeTeam: "NETHERLANDS",
-      awayTeam: "SERBIA",
-      lineups: {
-        home: {
-          starters: [
-            { jersey: 1, name: "Bart Verbruggen" },
-            { jersey: 20, name: "Teun Koopmeiners" },
-            { jersey: 4, name: "Virgil van Dijk" },
-            { jersey: 15, name: "Micky van de Ven" },
-            { jersey: 22, name: "Denzel Dumfries" },
-            { jersey: 18, name: "Joey Veerman" },
-            { jersey: 14, name: "Tijjani Reijnders" },
-            { jersey: 8, name: "Ryan Gravenberch" },
-            { jersey: 17, name: "Mexx Meerdink" },
-            { jersey: 10, name: "Noa Lang" },
-            { jersey: 7, name: "Crysencio Summerville" }
-          ],
-          bench: [
-            { jersey: 13, name: "Justin Bijlow" },
-            { jersey: 5, name: "Nathan Aké" },
-            { jersey: 6, name: "Stefan de Vrij" }
-          ]
-        },
-        away: {
-          starters: [
-            { jersey: 23, name: "Vanja Milinkovic-Savic" },
-            { jersey: 15, name: "Srdjan Babic" },
-            { jersey: 3, name: "Strahinja Pavlovic" },
-            { jersey: 19, name: "Stefan Gudelj" },
-            { jersey: 17, name: "Aleksa Terzic" },
-            { jersey: 2, name: "Kosta Nedeljkovic" },
-            { jersey: 22, name: "Sasa Lukic" },
-            { jersey: 7, name: "Aleksandar Stankovic" },
-            { jersey: 21, name: "Lazar Samardzic" },
-            { jersey: 10, name: "Dusan Tadic" },
-            { jersey: 18, name: "Mihajlo Cvetkovic" }
-          ],
-          bench: [
-            { jersey: 1, name: "Predrag Rajkovic" },
-            { jersey: 4, name: "Nikola Milenkovic" },
-            { jersey: 16, name: "Ivan Ilic" }
-          ]
-        }
-      },
       events: [
         { minute: "15'", description: "Gol! Dusan Tadic (Serbia)" },
         { minute: "34'", description: "Gol! Virgil van Dijk (Netherlands)" },
@@ -299,90 +173,13 @@
       ]
     };
 
-    function switchTab(evt, tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      evt.currentTarget.classList.add('active');
-      
-      if (tabName === 'events') {
-        renderEventsTab();
-      } else {
-        renderLineupsTab();
-      }
-    }
-
-    function renderLineupsTab() {
+    function renderEvents() {
       const container = document.getElementById('tab-content');
-      const homeStarters = matchData?.lineups?.home?.starters || [];
-      const awayStarters = matchData?.lineups?.away?.starters || [];
-      const homeBench = matchData?.lineups?.home?.bench || [];
-      const awayBench = matchData?.lineups?.away?.bench || [];
-
-      if (homeStarters.length === 0 && awayStarters.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#a0aec0; padding:20px;">Kadro bilgisi henüz açıklanmadı.</div>';
+      if (!matchData.events || matchData.events.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#8c9ba5; padding:10px;">Olay bilgisi bulunmuyor.</div>';
         return;
       }
 
-      const maxStarters = Math.max(homeStarters.length, awayStarters.length);
-      let startersHtml = '';
-
-      for (let i = 0; i < maxStarters; i++) {
-        const h = homeStarters[i];
-        const a = awayStarters[i];
-
-        const hNum = h?.jersey ? `<span class="jersey-num">${h.jersey}</span>` : '';
-        const hName = h ? `${hNum} <span>${h.name}</span>` : '';
-
-        const aNum = a?.jersey ? `<span class="jersey-num">${a.jersey}</span>` : '';
-        const aName = a ? `<span>${a.name}</span> ${aNum}` : '';
-
-        startersHtml += `
-          <div class="player-row">${hName}</div>
-          <div class="player-row" style="justify-content: flex-end;">${aName}</div>
-        `;
-      }
-
-      const maxBench = Math.max(homeBench.length, awayBench.length);
-      let benchHtml = '';
-
-      for (let i = 0; i < maxBench; i++) {
-        const h = homeBench[i];
-        const a = awayBench[i];
-
-        const hNum = h?.jersey ? `<span class="jersey-num">${h.jersey}</span>` : '';
-        const hName = h ? `${hNum} <span>${h.name}</span>` : '';
-
-        const aNum = a?.jersey ? `<span class="jersey-num">${a.jersey}</span>` : '';
-        const aName = a ? `<span>${a.name}</span> ${aNum}` : '';
-
-        benchHtml += `
-          <div class="player-row">${hName}</div>
-          <div class="player-row" style="justify-content: flex-end;">${aName}</div>
-        `;
-      }
-
-      let html = `
-        <div class="lineup-grid">
-          <div class="section-title">${matchData.homeTeam}</div>
-          <div class="section-title" style="text-align: right;">${matchData.awayTeam}</div>
-          ${startersHtml}
-        </div>
-      `;
-
-      if (maxBench > 0) {
-        html += `
-          <div class="lineup-grid" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #1b264f;">
-            <div class="section-title" style="color: #a0aec0;">YEDEKLER</div>
-            <div class="section-title" style="text-align: right; color: #a0aec0;">YEDEKLER</div>
-            ${benchHtml}
-          </div>
-        `;
-      }
-
-      container.innerHTML = html;
-    }
-
-    function renderEventsTab() {
-      const container = document.getElementById('tab-content');
       let eventsHtml = matchData.events.map(e => `
         <div class="event-item">
           <span class="event-minute">${e.minute}</span>
@@ -393,7 +190,7 @@
       container.innerHTML = `<div class="events-list">${eventsHtml}</div>`;
     }
 
-    renderLineupsTab();
+    renderEvents();
   </script>
 </body>
 </html>
