@@ -90,6 +90,21 @@ module.exports = async (req, res) => {
             const home = comp.competitors.find(c => c.homeAway === 'home') || comp.competitors[0];
             const away = comp.competitors.find(c => c.awayAway === 'away') || comp.competitors[1];
 
+            const statusState = event.status.type.state;
+            let displayMinute = event.status.type.shortDetail;
+
+            // Başlamamış maçlar için başlama saatini Türkiye saatine göre alıyoruz (HH:mm)
+            if (statusState === 'pre') {
+              const matchDate = new Date(event.date);
+              displayMinute = matchDate.toLocaleTimeString('tr-TR', {
+                timeZone: 'Europe/Istanbul',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+            } else if (statusState === 'post') {
+              displayMinute = 'MS';
+            }
+
             return {
               id: event.id,
               leagueSlug: league.slug,
@@ -97,8 +112,8 @@ module.exports = async (req, res) => {
               awayTeam: translateTeam(away.team.displayName),
               homeScore: home.score || '0',
               awayScore: away.score || '0',
-              minute: event.status.type.shortDetail,
-              status: event.status.type.state === 'in' ? 'LIVE' : 'FINISHED',
+              minute: displayMinute,
+              status: statusState === 'in' ? 'LIVE' : (statusState === 'post' ? 'FINISHED' : 'PRE'),
               venue: comp.venue ? comp.venue.fullName : ''
             };
           });
