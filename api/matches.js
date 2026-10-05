@@ -35,13 +35,46 @@ export default async function handler(req, res) {
       }).join(' ');
 
       const lower = clean.toLowerCase();
+
+      // Özel / Popüler Lig Tanımlamaları
       if (lower.includes('super lig') || lower.includes('süper lig') || lower.includes('turkish super lig')) return 'Trendyol Süper Lig';
       if (lower.includes('premier league')) return 'Premier League';
       if (lower.includes('serie a')) return 'Serie A';
       if (lower.includes('laliga') || lower.includes('la liga')) return 'La Liga';
       if (lower.includes('bundesliga')) return 'Bundesliga';
       if (lower.includes('ligue 1')) return 'Ligue 1';
-      if (lower.includes('regular season')) return 'Genel Lig / Turnuva';
+
+      // Türkçe Çeviri Sözlüğü
+      const translations = {
+        'international friendly': 'Uluslararası Hazırlık Maçı',
+        'friendly': 'Hazırlık Maçı',
+        'league phase': 'Lig Aşaması',
+        'group stage': 'Grup Aşaması',
+        'regular season': 'Genel Lig / Turnuva',
+        'qualifying': 'Elemeler',
+        'qualification': 'Elemeler',
+        'torneo clausura': 'Kapanış Ligi (Clausura)',
+        'torneo apertura': 'Açılış Ligi (Apertura)',
+        'clausura': 'Kapanış Ligi',
+        'apertura': 'Açılış Ligi',
+        'playoffs': 'Play-Off',
+        'play off': 'Play-Off',
+        'semi finals': 'Yarı Final',
+        'final': 'Final',
+        'round of 16': 'Son 16 Turu',
+        'quarter finals': 'Çeyrek Final',
+        'uefa nations league': 'UEFA Uluslar Ligi',
+        'nations league': 'Uluslar Ligi',
+        'world cup': 'Dünya Kupası',
+        'european championship': 'Avrupa Şampiyonası'
+      };
+
+      // Tam veya kısmi eşleşme kontrolü
+      for (const [key, value] of Object.entries(translations)) {
+        if (lower.includes(key)) {
+          return value;
+        }
+      }
 
       return clean || 'Diğer Ligler';
     }
@@ -64,7 +97,6 @@ export default async function handler(req, res) {
 
         const statusState = competition.status?.type?.state;
 
-        // Maç saatini Türkiye zaman dilimine (UTC+3) göre dönüştürüyoruz
         const matchTime = new Date(event.date).toLocaleTimeString('tr-TR', {
           hour: '2-digit',
           minute: '2-digit',
@@ -97,7 +129,11 @@ export default async function handler(req, res) {
       'Serie A',
       'La Liga',
       'Bundesliga',
-      'Ligue 1'
+      'Ligue 1',
+      'UEFA Uluslar Ligi',
+      'Lig Aşaması',
+      'Grup Aşaması',
+      'Uluslararası Hazırlık Maçı'
     ];
 
     const sortedLeagues = Object.keys(groupedMatches).sort((a, b) => {
@@ -121,4 +157,4 @@ export default async function handler(req, res) {
     console.error('API Error:', error);
     return res.status(200).json([]);
   }
-}
+                          }
