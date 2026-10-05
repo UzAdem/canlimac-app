@@ -92,12 +92,23 @@
       display: flex;
       align-items: center;
       justify-content: space-around;
-      margin-top: 15px;
+      margin-top: 10px;
     }
     .team-box { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 35%; }
     .team-box img { width: 48px; height: 48px; }
-    .big-score { font-size: 28px; font-weight: bold; color: #4eef90; }
-    .iy-score { font-size: 12px; color: #a0aec0; margin-top: 4px; }
+    
+    .score-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .big-score { font-size: 28px; font-weight: bold; color: #4eef90; line-height: 1.2; }
+    .iy-score { 
+      font-size: 13px; 
+      color: #a0aec0; 
+      margin-top: 4px; 
+      font-weight: 500;
+    }
     
     /* Olaylar Akışı */
     .events-container {
@@ -246,15 +257,15 @@
         </div>
 
         <div class="match-summary-box">
-          <div id="status-detail" style="color: #a0aec0; font-size: 13px;">Maç Sonu</div>
+          <div id="status-detail" style="color: #a0aec0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">MS</div>
           <div class="teams-vs">
             <div class="team-box">
               <img src="${m.homeLogo}" onerror="this.style.opacity=0">
               <strong style="font-size:14px;">${m.homeTeam}</strong>
             </div>
-            <div>
+            <div class="score-container">
               <div class="big-score">${m.homeScore !== 'null' && m.homeScore !== null ? m.homeScore : '0'} - ${m.awayScore !== 'null' && m.awayScore !== null ? m.awayScore : '0'}</div>
-              <div id="iy-score" class="iy-score"></div>
+              <div id="iy-header-score" class="iy-score"></div>
             </div>
             <div class="team-box">
               <img src="${m.awayLogo}" onerror="this.style.opacity=0">
@@ -271,13 +282,11 @@
         .then(res => res.json())
         .then(data => {
           if (data.statusDetail) {
-            document.getElementById('status-detail').innerText = data.statusDetail;
+            document.getElementById('status-detail').innerText = data.statusDetail.includes('FT') || data.statusDetail.includes('Sonu') ? 'MS' : data.statusDetail;
           }
           
-          let iyScoreText = '';
           if (data.homeIY !== undefined && data.awayIY !== undefined) {
-            iyScoreText = ` (İY ${data.homeIY} - ${data.awayIY})`;
-            document.getElementById('iy-score').innerText = `İY ${data.homeIY} - ${data.awayIY}`;
+            document.getElementById('iy-header-score').innerText = `(İY ${data.homeIY} - ${data.awayIY})`;
           }
 
           const eventsEl = document.getElementById('events-list');
@@ -295,7 +304,7 @@
             if (!iyDividerAdded && minute > 45) {
               eventsHtml += `
                 <div class="timeline-divider">
-                  <span>İlk Yarı Bitti${iyScoreText}</span>
+                  <span>İlk Yarı Bitti</span>
                 </div>
               `;
               iyDividerAdded = true;
@@ -318,15 +327,14 @@
           if (!iyDividerAdded) {
             eventsHtml += `
               <div class="timeline-divider">
-                <span>İlk Yarı Bitti${iyScoreText}</span>
+                <span>İlk Yarı Bitti</span>
               </div>
             `;
           }
 
-          const msScore = (m.homeScore !== 'null' && m.homeScore !== null) ? `${m.homeScore} - ${m.awayScore}` : '';
           eventsHtml += `
             <div class="timeline-divider">
-              <span>Maç Sonu ${msScore ? '(' + msScore + ')' : ''}</span>
+              <span>Maç Sonu</span>
             </div>
           `;
 
