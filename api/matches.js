@@ -79,18 +79,13 @@ export default async function handler(req, res) {
           const rawHome = home.team.displayName;
           const rawAway = away.team.displayName;
 
-          // Gol ve Kart Olayları Düzenlemesi (Player Name Düzeltildi)
+          // Gol ve Kart Metinlerini Temizleme
           const matchEvents = (competition.details || []).map(d => {
-            let playerStr = '';
-            if (d.athletes && d.athletes.length > 0) {
-              playerStr = d.athletes[0].displayName || '';
-            } else if (d.team) {
-              playerStr = d.team.displayName || '';
-            }
+            let desc = d.athletesIn && d.athletesIn[0] ? d.athletesIn[0].displayName : (d.team ? d.team.displayName : '');
             return {
               clock: d.clock ? d.clock.displayValue : '',
               type: d.type ? d.type.text : 'Olay',
-              summary: playerStr
+              summary: desc
             };
           });
 
@@ -114,4 +109,4 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: 'Veriler çekilirken bir sorun oluştu.' });
   }
-}
+    }
