@@ -329,7 +329,24 @@
     }
 
     .player-main { font-weight: bold; color: #fff; }
-    .player-sub { font-size: 10px; color: #9ca3af; }
+    .player-sub { font-size: 10px; margin-top: 2px; }
+
+    .badge-divider {
+      text-align: center;
+      margin: 18px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .badge-divider span {
+      background-color: #1e293b;
+      color: #9ca3af;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      border: 1px solid #334155;
+    }
   </style>
 </head>
 <body>
@@ -364,19 +381,19 @@
     <div class="scoreboard-header">
       <div class="team-box">
         <img id="d-home-logo" src="" alt="" />
-        <div class="name" id="d-home-name">HOLLANDA</div>
+        <div class="name" id="d-home-name">EV SAHİBİ</div>
         <div class="coach" id="d-home-coach">-</div>
       </div>
 
       <div class="score-box">
         <span class="status-badge" id="d-status">MS</span>
-        <div class="main-score" id="d-score">2 - 1</div>
-        <div class="ht-score" id="d-ht-score">(İY 1-1)</div>
+        <div class="main-score" id="d-score">0 - 0</div>
+        <div class="ht-score" id="d-ht-score">(İY 0-0)</div>
       </div>
 
       <div class="team-box">
         <img id="d-away-logo" src="" alt="" />
-        <div class="name" id="d-away-name">SIRBİSTAN</div>
+        <div class="name" id="d-away-name">DEPLASMAN</div>
         <div class="coach" id="d-away-coach">-</div>
       </div>
     </div>
@@ -466,6 +483,29 @@
       }
     }
 
+    // İkon ve Türkçe Metin Eşleştirici
+    function getEventBadge(typeText) {
+      const type = (typeText || '').toLowerCase();
+
+      if (type.includes('goal')) {
+        return { icon: '⚽', label: 'Gol', color: '#00e676' };
+      } else if (type.includes('yellow card')) {
+        return { icon: '🟨', label: 'Sarı Kart', color: '#facc15' };
+      } else if (type.includes('red card')) {
+        return { icon: '🟥', label: 'Kırmızı Kart', color: '#ef4444' };
+      } else if (type.includes('substitution')) {
+        return { icon: '🔄', label: 'Oyuncu Değişikliği', color: '#38bdf8' };
+      } else if (type.includes('kickoff') || type.includes('first half begins')) {
+        return { icon: '🏁', label: 'Maç Başladı', isCenterBadge: true };
+      } else if (type.includes('halftime') || type.includes('first half ends')) {
+        return { icon: '⏸️', label: 'İlk Yarı Bitti', isCenterBadge: true };
+      } else if (type.includes('start 2nd half') || type.includes('second half begins')) {
+        return { icon: '▶️', label: 'İkinci Yarı Başladı', isCenterBadge: true };
+      }
+
+      return { icon: '📌', label: typeText, color: '#9ca3af' };
+    }
+
     // MAÇ DETAY EKRANINI AÇMA
     async function openMatchDetails(matchId, homeName, awayName, homeLogo, awayLogo, score) {
       const screen = document.getElementById('detail-screen');
@@ -481,11 +521,9 @@
       tabContent.innerHTML = '<div class="loading">Maç olayları yükleniyor...</div>';
 
       try {
-        // BURADA API ADRESİ match-detail OLARAK DÜZELTİLDİ
         const res = await fetch(`/api/match-detail?matchId=${matchId}`);
         const data = await res.json();
 
-        // Header durum güncellemesi
         if (data.header) {
           const comp = data.header.competitions?.[0];
           if (comp?.status?.type?.shortDetail) {
@@ -493,22 +531,42 @@
           }
         }
 
-        // Dikey Zaman Çizelgesi (Timeline)
         let timelineHtml = '<div class="timeline-container"><div class="timeline-line"></div>';
 
         if (data.events && data.events.length > 0) {
           data.events.forEach(evt => {
-            const isHome = evt.team ? evt.team.toLowerCase().includes(homeName.toLowerCase().slice(0, 3)) : true;
+            const badge = getEventBadge(evt.type);
             const clockDisplay = evt.clock ? evt.clock : "•";
+
+            if (badge.isCenterBadge) {
+              timelineHtml += `
+                <div class="badge-divider">
+                  <span>${badge.icon} ${badge.label}</span>
+                </div>
+              `;
+              return;
+            }
+
+            const isHome = evt.team ? evt.team.toLowerCase().includes(homeName.toLowerCase().slice(0, 3)) : true;
 
             timelineHtml += `
               <div class="timeline-event">
                 <div class="event-left">
-                  ${isHome ? `<div class="event-card"><div class="player-main">${evt.player || evt.detail}</div><div class="player-sub">${evt.type}</div></div>` : ''}
+                  ${isHome ? `
+                    <div class="event-card">
+                      <div class="player-main">${evt.player \vert{}\vert{} evt.detail}${badge.icon}</div>
+                      <div class="player-sub" style="color: ${badge.color}">${badge.label}</div>
+                    </div>
+                  ` : ''}
                 </div>
                 <div class="event-center">${clockDisplay}</div>
                 <div class="event-right">
-                  ${!isHome ? `<div class="event-card"><div class="player-main">${evt.player || evt.detail}</div><div class="player-sub">${evt.type}</div></div>` : ''}
+                  ${!isHome ? `
+                    <div class="event-card">
+                      <div class="player-main">${badge.icon}${evt.player || evt.detail}</div>
+                      <div class="player-sub" style="color: ${badge.color}">${badge.label}</div>
+                    </div>
+                  ` : ''}
                 </div>
               </div>
             `;
@@ -552,4 +610,5 @@
     fetchMatches();
   </script>
 </body>
-</html>
+  </html>
+  
