@@ -7,75 +7,62 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { id } = req.query;
-
-  if (!id) {
-    return res.status(400).json({ error: 'Match ID required' });
-  }
+  const { date } = req.query;
+  const targetDate = date ? date.replace(/-/g, '') : new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
   try {
     const response = await fetch(
-      `https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event=${id}`
+      `https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?dates=${targetDate}`
     );
 
     if (!response.ok) {
-      return res.status(404).json({ error: 'Match details not found' });
+      return res.status(200).json([]);
     }
 
     const data = await response.json();
-    const competition = data.header?.competitions?.[0];
+    const events = data.events || [];
 
-    const homeComp = competition?.competitors?.find(c => c.homeAway === 'home');
-    const awayComp = competition?.competitors?.find(c => c.homeAway === 'away');
+    const grouped = {};
 
-    const homeIY = homeComp?.linescores?.[0]?.displayValue || '0';
-    const awayIY = awayComp?.linescores?.[0]?.displayValue || '0';
+    events.forEach(event => {
+      const leagueName = event.season?.slug || event.league?.name || 'Diğer Ligler';
+      const competition = event.competitions?.[0];
+      if (!competition) return;
 
-    const rawEvents = competition?.details || [];
-    const formattedEvents = rawEvents.map(item => {
-      const typeText = (item.type?.text || '').toLowerCase();
-      let icon = '📌';
-      let typeLabel = 'Olay';
+      const homeComp = competition.competitors?.find(c => c.homeAway === 'home');
+      const awayComp = competition.competitors?.find(c => c.homeAway === 'away');
 
-      if (typeText.includes('goal') || typeText.includes('penalty')) {
-        icon = '⚽';
-        typeLabel = 'Gol';
-      } else if (typeText.includes('yellow card')) {
-        icon = '🟨';
-        typeLabel = 'Sarı Kart';
-      } else if (typeText.includes('red card')) {
-        icon = '🟥';
-        typeLabel = 'Kırmızı Kart';
-      } else if (typeText.includes('substitution') || typeText.includes('sub')) {
-        icon = '🔄';
-        typeLabel = 'Oyuncu Değişikliği';
-      }
+      const status = competition.status?.type?.state; // 'pre', 'in', 'post'
+      const matchDate = new Date(event.date);
+      const timeStr = matchDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
-      const teamId = item.team?.id;
-      const isHome = teamId === homeComp?.id;
-
-      return {
-        clock: item.clock?.displayValue || '',
-        icon,
-        typeLabel,
-        isHome,
-        teamName: item.team?.displayName || '',
-        player: item.participants?.map(p => p.athlete?.displayName).join(' ➔ ') || item.text || ''
+      const matchObj = {
+        id: event.id,
+        time: status === 'in' ? (competition.status?.displayClock || 'Canlı') : timeStr,
+        state: status,
+        homeTeam: homeComp?.team?.displayName || 'Ev Sahibi',
+        awayTeam: awayComp?.team?.displayName || 'Deplasman',
+        homeLogo: homeComp?.team?.logo || '',
+        awayLogo: awayComp?.team?.logo || '',
+        homeScore: status !== 'pre' ? (homeComp?.score || '0') : null,
+        awayScore: status !== 'pre' ? (awayComp?.score || '0') : null
       };
+
+      if (!grouped[leagueName]) {
+        grouped[leagueName] = [];
+      }
+      grouped[leagueName].push(matchObj);
     });
 
-    return res.status(200).json({
-      homeTeam: homeComp?.team?.displayName || 'Ev Sahibi',
-      awayTeam: awayComp?.team?.displayName || 'Deplasman',
-      homeScore: homeComp?.score || '0',
-      awayScore: awayComp?.score || '0',
-      homeIY,
-      awayIY,
-      statusDetail: competition?.status?.type?.shortDetail || 'MS',
-      events: formattedEvents
-    });
+    const result = Object.keys(grouped).map(league => ({
+      league: league.toUpperCase(),
+      matches: grouped[league]
+    }));
+
+    return res.status(200).json(result);
   } catch (error) {
-    console.error('Match Details API Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Matches API Error:', error);
+    // Hata durumunda uygulamanın çökmemesi için boş liste dönüyoruz
+    return res.status(200).json([]);
   }
 }
