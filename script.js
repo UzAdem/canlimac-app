@@ -129,14 +129,22 @@ function renderList() {
               timeStr = (m.time && m.time.length <= 5 && m.time.includes(':')) ? m.time : '--:--';
             }
 
+            // --- TÜRKİYE SAATİ (TRT / UTC+3) DÖNÜŞÜMÜ ---
+            if (timeStr.includes(':')) {
+              let [h, min] = timeStr.split(':').map(Number);
+              if (!isNaN(h) && !isNaN(min)) {
+                h = (h + 3) % 24; // UTC saate 3 saat ekliyoruz
+                timeStr = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+              }
+            }
+            // ---------------------------------------------
+
             timeDisplay = timeStr;
             badgeClass = 'upcoming';
             centerDisplay = `<div class="vs-divider">v</div>`;
           } else if (m.state === 'in') {
-            // Canlı maçlar için olası tüm dakika/durum alanlarını kontrol ediyoruz
             let liveMinute = m.minute || m.clock || m.min || m.matchTime || m.statusDetail || m.time || 'Canlı';
             
-            // Eğer gelen değer sadece sayıdan ibaretse sonuna kesme işareti ekle (örn: 87 -> 87')
             if (/^\d+$/.test(liveMinute)) {
               liveMinute = `${liveMinute}'`;
             }
@@ -507,4 +515,4 @@ function goBack() {
 }
 
 renderList();
-            
+    
