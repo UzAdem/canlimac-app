@@ -32,13 +32,15 @@ export default async function handler(req, res) {
       const competition = ev?.competitions?.[0];
       if (!competition) return;
 
-      // Lig adını ESPN'in farklı yapı taşlarından güvenli bir şekilde çekiyoruz
-      const leagueName = ev?.league?.name || 
-                         competition?.league?.name || 
-                         ev?.tournament?.name || 
-                         competition?.tournament?.name || 
-                         (competition?.type && competition.type.name) || 
-                         'Diğer Ligler';
+      // Lig adını en garanti yoldan çekiyoruz
+      let leagueName = 'Diğer Ligler';
+      if (ev?.league?.name) {
+        leagueName = ev.league.name;
+      } else if (competition?.tournament?.name) {
+        leagueName = competition.tournament.name;
+      } else if (ev?.season?.type === 1) {
+        leagueName = 'Hazırlık Maçları';
+      }
 
       const competitors = competition?.competitors || [];
       const homeComp = competitors.find(c => c.homeAway === 'home');
@@ -88,16 +90,16 @@ export default async function handler(req, res) {
       matches: leaguesMap[league]
     }));
 
-    // İstediğin özel sıralama önceliği
-    const getPriority = (leagueName) => {
-      const name = leagueName.toLowerCase();
-      if (name.includes('süper lig') || name.includes('turkish') || name.includes('turkey')) return 1;
-      if (name.includes('premier league') || name.includes('premier') || name.includes('england')) return 2;
-      if (name.includes('laliga') || name.includes('la liga') || name.includes('spanish') || name.includes('spain')) return 3;
-      if (name.includes('serie a') || name.includes('italian') || name.includes('italy')) return 4;
-      if (name.includes('bundesliga') || name.includes('german') || name.includes('germany')) return 5;
-      if (name.includes('ligue 1') || name.includes('french') || name.includes('france')) return 6;
-      return 100; // Diğer ligler en sonda
+    // İstediğin lig öncelik sıralaması
+    const getPriority = (name) => {
+      const l = name.toLowerCase();
+      if (l.includes('süper lig') || l.includes('turkish')) return 1;
+      if (l.includes('premier league') || l.includes('premier')) return 2;
+      if (l.includes('laliga') || l.includes('la liga')) return 3;
+      if (l.includes('serie a')) return 4;
+      if (l.includes('bundesliga')) return 5;
+      if (l.includes('ligue 1')) return 6;
+      return 50; // Diğer ligler
     };
 
     result.sort((a, b) => {
@@ -113,4 +115,5 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+      }
+      
