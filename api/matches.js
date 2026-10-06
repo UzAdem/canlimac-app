@@ -24,21 +24,23 @@ export default async function handler(req, res) {
 
     const grouped = {};
 
-    // Lig adlarını Türkçeleştirme sözlüğü
-    const translateLeague = (slug) => {
-      if (!slug) return 'DİĞER LİGLER';
-      const s = slug.toLowerCase();
-      if (s.includes('turkish-super-lig') || s.includes('super-lig')) return 'SÜPER LİG';
-      if (s.includes('turkish-1-lig') || s.includes('1-lig') || s.includes('tff-1')) return '1. LİG';
-      if (s.includes('english-premier-league') || s.includes('premier-league')) return 'PREMIER LİG';
-      if (s.includes('spanish-primera-division') || s.includes('la-liga')) return 'LA LİGA';
-      if (s.includes('italian-serie-a') || s.includes('serie-a')) return 'SERİE A';
+    // Lig adlarını Türkçeleştirme ve standartlaştırma
+    const translateLeague = (slug, leagueNameAPI) => {
+      const s = ((slug || '') + ' ' + (leagueNameAPI || '')).toLowerCase();
+      
+      if (s.includes('turkish-super-lig') || s.includes('super lig') || s.includes('sÜper lig')) return 'SÜPER LİG';
+      if (s.includes('english-premier-league') || s.includes('premier lig')) return 'PREMIER LİG';
+      if (s.includes('spanish-primera-division') || s.includes('la liga') || s.includes('laliga')) return 'LA LİGA';
+      if (s.includes('italian-serie-a') || s.includes('serie a')) return 'SERİE A';
       if (s.includes('german-bundesliga') || s.includes('bundesliga')) return 'BUNDESLİGA';
-      if (s.includes('french-ligue-one') || s.includes('ligue-1')) return 'LİGUE 1';
-      return slug.replace(/-/g, ' ').toUpperCase();
+      if (s.includes('french-ligue-one') || s.includes('ligue 1')) return 'LİGUE 1';
+      if (s.includes('english-championship') || s.includes('championship')) return 'İNGİLTERE CHAMPIONSHIP';
+      if (s.includes('turkish-1-lig') || s.includes('1. lig') || s.includes('tff 1')) return '1. LİG';
+      
+      return (leagueNameAPI || slug || 'DİĞER LİGLER').replace(/-/g, ' ').toUpperCase();
     };
 
-    // Takım adlarını Türkçeleştirme / Karakter düzeltme sözlüğü
+    // Takım adlarını Türkçeleştirme
     const translateTeam = (name) => {
       if (!name) return '';
       const map = {
@@ -69,8 +71,9 @@ export default async function handler(req, res) {
     };
 
     events.forEach(event => {
-      const rawLeague = event.season?.slug || event.league?.name || 'Diğer Ligler';
-      const leagueName = translateLeague(rawLeague);
+      const rawSlug = event.season?.slug || '';
+      const rawLeagueName = event.league?.name || '';
+      const leagueName = translateLeague(rawSlug, rawLeagueName);
       
       const competition = event.competitions?.[0];
       if (!competition) return;
@@ -105,7 +108,31 @@ export default async function handler(req, res) {
       grouped[leagueName].push(matchObj);
     });
 
-    const result = Object.keys(grouped).map(league => ({
+    // İstediğin Kesin Sıralama Önceliği
+    const priorityLeagues = [
+      'SÜPER LİG',
+      'PREMIER LİG',
+      'LA LİGA',
+      'SERİE A',
+      'BUNDESLİGA',
+      'LİGUE 1',
+      'İNGİLTERE CHAMPIONSHIP'
+    ];
+
+    const sortedLeagues = Object.keys(grouped).sort((a, b) => {
+      let indexA = priorityLeagues.indexOf(a);
+      let indexB = priorityLeagues.indexOf(b);
+
+      if (indexA === -1) indexA = 999;
+      if (indexB === -1) indexB = 999;
+
+      if (indexA !== indexB) {
+        return indexA - indexB;
+      }
+      return a.localeCompare(b);
+    });
+
+    const result = sortedLeagues.map(league => ({
       league: league,
       matches: grouped[league]
     }));
@@ -115,5 +142,5 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(200).json([]);
   }
-    }
-        
+        }
+      
