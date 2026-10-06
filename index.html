@@ -304,12 +304,11 @@
         if (!players || players.length === 0) return '<div style="color:#718096; font-size:12px; padding:4px 0;">Bulunmuyor</div>';
         return players.map(p => {
           const numHtml = p.jersey ? `<span class="jersey-num">${p.jersey}</span>` : '';
-          const posHtml = p.position ? `<span style="font-size:10px; color:#a0aec0; margin-left:4px;">(${p.position})</span>` : '';
           
           if (isHome) {
-            return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span> ${posHtml}</div>`;
+            return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span></div>`;
           } else {
-            return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;">${posHtml} <span>${p.name}</span> ${numHtml}</div>`;
+            return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
           }
         }).join('');
       };
