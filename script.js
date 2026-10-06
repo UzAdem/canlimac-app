@@ -71,15 +71,14 @@ function renderList() {
         return;
       }
 
-      // Gelen verinin düz liste mi yoksa gruplanmış mı olduğunu kontrol edip grupluyoruz
+      // Liglere göre gruplama kontrolü (Eğer veri zaten gruplu değilse lig adına göre grupla)
       let groupedData = [];
-      if (Array.isArray(rawdata) && rawdata.length > 0 && rawdata[0].league) {
-        groupedData = rawdata; // Zaten gruplu gelmişse
+      if (Array.isArray(rawdata) && rawdata.length > 0 && Array.isArray(rawdata[0].matches)) {
+        groupedData = rawdata; 
       } else {
-        // Düz liste geldiyse 'league' alanına göre otomatik grupla
         let map = {};
         rawdata.forEach(m => {
-          let lName = m.league || m.competition || 'Diğer Maçlar';
+          let lName = m.league || m.competition || m.leagueName || m.tournament || m.competitionName || 'Diğer Ligler';
           if (!map[lName]) map[lName] = [];
           map[lName].push(m);
         });
@@ -89,7 +88,6 @@ function renderList() {
       let html = '';
       
       groupedData.forEach(group => {
-        // Lig Başlığı
         html += `
           <div class="league-title">
             <span>${group.league}</span>
@@ -136,7 +134,13 @@ function renderList() {
             badgeClass = 'upcoming';
             centerDisplay = `<div class="vs-divider">v</div>`;
           } else if (m.state === 'in') {
-            timeDisplay = `<span class="live-dot"></span> Canlı`;
+            // Canlı maçlar için dakika bilgisi (minute veya clock varsa yazdır, yoksa 'Canlı')
+            let liveMinute = m.minute || m.clock || 'Canlı';
+            if (/^\d+$/.test(liveMinute)) {
+              liveMinute = `${liveMinute}'`;
+            }
+
+            timeDisplay = `<span class="live-dot"></span> ${liveMinute}`;
             badgeClass = 'live';
             centerDisplay = `<div class="score live">${m.homeScore} - ${m.awayScore}</div>`;
           } else {
@@ -502,3 +506,4 @@ function goBack() {
 }
 
 renderList();
+        
