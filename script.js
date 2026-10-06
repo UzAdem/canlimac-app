@@ -73,7 +73,11 @@ function renderList() {
 
       let html = '';
       data.forEach(group => {
-        html += `<div class="league-title">${group.league}</div>`;
+        // Lig Başlığı / Ayrımı
+        html += `<div class="league-title" style="background: #1e293b; color: #4ade80; padding: 8px 12px; font-weight: bold; font-size: 13px; margin-top: 12px; border-left: 4px solid #4ade80; display: flex; justify-content: space-between; align-items: center;">
+          <span>${group.league}</span>
+        </div>`;
+
         group.matches.forEach(m => {
           let timeDisplay = '';
           let centerDisplay = '';
@@ -82,7 +86,6 @@ function renderList() {
           if (m.state === 'pre') {
             let timeStr = m.time || '';
             
-            // Eğer gelen veri içinde 'October' veya virgül gibi ifadeler geçiyorsa temizle
             if (timeStr.includes(',')) {
               const parts = timeStr.split(',');
               timeStr = parts[1] ? parts[1].trim() : timeStr;
@@ -107,7 +110,6 @@ function renderList() {
               }
             }
 
-            // Saat formatına gelmediyse ve çok uzunsa güvenli bir çizgi koyalım
             if (!timeStr.includes(':')) {
               timeStr = (m.time && m.time.length <= 5 && m.time.includes(':')) ? m.time : '--:--';
             }
@@ -130,16 +132,13 @@ function renderList() {
               <div class="match-time-col ${badgeClass}">${timeDisplay}</div>
               <div class="match-teams-col" style="display: flex; align-items: center; width: 100%;">
                 
-                <!-- Ev Sahibi: Logo Solda, İsim Sağda -->
                 <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-start; overflow: hidden;">
                   <img src="${m.homeLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
                   <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${m.homeTeam}</span>
                 </div>
 
-                <!-- Ortada Skor veya 'v' -->
                 ${centerDisplay}
 
-                <!-- Deplasman: İsim Solda, Logo Sağda -->
                 <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; overflow: hidden;">
                   <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;">${m.awayTeam}</span>
                   <img src="${m.awayLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
@@ -488,4 +487,4 @@ function goBack() {
 }
 
 renderList();
-              
+          
