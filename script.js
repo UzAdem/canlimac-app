@@ -142,13 +142,13 @@ function renderList() {
             badgeClass = 'upcoming';
             centerDisplay = `<div class="vs-divider">v</div>`;
           } else if (m.state === 'in') {
-            let liveMinute = m.minute || m.clock || m.min || m.matchTime || m.statusDetail || m.time || 'Canlı';
+            let liveMinute = m.minute || m.clock || m.min || m.matchTime || m.statusDetail || m.liveTime || '';
             
             if (/^\d+$/.test(liveMinute)) {
               liveMinute = `${liveMinute}'`;
             }
 
-            timeDisplay = `<span class="live-dot"></span> ${liveMinute}`;
+            timeDisplay = `<span class="live-dot"></span> ${liveMinute ? liveMinute : 'Canlı'}`;
             badgeClass = 'live';
             centerDisplay = `<div class="score live">${m.homeScore} - ${m.awayScore}</div>`;
           } else {
@@ -514,4 +514,3 @@ function goBack() {
 }
 
 renderList();
-            
