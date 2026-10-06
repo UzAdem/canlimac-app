@@ -112,16 +112,23 @@ function renderList() {
           html += `
             <div class="match-card mackolik-style" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}', '${m.homeId || ''}', '${m.awayId || ''}')">
               <div class="match-time-col ${badgeClass}">${scoreText}</div>
-              <div class="match-teams-col">
-                <div class="team-side home" style="display: flex; align-items: center; gap: 8px; justify-content: flex-start; flex: 1;">
-                  <img src="${m.homeLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain;">
-                  <span style="text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.homeTeam}</span>
+              <div class="match-teams-col" style="display: flex; align-items: center; width: 100%;">
+                
+                <!-- Ev Sahibi: Logo Solda, İsim Sağda -->
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-start; overflow: hidden;">
+                  <img src="${m.homeLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${m.homeTeam}</span>
                 </div>
-                <div class="vs-divider" style="padding: 0 8px; color: #64748b; font-size: 12px;">v</div>
-                <div class="team-side away" style="display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex: 1;">
-                  <span style="text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.awayTeam}</span>
-                  <img src="${m.awayLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain;">
+
+                <!-- Ortadaki 'v' Ayracı -->
+                <div class="vs-divider" style="padding: 0 10px; color: #64748b; font-size: 12px; flex-shrink: 0;">v</div>
+
+                <!-- Deplasman: İsim Solda, Logo Sağda -->
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; overflow: hidden;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;">${m.awayTeam}</span>
+                  <img src="${m.awayLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
                 </div>
+
               </div>
             </div>
           `;
@@ -465,4 +472,4 @@ function goBack() {
 }
 
 renderList();
-                
+      
