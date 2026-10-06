@@ -73,10 +73,12 @@ function renderList() {
 
       let html = '';
       data.forEach(group => {
-        // Lig Başlığı / Ayrımı
-        html += `<div class="league-title" style="background: #1e293b; color: #4ade80; padding: 8px 12px; font-weight: bold; font-size: 13px; margin-top: 12px; border-left: 4px solid #4ade80; display: flex; justify-content: space-between; align-items: center;">
-          <span>${group.league}</span>
-        </div>`;
+        // Lig Başlığı ve Ayrımı
+        html += `
+          <div style="background: #1e293b; color: #4ade80; padding: 8px 12px; font-weight: bold; font-size: 13px; margin-top: 14px; margin-bottom: 6px; border-left: 4px solid #4ade80; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
+            <span>${group.league}</span>
+          </div>
+        `;
 
         group.matches.forEach(m => {
           let timeDisplay = '';
@@ -487,4 +489,3 @@ function goBack() {
 }
 
 renderList();
-                                      
