@@ -64,18 +64,32 @@ function renderList() {
 
   fetch(`/api/matches?date=${dateStr}`)
     .then(res => res.json())
-    .then(data => {
+    .then(rawdata => {
       const listEl = document.getElementById('matches-list');
-      if (!data || data.length === 0) {
+      if (!rawdata || rawdata.length === 0) {
         listEl.innerHTML = '<div style="text-align:center; padding: 40px; color:#a0aec0;">Bu tarihte maç bulunamadı.</div>';
         return;
       }
 
+      // Gelen verinin düz liste mi yoksa gruplanmış mı olduğunu kontrol edip grupluyoruz
+      let groupedData = [];
+      if (Array.isArray(rawdata) && rawdata.length > 0 && rawdata[0].league) {
+        groupedData = rawdata; // Zaten gruplu gelmişse
+      } else {
+        // Düz liste geldiyse 'league' alanına göre otomatik grupla
+        let map = {};
+        rawdata.forEach(m => {
+          let lName = m.league || m.competition || 'Diğer Maçlar';
+          if (!map[lName]) map[lName] = [];
+          map[lName].push(m);
+        });
+        groupedData = Object.keys(map).map(k => ({ league: k, matches: map[k] }));
+      }
+
       let html = '';
       
-      // Ligleri ve altındaki maçları gruplar halinde işliyoruz
-      data.forEach(group => {
-        // CSS'indeki .league-title sınıfını kullanarak lig başlığını basıyoruz
+      groupedData.forEach(group => {
+        // Lig Başlığı
         html += `
           <div class="league-title">
             <span>${group.league}</span>
@@ -488,4 +502,3 @@ function goBack() {
 }
 
 renderList();
-  
