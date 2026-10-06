@@ -108,7 +108,7 @@
       border-radius: 6px;
       margin: 15px 0 10px 0;
       font-size: 13px;
-      color: #a0aec0;
+      color: #4eef90;
       font-weight: 600;
     }
     .match-card {
@@ -350,7 +350,7 @@
   <div id="app">Yükleniyor...</div>
 
   <script>
-    let currentDate = new Date('2026-10-06'); // Sistem tarihine uyumlu başlangıç
+    let currentDate = new Date('2026-10-06');
     let selectedMatch = null;
     let matchData = null;
 
@@ -368,7 +368,6 @@
       const dateStr = formatDate(currentDate);
       const app = document.getElementById('app');
       
-      // Tarih şeridi için günleri üret (-3 gün ile +3 gün arası)
       let dateChipsHtml = '';
       for (let i = -3; i <= 3; i++) {
         let d = new Date(currentDate);
@@ -380,7 +379,6 @@
         const dayName = dayNames[d.getDay()];
         const dayMonth = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
         
-        // Bugün kontrolü
         let displayLabel = dayName;
         const todayStr = '2026-10-06';
         if (dStr === todayStr) {
@@ -396,7 +394,6 @@
       }
 
       app.innerHTML = `
-        <!-- Üst Bar (Logo ve İsim Alanı) -->
         <div class="top-bar">
           <div class="brand-area">OFİSYEL</div>
           <div class="top-icons">
@@ -405,7 +402,6 @@
           </div>
         </div>
 
-        <!-- Yatay Tarih Şeridi ve Takvim İkonu -->
         <div class="date-strip-container">
           <div class="calendar-icon-btn calendar-input-wrapper" title="Takvimden Tarih Seç">
             📅
@@ -425,6 +421,32 @@
             listEl.innerHTML = '<div style="text-align:center; padding: 40px; color:#a0aec0;">Bu tarihte maç bulunamadı.</div>';
             return;
           }
+
+          // İstenen Lig Sıralaması Önceliği:
+          // 1. Süper Lig
+          // 2. 1. Lig
+          // 3. Premier Lig
+          // 4. İspanya (La Liga)
+          // 5. İtalya (Serie A)
+          // 6. Almanya (Bundesliga)
+          const leaguePriority = [
+            /süper lig/i,
+            /1\. lig/i,
+            /premier/i,
+            /laliga|spain|ispanya/i,
+            /serie a|italya|italy/i,
+            /bundesliga|almanya|germany/i
+          ];
+
+          data.sort((a, b) => {
+            let indexA = leaguePriority.findIndex(regex => regex.test(a.league));
+            let indexB = leaguePriority.findIndex(regex => regex.test(b.league));
+            
+            if (indexA === -1) indexA = 999;
+            if (indexB === -1) indexB = 999;
+            
+            return indexA - indexB;
+          });
 
           let html = '';
           data.forEach(group => {
@@ -641,7 +663,7 @@
             <div style="display: flex; flex-direction: column; gap: 4px;">${startersHtml.split('</div>\n          <div class="player-row" style="justify-content: flex-end; text-align: right;">')[0]}</div>
           </div>
           <div class="lineup-column-away">
-         <div class="section-title" style="text-align: right;">${selectedMatch.awayTeam}</div>
+            <div class="section-title" style="text-align: right;">${selectedMatch.awayTeam}</div>
             <div style="display: flex; flex-direction: column; gap: 4px;">${startersHtml.split('</div>\n          <div class="player-row" style="justify-content: flex-end; text-align: right;">')[1] || ''}</div>
           </div>
         </div>
