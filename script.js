@@ -1,6 +1,7 @@
 let currentDate = new Date('2026-10-06');
 let selectedMatch = null;
 let matchData = null;
+let selectedTeam = null;
 
 function formatDate(date) {
   const d = new Date(date);
@@ -115,7 +116,7 @@ function renderList() {
           }
 
           html += `
-            <div class="match-card" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}')">
+            <div class="match-card" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}', '${m.homeId || ''}', '${m.awayId || ''}')">
               <div class="team">
                 <img src="${m.homeLogo}" onerror="this.style.opacity=0">
                 <span>${m.homeTeam}</span>
@@ -141,8 +142,8 @@ function selectDate(dateStr) {
   renderList();
 }
 
-function openDetail(id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore) {
-  selectedMatch = { id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore };
+function openDetail(id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore, homeId, awayId) {
+  selectedMatch = { id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore, homeId, awayId };
   renderDetail();
 }
 
@@ -160,7 +161,7 @@ function renderDetail() {
     <div class="match-summary-box">
       <div id="status-detail" style="color: #a0aec0; font-size: 12px; font-weight: bold; letter-spacing: 1px;">MS</div>
       <div class="teams-vs">
-        <div class="team-box">
+        <div class="team-box" onclick="openTeamDetail('${m.homeId}')" style="cursor: pointer;" title="Takım Profiline Git">
           <img src="${m.homeLogo}" onerror="this.style.opacity=0">
           <strong style="font-size:13px;">${m.homeTeam}</strong>
         </div>
@@ -168,7 +169,7 @@ function renderDetail() {
           <div class="big-score">${msScore}</div>
           <div id="iy-header-score" class="iy-score"></div>
         </div>
-        <div class="team-box">
+        <div class="team-box" onclick="openTeamDetail('${m.awayId}')" style="cursor: pointer;" title="Takım Profiline Git">
           <img src="${m.awayLogo}" onerror="this.style.opacity=0">
           <strong style="font-size:13px;">${m.awayTeam}</strong>
         </div>
@@ -198,6 +199,94 @@ function renderDetail() {
     })
     .catch(() => {
       document.getElementById('tab-content').innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Detaylar yüklenirken hata oluştu.</div>';
+    });
+}
+
+function openTeamDetail(teamId) {
+  if (!teamId || teamId === 'undefined' || teamId === 'null') {
+    alert('Bu takım için detay bilgisi bulunamadı.');
+    return;
+  }
+  
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="detail-header">
+      <button class="back-btn" onclick="renderDetail()">&larr;</button>
+      <h2>Takım Profili</h2>
+    </div>
+    <div style="text-align:center; padding: 40px; color:#a0aec0;">Takım bilgileri yükleniyor...</div>
+  `;
+
+  fetch(`/api/team-detail?id=${teamId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data || data.error) {
+        app.innerHTML = `
+          <div class="detail-header">
+            <button class="back-btn" onclick="renderDetail()">&larr;</button>
+            <h2>Takım Profili</h2>
+          </div>
+          <div style="text-align:center; padding: 40px; color:#ef4444;">Takım bilgileri alınamadı.</div>
+        `;
+        return;
+      }
+
+      const t = data.team;
+      const matches = data.matches || [];
+
+      let matchesHtml = '';
+      if (matches.length === 0) {
+        matchesHtml = '<div style="text-align:center; color:#a0aec0; padding:15px; font-size:13px;">Son maç bilgisi bulunmuyor.</div>';
+      } else {
+        matches.forEach(m => {
+          matchesHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 13px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                <img src="${m.homeLogo}" width="18" height="18" onerror="this.style.opacity=0">
+                <span style="color: ${m.homeTeam === t.name ? '#4ade80' : '#e2e8f0'}; font-weight:${m.homeTeam === t.name ? 'bold' : 'normal'}">${m.homeTeam}</span>
+              </div>
+              <div style="background: #0f172a; padding: 4px 10px; border-radius: 4px; font-weight: bold; color: #fff;">
+                ${m.homeScore} - ${m.awayScore}
+              </div>
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex: 1; text-align: right;">
+                <span style="color: ${m.awayTeam === t.name ? '#4ade80' : '#e2e8f0'}; font-weight:${m.awayTeam === t.name ? 'bold' : 'normal'}">${m.awayTeam}</span>
+                <img src="${m.awayLogo}" width="18" height="18" onerror="this.style.opacity=0">
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      app.innerHTML = `
+        <div class="detail-header">
+          <button class="back-btn" onclick="renderDetail()">&larr;</button>
+          <h2>Takım Profili</h2>
+        </div>
+
+        <div style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="background: #1e293b; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; border-top: 4px solid ${t.color};">
+            <img src="${t.logo}" width="60" height="60" onerror="this.style.opacity=0">
+            <div>
+              <h3 style="margin: 0; font-size: 18px; color: #fff;">${t.name}</h3>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8;">Stadyum: ${t.venue}</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="color: #cbd5e1; font-size: 14px; margin-bottom: 10px; border-left: 3px solid #4ade80; padding-left: 8px;">Son Maçlar / Fikstür</h4>
+            <div>${matchesHtml}</div>
+          </div>
+        </div>
+      `;
+    })
+    .catch(() => {
+      app.innerHTML = `
+        <div class="detail-header">
+          <button class="back-btn" onclick="renderDetail()">&larr;</button>
+          <h2>Takım Profili</h2>
+        </div>
+        <div style="text-align:center; padding: 40px; color:#ef4444;">Bağlantı hatası oluştu.</div>
+      `;
     });
 }
 
