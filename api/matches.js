@@ -25,64 +25,64 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    const events = data?.events || [];
-    const leaguesMap = {};
+    const leagues = data?.leagues || [];
+    const result = [];
 
-    events.forEach(ev => {
-      const competition = ev?.competitions?.[0];
-      if (!competition) return;
+    leagues.forEach(lg => {
+      const leagueName = lg.name || lg.abbreviation || 'Diğer Ligler';
+      const events = lg.events || [];
+      const matches = [];
 
-      const leagueName = ev?.season?.type === 1 
-        ? (ev?.league?.name || 'Özel Maçlar') 
-        : (ev?.league?.name || competition?.tournament?.name || 'Diğer Ligler');
+      events.forEach(ev => {
+        const competition = ev?.competitions?.[0];
+        if (!competition) return;
 
-      const competitors = competition?.competitors || [];
-      const homeComp = competitors.find(c => c.homeAway === 'home');
-      const awayComp = competitors.find(c => c.homeAway === 'away');
+        const competitors = competition?.competitors || [];
+        const homeComp = competitors.find(c => c.homeAway === 'home');
+        const awayComp = competitors.find(c => c.homeAway === 'away');
 
-      if (!homeComp || !awayComp) return;
+        if (!homeComp || !awayComp) return;
 
-      const matchId = ev.id;
-      const homeTeam = homeComp?.team?.displayName || 'Ev Sahibi';
-      const homeLogo = homeComp?.team?.logo || '';
-      const homeId = homeComp?.team?.id || '';
-      const homeScore = homeComp?.score || '0';
+        const matchId = ev.id;
+        const homeTeam = homeComp?.team?.displayName || 'Ev Sahibi';
+        const homeLogo = homeComp?.team?.logo || '';
+        const homeId = homeComp?.team?.id || '';
+        const homeScore = homeComp?.score || '0';
 
-      const awayTeam = awayComp?.team?.displayName || 'Deplasman';
-      const awayLogo = awayComp?.team?.logo || '';
-      const awayId = awayComp?.team?.id || '';
-      const awayScore = awayComp?.score || '0';
+        const awayTeam = awayComp?.team?.displayName || 'Deplasman';
+        const awayLogo = awayComp?.team?.logo || '';
+        const awayId = awayComp?.team?.id || '';
+        const awayScore = awayComp?.score || '0';
 
-      const statusType = competition?.status?.type?.state; 
-      let state = 'pre';
-      if (statusType === 'in') state = 'in';
-      else if (statusType === 'post') state = 'post';
+        const statusType = competition?.status?.type?.state; 
+        let state = 'pre';
+        if (statusType === 'in') state = 'in';
+        else if (statusType === 'post') state = 'post';
 
-      const time = competition?.status?.type?.detail || ev?.date || '';
+        const time = competition?.status?.type?.detail || ev?.date || '';
 
-      if (!leaguesMap[leagueName]) {
-        leaguesMap[leagueName] = [];
-      }
-
-      leaguesMap[leagueName].push({
-        id: matchId,
-        homeTeam,
-        homeLogo,
-        homeId,
-        homeScore,
-        awayTeam,
-        awayLogo,
-        awayId,
-        awayScore,
-        state,
-        time
+        matches.push({
+          id: matchId,
+          homeTeam,
+          homeLogo,
+          homeId,
+          homeScore,
+          awayTeam,
+          awayLogo,
+          awayId,
+          awayScore,
+          state,
+          time
+        });
       });
-    });
 
-    const result = Object.keys(leaguesMap).map(league => ({
-      league,
-      matches: leaguesMap[league]
-    }));
+      if (matches.length > 0) {
+        result.push({
+          league: leagueName,
+          matches: matches
+        });
+      }
+    });
 
     return res.status(200).json(result);
 
@@ -90,4 +90,4 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+          }
