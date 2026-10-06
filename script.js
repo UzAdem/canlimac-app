@@ -73,7 +73,7 @@ function renderList() {
 
       let html = '';
       data.forEach(group => {
-        // Lig Başlığı ve Ayrımı
+        // Her lig için ayrı şerit başlık
         html += `
           <div style="background: #1e293b; color: #4ade80; padding: 8px 12px; font-weight: bold; font-size: 13px; margin-top: 14px; margin-bottom: 6px; border-left: 4px solid #4ade80; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
             <span>${group.league}</span>
