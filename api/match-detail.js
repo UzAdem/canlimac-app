@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
-      return res.status(200).json({ events: [], lineups: { home: { starters: [] }, away: { starters: [] } }, statusDetail: 'MS', homeIY: 0, awayIY: 0 });
+      return res.status(200).json({ events: [], lineups: { home: { starters: [] }, away: { starters: [] } }, statistics: [], statusDetail: 'MS', homeIY: 0, awayIY: 0 });
     }
 
     const data = await response.json();
@@ -40,6 +40,39 @@ export default async function handler(req, res) {
     const awayId = String(awayComp?.id || '');
     const awayName = awayComp?.team?.displayName || '';
 
+    // İstatistikleri Çekme ve Eşleme
+    const rawStats = data?.statistics || [];
+    const statistics = [];
+    if (Array.isArray(rawStats) && rawStats.length > 0) {
+      // Genellikle 0: Ev Sahibi, 1: Deplasman şeklinde gelir
+      const homeStatsList = rawStats[0]?.stats || [];
+      const awayStatsList = rawStats[1]?.stats || [];
+
+      // İsim Türkçeleştirmeleri için sözlük
+      const statNameMap = {
+        'possession': 'Topla Oynama',
+        'shots': 'Toplam Şut',
+        'shotsonTarget': 'Kaleyi Bulan Şut',
+        'corners': 'Korner',
+        'fouls': 'Fauller',
+        'yellowCards': 'Sarı Kart',
+        'redCards': 'Kırmızı Kart',
+        'offsides': 'Ofsayt',
+        'saves': 'Kurtarışlar'
+      };
+
+      homeStatsList.forEach((hs, index) => {
+        const key = hs.name || hs.abbreviation;
+        const label = statNameMap[key] || hs.displayName || key;
+        const homeVal = hs.displayValue || '0';
+        
+        const as = awayStatsList[index] || {};
+        const awayVal = as.displayValue || '0';
+
+        statistics.push({ label, homeVal, awayVal });
+      });
+    }
+
     const rosters = data?.rosters || [];
     const parseRoster = (teamRoster) => {
       const starters = [];
@@ -49,10 +82,9 @@ export default async function handler(req, res) {
         teamRoster.roster.forEach(playerObj => {
           const name = playerObj?.athlete?.displayName || playerObj?.athlete?.shortName || 'Oyuncu';
           const jersey = playerObj?.jersey || '';
-          const position = playerObj?.position?.abbreviation || '';
           const isStarter = playerObj?.starter || false;
 
-          const playerInfo = { name, jersey, position };
+          const playerInfo = { name, jersey };
           if (isStarter) starters.push(playerInfo);
           else bench.push(playerInfo);
         });
@@ -157,7 +189,8 @@ export default async function handler(req, res) {
       homeIY,
       awayIY,
       events,
-      lineups
+      lineups,
+      statistics
     });
 
   } catch (error) {
@@ -165,9 +198,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ 
       events: [], 
       lineups: { home: { starters: [] }, away: { starters: [] } }, 
+      statistics: [],
       statusDetail: 'MS', 
       homeIY: 0, 
       awayIY: 0 
     });
   }
-        }
+}
