@@ -61,7 +61,6 @@
     .team.away { justify-content: flex-end; }
     .team img { width: 24px; height: 24px; object-fit: contain; }
     
-    /* Skor / Durum Rozetleri Ayrımı */
     .score {
       font-weight: bold;
       background: #1c2541;
@@ -78,15 +77,9 @@
       color: #4eef90;
       border: 1px solid rgba(78, 239, 144, 0.3);
     }
-    .score.finished {
-      color: #a0aec0;
-    }
-    .score.upcoming {
-      color: #60a5fa;
-      background: rgba(96, 165, 250, 0.1);
-    }
+    .score.finished { color: #a0aec0; }
+    .score.upcoming { color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
 
-    /* Canlı Nokta Efekti */
     .live-dot {
       width: 8px;
       height: 8px;
@@ -139,7 +132,6 @@
     .big-score { font-size: 28px; font-weight: bold; color: #4eef90; line-height: 1.2; }
     .iy-score { font-size: 13px; color: #a0aec0; margin-top: 4px; font-weight: 500; }
     
-    /* Sekme Yapısı */
     .tabs {
       display: flex;
       background: #131b2e;
@@ -163,26 +155,77 @@
       color: #4eef90;
     }
 
-    /* Olaylar */
-    .events-container { display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; }
-    .event-row { display: flex; width: 100%; align-items: center; }
-    .event-row.home { justify-content: flex-start; }
-    .event-row.away { justify-content: flex-end; }
-    
+    /* 3 Sütunlu Yeni Zaman Çizelgesi Tasarımı */
+    .timeline-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 30px;
+    }
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 1fr 54px 1fr;
+      align-items: center;
+      gap: 6px;
+    }
+    .timeline-side {
+      display: flex;
+      flex-direction: column;
+    }
+    .timeline-side.left { align-items: flex-end; text-align: right; }
+    .timeline-side.right { align-items: flex-start; text-align: left; }
+
+    .timeline-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #4eef90;
+      background: #1c2541;
+      padding: 6px 2px;
+      border-radius: 6px;
+      border: 1px solid #2a3859;
+    }
+
     .event-card {
+      background: #131b2e;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      width: 100%;
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: #131b2e;
-      padding: 10px 14px;
-      border-radius: 10px;
-      max-width: 80%;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .event-row.home .event-card { border-left: 4px solid #4eef90; flex-direction: row; text-align: left; }
-    .event-row.away .event-card { border-right: 4px solid #3b82f6; flex-direction: row-reverse; text-align: right; }
-    .event-icon { font-size: 18px; }
-    .event-player { font-size: 14px; font-weight: bold; color: #ffffff; }
-    .event-sub { font-size: 12px; color: #a0aec0; margin-top: 2px; }
+    .timeline-side.left .event-card {
+      border-left: 3px solid #4eef90;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+    }
+    .timeline-side.right .event-card {
+      border-right: 3px solid #3b82f6;
+      flex-direction: row;
+      justify-content: flex-start;
+    }
+
+    .event-icon { font-size: 16px; flex-shrink: 0; }
+    .event-details { display: flex; flex-direction: column; overflow: hidden; }
+    .event-player { font-size: 13px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .event-sub { font-size: 11px; color: #a0aec0; }
+
+    /* Oyuncu Değişikliği Okları */
+    .sub-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sub-in { color: #4eef90; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 12px; }
+    .sub-out { color: #ef4444; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 12px; }
+    .timeline-side.left .sub-box { align-items: flex-end; }
+    .timeline-side.right .sub-box { align-items: flex-start; }
+    .timeline-side.left .sub-in, .timeline-side.left .sub-out { flex-direction: row-reverse; }
 
     .timeline-divider {
       display: flex;
@@ -191,7 +234,7 @@
       color: #a0aec0;
       font-size: 12px;
       font-weight: bold;
-      margin: 16px 0;
+      margin: 14px 0;
     }
     .timeline-divider::before, .timeline-divider::after {
       content: ''; flex: 1; border-bottom: 1px dashed #2a3859;
@@ -289,15 +332,12 @@
               let badgeClass = '';
 
               if (m.state === 'pre') {
-                // Başlamamış maç (Saat gösterilir)
                 scoreText = m.time;
                 badgeClass = 'upcoming';
               } else if (m.state === 'in') {
-                // Canlı maç (Yeşil nokta ve canlı skoru)
                 scoreText = `<span class="live-dot"></span> ${m.homeScore} - ${m.awayScore}`;
                 badgeClass = 'live';
               } else {
-                // Biten maç (MS skoru)
                 scoreText = `${m.homeScore} - ${m.awayScore}`;
                 badgeClass = 'finished';
               }
@@ -403,7 +443,7 @@
         return;
       }
 
-      let eventsHtml = '<div class="events-container">';
+      let eventsHtml = '<div class="timeline-container">';
       let iyDividerAdded = false;
 
       matchData.events.forEach(e => {
@@ -414,16 +454,15 @@
           iyDividerAdded = true;
         }
 
-        const sideClass = e.isHome ? 'home' : 'away';
+        const isHome = e.isHome;
+        const leftContent = isHome ? buildEventCardContent(e) : '';
+        const rightContent = !isHome ? buildEventCardContent(e) : '';
+
         eventsHtml += `
-          <div class="event-row ${sideClass}">
-            <div class="event-card">
-              <span class="event-icon">${e.icon}</span>
-              <div>
-                <div class="event-player">${e.player}</div>
-                <div class="event-sub">${e.clock}" • ${e.typeLabel}</div>
-              </div>
-            </div>
+          <div class="timeline-row">
+            <div class="timeline-side left">${leftContent}</div>
+            <div class="timeline-center">${e.clock}'</div>
+            <div class="timeline-side right">${rightContent}</div>
           </div>
         `;
       });
@@ -434,6 +473,30 @@
 
       eventsHtml += '</div>';
       container.innerHTML = eventsHtml;
+    }
+
+    function buildEventCardContent(e) {
+      if (e.icon === '🔄' && e.playerIn && e.playerOut) {
+        return `
+          <div class="event-card">
+            <span class="event-icon">${e.icon}</span>
+            <div class="sub-box">
+              <div class="sub-in"><span>➔</span> ${e.playerIn}</div>
+              <div class="sub-out"><span>➔</span> ${e.playerOut}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="event-card">
+          <span class="event-icon">${e.icon}</span>
+          <div class="event-details">
+            <div class="event-player">${e.player}</div>
+            <div class="event-sub">${e.typeLabel}</div>
+          </div>
+        </div>
+      `;
     }
 
     function renderLineupsTab(container) {
