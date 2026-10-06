@@ -257,4 +257,81 @@ function buildEventCardContent(e) {
     return `
       <div class="event-card">
         <span class="event-icon">${e.icon}</span>
+        <div class="sub-box">
+          <div class="sub-in"><span>➔</span> ${e.playerIn}</div>
+          <div class="sub-out"><span>➔</span> ${e.playerOut}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="event-card">
+      <span class="event-icon">${e.icon}</span>
+      <div class="event-details">
+        <div class="event-player">${e.player}</div>
+        <div class="event-sub">${e.typeLabel}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderLineupsTab(container) {
+  const homeStarters = matchData?.lineups?.home?.starters || [];
+  const awayStarters = matchData?.lineups?.away?.starters || [];
+  const homeBench = matchData?.lineups?.home?.bench || [];
+  const awayBench = matchData?.lineups?.away?.bench || [];
+
+  if (homeStarters.length === 0 && awayStarters.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:#a0aec0; padding:20px;">Kadro bilgisi henüz açıklanmadı.</div>';
+    return;
+  }
+
+  const renderPlayerList = (players, isHome) => {
+    if (!players || players.length === 0) return '<div style="color:#718096; font-size:12px; padding:4px 0;">Bulunmuyor</div>';
+    return players.map(p => {
+      const numHtml = p.jersey ? `<span class="jersey-num">${p.jersey}</span>` : '';
+      
+      if (isHome) {
+        return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span></div>`;
+      } else {
+        return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
+      }
+    }).join('');
+  };
+
+  container.innerHTML = `
+    <div class="lineup-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px;">
+      <div>
+        <div class="section-title" style="color: #4ade80; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #2d3748; padding-bottom: 4px;">${selectedMatch.homeTeam}</div>
+        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold;">İlk 11</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+          ${renderPlayerList(homeStarters, true)}
+        </div>
+        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold;">Yedekler</div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          ${renderPlayerList(homeBench, true)}
+        </div>
+      </div>
+
+      <div class="lineup-column-away">
+        <div class="section-title" style="color: #4ade80; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #2d3748; padding-bottom: 4px; text-align: right;">${selectedMatch.awayTeam}</div>
+        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold; text-align: right;">İlk 11</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+          ${renderPlayerList(awayStarters, false)}
+        </div>
+        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold; text-align: right;">Yedekler</div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          ${renderPlayerList(awayBench, false)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function goBack() {
+  renderList();
+}
+
+renderList();
   
