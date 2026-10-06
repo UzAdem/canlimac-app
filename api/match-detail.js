@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+Export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Content-Type', 'application/json');
@@ -32,7 +32,6 @@ export default async function handler(req, res) {
     const rawStatus = headerComp?.status?.type?.detail || 'MS';
     const statusDetail = (rawStatus.includes('FT') || rawStatus.includes('Sonu')) ? 'MS' : rawStatus;
 
-    // Ev Sahibi ve Deplasman Bilgileri
     const homeComp = headerComp?.competitors?.find(c => c.homeAway === 'home');
     const awayComp = headerComp?.competitors?.find(c => c.homeAway === 'away');
 
@@ -41,7 +40,6 @@ export default async function handler(req, res) {
     const awayId = String(awayComp?.id || '');
     const awayName = awayComp?.team?.displayName || '';
 
-    // Kadro Verisi Çekme (Rosters)
     const rosters = data?.rosters || [];
     const parseRoster = (teamRoster) => {
       const starters = [];
@@ -69,7 +67,6 @@ export default async function handler(req, res) {
       away: parseRoster(awayRosterRaw)
     };
 
-    // Olaylar (Events)
     const rawEvents = data?.keyEvents || [];
     const events = [];
     let homeIY = 0;
@@ -127,35 +124,10 @@ export default async function handler(req, res) {
         }
 
         let player = '';
+        let playerIn = '';
+        let playerOut = '';
+
         if (item?.participants && item.participants.length > 0) {
           const p1 = item.participants[0]?.athlete?.displayName || '';
-          const p2 = item.participants[1]?.athlete?.displayName || '';
-
-          if (icon === '🔄' && p1 && p2) {
-            player = `${p1} ➔ ${p2}`;
-          } else if (p1) {
-            player = p1;
-          }
-        }
-
-        if (!player) player = text;
-
-        events.push({ clock, icon, typeLabel, player, isHome });
-      } catch (err) {
-        console.error('Event parse error:', err);
-      }
-    });
-
-    return res.status(200).json({
-      statusDetail,
-      homeIY,
-      awayIY,
-      events,
-      lineups
-    });
-
-  } catch (error) {
-    console.error('Match Detail API Error:', error);
-    return res.status(200).json({ events: [], lineups: { home: [], away: [] }, statusDetail: 'MS', homeIY: 0, awayIY: 0 });
-  }
-}
+          const p2 =
+      
