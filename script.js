@@ -129,15 +129,14 @@ function renderList() {
               timeStr = (m.time && m.time.length <= 5 && m.time.includes(':')) ? m.time : '--:--';
             }
 
-            // --- TÜRKİYE SAATİ (TRT / UTC+3) DÖNÜŞÜMÜ ---
+            // Türkiye Saati (+3 Saat) Dönüşümü
             if (timeStr.includes(':')) {
               let [h, min] = timeStr.split(':').map(Number);
               if (!isNaN(h) && !isNaN(min)) {
-                h = (h + 3) % 24; // UTC saate 3 saat ekliyoruz
+                h = (h + 3) % 24;
                 timeStr = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
               }
             }
-            // ---------------------------------------------
 
             timeDisplay = timeStr;
             badgeClass = 'upcoming';
@@ -515,4 +514,4 @@ function goBack() {
 }
 
 renderList();
-    
+            
