@@ -60,14 +60,48 @@
     .team { display: flex; align-items: center; gap: 8px; width: 40%; }
     .team.away { justify-content: flex-end; }
     .team img { width: 24px; height: 24px; object-fit: contain; }
+    
+    /* Skor / Durum Rozetleri Ayrımı */
     .score {
       font-weight: bold;
       background: #1c2541;
       padding: 4px 10px;
       border-radius: 4px;
       font-size: 14px;
-      color: #4eef90;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    .score.live {
+      background: rgba(78, 239, 144, 0.15);
+      color: #4eef90;
+      border: 1px solid rgba(78, 239, 144, 0.3);
+    }
+    .score.finished {
+      color: #a0aec0;
+    }
+    .score.upcoming {
+      color: #60a5fa;
+      background: rgba(96, 165, 250, 0.1);
+    }
+
+    /* Canlı Nokta Efekti */
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #4eef90;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px #4eef90;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
     .detail-header {
       display: flex;
       align-items: center;
@@ -251,14 +285,30 @@
           data.forEach(group => {
             html += `<div class="league-title">${group.league}</div>`;
             group.matches.forEach(m => {
-              const scoreText = m.state === 'pre' ? m.time : `${m.homeScore} - ${m.awayScore}`;
+              let scoreText = '';
+              let badgeClass = '';
+
+              if (m.state === 'pre') {
+                // Başlamamış maç (Saat gösterilir)
+                scoreText = m.time;
+                badgeClass = 'upcoming';
+              } else if (m.state === 'in') {
+                // Canlı maç (Yeşil nokta ve canlı skoru)
+                scoreText = `<span class="live-dot"></span> ${m.homeScore} - ${m.awayScore}`;
+                badgeClass = 'live';
+              } else {
+                // Biten maç (MS skoru)
+                scoreText = `${m.homeScore} - ${m.awayScore}`;
+                badgeClass = 'finished';
+              }
+
               html += `
                 <div class="match-card" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}')">
                   <div class="team">
                     <img src="${m.homeLogo}" onerror="this.style.opacity=0">
                     <span>${m.homeTeam}</span>
                   </div>
-                  <div class="score">${scoreText}</div>
+                  <div class="score ${badgeClass}">${scoreText}</div>
                   <div class="team away">
                     <span>${m.awayTeam}</span>
                     <img src="${m.awayLogo}" onerror="this.style.opacity=0">
