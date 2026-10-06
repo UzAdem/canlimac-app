@@ -84,6 +84,22 @@ function renderList() {
               const parts = timeStr.split('at');
               timeStr = parts[1] ? parts[1].trim().replace('EDT', '').replace('EST', '').trim() : timeStr;
             }
+
+            // AM / PM ifadelerini temizleyip 24 saate çevirme
+            const isPM = timeStr.toUpperCase().includes('PM');
+            const isAM = timeStr.toUpperCase().includes('AM');
+            timeStr = timeStr.replace(/am|pm|EDT|EST/gi, '').trim();
+
+            if (isPM || isAM) {
+              let [hours, minutes] = timeStr.split(':');
+              if (hours && minutes) {
+                let h = parseInt(hours, 10);
+                if (isPM && h < 12) h += 12;
+                if (isAM && h === 12) h = 0;
+                timeStr = `${String(h).padStart(2, '0')}:${minutes}`;
+              }
+            }
+
             scoreText = timeStr;
             badgeClass = 'upcoming';
           } else if (m.state === 'in') {
@@ -450,4 +466,4 @@ function goBack() {
 }
 
 renderList();
-    
+      
