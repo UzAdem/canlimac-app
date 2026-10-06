@@ -113,14 +113,14 @@ function renderList() {
             <div class="match-card mackolik-style" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}', '${m.homeId || ''}', '${m.awayId || ''}')">
               <div class="match-time-col ${badgeClass}">${scoreText}</div>
               <div class="match-teams-col">
-                <div class="team-side home">
-                  <span>${m.homeTeam}</span>
-                  <img src="${m.homeLogo}" onerror="this.style.opacity=0">
+                <div class="team-side home" style="display: flex; align-items: center; gap: 8px; justify-content: flex-start; flex: 1;">
+                  <img src="${m.homeLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain;">
+                  <span style="text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.homeTeam}</span>
                 </div>
-                <div class="vs-divider">v</div>
-                <div class="team-side away">
-                  <span>${m.awayTeam}</span>
-                  <img src="${m.awayLogo}" onerror="this.style.opacity=0">
+                <div class="vs-divider" style="padding: 0 8px; color: #64748b; font-size: 12px;">v</div>
+                <div class="team-side away" style="display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex: 1;">
+                  <span style="text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.awayTeam}</span>
+                  <img src="${m.awayLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain;">
                 </div>
               </div>
             </div>
@@ -465,4 +465,4 @@ function goBack() {
 }
 
 renderList();
-    
+                
