@@ -107,10 +107,10 @@ function renderList() {
             scoreText = m.time;
             badgeClass = 'upcoming';
           } else if (m.state === 'in') {
-            scoreText = `<span class="live-dot"></span> ${m.homeScore} -${m.awayScore}`;
+            scoreText = `<span class="live-dot"></span> ${m.homeScore} - ${m.awayScore}`;
             badgeClass = 'live';
           } else {
-            scoreText = `${m.homeScore} -${m.awayScore}`;
+            scoreText = `${m.homeScore} - ${m.awayScore}`;
             badgeClass = 'finished';
           }
 
@@ -149,7 +149,7 @@ function openDetail(id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayS
 function renderDetail() {
   const app = document.getElementById('app');
   const m = selectedMatch;
-  const msScore = (m.homeScore !== 'null' && m.homeScore !== null) ? `${m.homeScore} -${m.awayScore}` : '0 - 0';
+  const msScore = (m.homeScore !== 'null' && m.homeScore !== null) ? `${m.homeScore} - ${m.awayScore}` : '0 - 0';
 
   app.innerHTML = `
     <div class="detail-header">
@@ -177,6 +177,7 @@ function renderDetail() {
 
     <div class="tabs">
       <button id="tab-events-btn" class="tab-btn active" onclick="switchTab('events')">Olaylar</button>
+      <button id="tab-stats-btn" class="tab-btn" onclick="switchTab('stats')">İstatistikler</button>
       <button id="tab-lineups-btn" class="tab-btn" onclick="switchTab('lineups')">Kadrolar</button>
     </div>
 
@@ -191,7 +192,7 @@ function renderDetail() {
         document.getElementById('status-detail').innerText = data.statusDetail;
       }
       if (data.homeIY !== undefined && data.awayIY !== undefined) {
-        document.getElementById('iy-header-score').innerText = `(İY ${data.homeIY} -${data.awayIY})`;
+        document.getElementById('iy-header-score').innerText = `(İY ${data.homeIY} - ${data.awayIY})`;
       }
       switchTab('events');
     })
@@ -202,6 +203,7 @@ function renderDetail() {
 
 function switchTab(tab) {
   document.getElementById('tab-events-btn').classList.toggle('active', tab === 'events');
+  document.getElementById('tab-stats-btn').classList.toggle('active', tab === 'stats');
   document.getElementById('tab-lineups-btn').classList.toggle('active', tab === 'lineups');
 
   const contentEl = document.getElementById('tab-content');
@@ -209,6 +211,8 @@ function switchTab(tab) {
 
   if (tab === 'events') {
     renderEventsTab(contentEl);
+  } else if (tab === 'stats') {
+    renderStatsTab(contentEl);
   } else {
     renderLineupsTab(contentEl);
   }
@@ -276,6 +280,47 @@ function buildEventCardContent(e) {
   `;
 }
 
+function renderStatsTab(container) {
+  const stats = matchData?.statistics || [];
+  if (stats.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:#a0aec0; padding:20px;">İstatistik bilgisi bulunmuyor.</div>';
+    return;
+  }
+
+  let html = '<div style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">';
+
+  stats.forEach(s => {
+    let hValNum = parseFloat(s.homeVal) || 0;
+    let aValNum = parseFloat(s.awayVal) || 0;
+    let total = hValNum + aValNum;
+    
+    let hPercent = 50;
+    let aPercent = 50;
+    
+    if (total > 0) {
+      hPercent = (hValNum / total) * 100;
+      aPercent = (aValNum / total) * 100;
+    }
+
+    html += `
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #e2e8f0;">
+          <span>${s.homeVal}</span>
+          <span style="color: #a0aec0; font-size: 12px; font-weight: normal;">${s.label}</span>
+          <span>${s.awayVal}</span>
+        </div>
+        <div style="display: flex; height: 6px; background: #2d3748; border-radius: 3px; overflow: hidden; gap: 2px;">
+          <div style="width: ${hPercent}%; background: #4ade80; border-radius: 3px 0 0 3px; transition: width 0.3s;"></div>
+          <div style="width: ${aPercent}%; background: #3b82f6; border-radius: 0 3px 3px 0; transition: width 0.3s;"></div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
 function renderLineupsTab(container) {
   const homeStarters = matchData?.lineups?.home?.starters || [];
   const awayStarters = matchData?.lineups?.away?.starters || [];
@@ -334,4 +379,3 @@ function goBack() {
 }
 
 renderList();
-  
