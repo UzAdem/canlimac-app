@@ -336,3 +336,62 @@ body {
   min-width: 18px;
   text-align: center;
 }
+.match-card.mackolik-style {
+  Display: flex;
+  Align-items: center;
+  Padding: 10px 14px;
+  Background: #1e293b;
+  Border-radius: 8px;
+  Margin-bottom: 8px;
+  Gap: 16px;
+}
+
+.match-time-col {
+  Width: 65px;
+  Font-size: 13px;
+  Font-weight: bold;
+  Color: #94a3b8;
+  Text-align: center;
+}
+
+.match-time-col.live {
+  Color: #4ade80;
+}
+
+.match-teams-col {
+  Display: flex;
+  Align-items: center;
+  Justify-content: space-between;
+  Flex: 1;
+}
+
+.team-side {
+  Display: flex;
+  Align-items: center;
+  Gap: 8px;
+  Font-size: 13px;
+  Color: #e2e8f0;
+  Width: 42%;
+}
+
+.team-side.home {
+  Justify-content: flex-start;
+}
+
+.team-side.away {
+  Justify-content: flex-end;
+  Text-align: right;
+}
+
+.team-side img {
+  Width: 18px;
+  Height: 18px;
+  Object-fit: contain;
+}
+
+.vs-divider {
+  Color: #64748b;
+  Font-size: 12px;
+  Font-weight: bold;
+}
+
