@@ -85,7 +85,6 @@ function renderList() {
               timeStr = parts[1] ? parts[1].trim().replace('EDT', '').replace('EST', '').trim() : timeStr;
             }
 
-            // AM / PM ifadelerini temizleyip 24 saate çevirme
             const isPM = timeStr.toUpperCase().includes('PM');
             const isAM = timeStr.toUpperCase().includes('AM');
             timeStr = timeStr.replace(/am|pm|EDT|EST/gi, '').trim();
@@ -120,8 +119,8 @@ function renderList() {
                 </div>
                 <div class="vs-divider">v</div>
                 <div class="team-side away">
-                  <img src="${m.awayLogo}" onerror="this.style.opacity=0">
                   <span>${m.awayTeam}</span>
+                  <img src="${m.awayLogo}" onerror="this.style.opacity=0">
                 </div>
               </div>
             </div>
@@ -466,4 +465,4 @@ function goBack() {
 }
 
 renderList();
-      
+    
