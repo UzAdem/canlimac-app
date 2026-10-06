@@ -83,31 +83,31 @@
             return;
           }
 
-          // Kesin Sıralama: 1. Süper Lig, 2. 1. Lig, 3. Premier Lig, Sonra Diğerleri
-          const leaguePriority = [
-            /süper|super/i,
-            /1\.lig|tff 1|1 lig|first league/i,
-            /english.*premier|premier-league|premier league/i,
-            /laliga|spain|ispanya/i,
-            /serie a|italya|italy/i,
-            /bundesliga|almanya|germany/i
+          // Kesin Sıralama: 1. Süper Lig, 2. Premier Lig, 3. La Liga, 4. Serie A, 5. Bundesliga, 6. Ligue 1, 7. Championship
+          const priorityLeagues = [
+            'SÜPER LİG',
+            'PREMIER LİG',
+            'LA LİGA',
+            'SERİE A',
+            'BUNDESLİGA',
+            'LİGUE 1',
+            'İNGİLTERE CHAMPIONSHIP'
           ];
 
           data.sort((a, b) => {
-            const nameA = (a.league || '').toLowerCase();
-            const nameB = (b.league || '').toLowerCase();
+            const nameA = (a.league || '').toUpperCase();
+            const nameB = (b.league || '').toUpperCase();
 
-            let indexA = leaguePriority.findIndex(regex => regex.test(nameA));
-            let indexB = leaguePriority.findIndex(regex => regex.test(nameB));
+            let indexA = priorityLeagues.indexOf(nameA);
+            let indexB = priorityLeagues.indexOf(nameB);
 
-            // İskoçya gibi karışabilecek ligleri öne atmasın
-            if (nameA.includes('scottish') || nameA.includes('scotland')) indexA = 99;
-            if (nameB.includes('scottish') || nameB.includes('scotland')) indexB = 99;
-            
             if (indexA === -1) indexA = 999;
             if (indexB === -1) indexB = 999;
-            
-            return indexA - indexB;
+
+            if (indexA !== indexB) {
+              return indexA - indexB;
+            }
+            return nameA.localeCompare(nameB);
           });
 
           let html = '';
