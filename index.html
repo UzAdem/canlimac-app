@@ -10,40 +10,104 @@
       background-color: #0b132b;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 16px;
+      padding: 12px;
       max-width: 600px;
       margin: 0 auto;
     }
-    header {
+
+    /* Üst Bar (Logo/İsim Alanı & Sağ İkonlar) */
+    .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 15px;
+      padding: 8px 0 12px 0;
       border-bottom: 1px solid #1c2541;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
-    .nav-btn {
-      background: #1c2541;
-      border: none;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .date-display {
-      background: #1c2541;
-      padding: 8px 16px;
-      border-radius: 6px;
+    .brand-area {
+      font-size: 20px;
       font-weight: bold;
-      color: #4eef90;
+      color: #ffffff;
+      letter-spacing: 0.5px;
     }
+    .top-icons {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .top-icon-btn {
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* Yatay Tarih Şeridi */
+    .date-strip-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 15px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .date-strip-container::-webkit-scrollbar { display: none; }
+
+    .calendar-icon-btn {
+      background: #1c2541;
+      border: 1px solid #2a3859;
+      color: #4eef90;
+      width: 44px;
+      height: 48px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+    .calendar-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    .calendar-input-wrapper input[type="date"] {
+      position: absolute;
+      left: 0; top: 0;
+      opacity: 0;
+      width: 100%; height: 100%;
+      cursor: pointer;
+    }
+
+    .date-chip {
+      background: #131b2e;
+      border: 1px solid #1c2541;
+      color: #a0aec0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-width: 65px;
+    }
+    .date-chip.active {
+      background: #1c2541;
+      border-color: #4eef90;
+      color: #4eef90;
+      font-weight: bold;
+    }
+    .date-chip .day-name { font-size: 11px; text-transform: uppercase; }
+    .date-chip .day-date { font-size: 13px; margin-top: 2px; }
+
     .league-title {
       background: #1c2541;
       padding: 8px 12px;
       border-radius: 6px;
       margin: 15px 0 10px 0;
-      font-size: 14px;
+      font-size: 13px;
       color: #a0aec0;
       font-weight: 600;
     }
@@ -57,16 +121,16 @@
       justify-content: space-between;
       cursor: pointer;
     }
-    .team { display: flex; align-items: center; gap: 8px; width: 40%; }
-    .team.away { justify-content: flex-end; }
-    .team img { width: 24px; height: 24px; object-fit: contain; }
+    .team { display: flex; align-items: center; gap: 8px; width: 40%; font-size: 13px; }
+    .team.away { justify-content: flex-end; text-align: right; }
+    .team img { width: 22px; height: 22px; object-fit: contain; }
     
     .score {
       font-weight: bold;
       background: #1c2541;
       padding: 4px 10px;
       border-radius: 4px;
-      font-size: 14px;
+      font-size: 13px;
       color: #e2e8f0;
       display: flex;
       align-items: center;
@@ -81,12 +145,12 @@
     .score.upcoming { color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
 
     .live-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       background-color: #4eef90;
       border-radius: 50%;
       display: inline-block;
-      box-shadow: 0 0 8px #4eef90;
+      box-shadow: 0 0 6px #4eef90;
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
@@ -95,6 +159,7 @@
       100% { transform: scale(0.95); opacity: 0.8; }
     }
 
+    /* Detay Sayfası Stilleri */
     .detail-header {
       display: flex;
       align-items: center;
@@ -122,15 +187,15 @@
       margin-top: 10px;
     }
     .team-box { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 35%; }
-    .team-box img { width: 48px; height: 48px; }
+    .team-box img { width: 44px; height: 44px; object-fit: contain; }
     
     .score-container {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    .big-score { font-size: 28px; font-weight: bold; color: #4eef90; line-height: 1.2; }
-    .iy-score { font-size: 13px; color: #a0aec0; margin-top: 4px; font-weight: 500; }
+    .big-score { font-size: 26px; font-weight: bold; color: #4eef90; line-height: 1.2; }
+    .iy-score { font-size: 12px; color: #a0aec0; margin-top: 4px; font-weight: 500; }
     
     .tabs {
       display: flex;
@@ -146,7 +211,7 @@
       background: transparent;
       color: #a0aec0;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
       border-radius: 6px;
       cursor: pointer;
     }
@@ -155,7 +220,7 @@
       color: #4eef90;
     }
 
-    /* 3 Sütunlu Yeni Zaman Çizelgesi Tasarımı */
+    /* Zaman Çizelgesi */
     .timeline-container {
       display: flex;
       flex-direction: column;
@@ -164,7 +229,7 @@
     }
     .timeline-row {
       display: grid;
-      grid-template-columns: 1fr 54px 1fr;
+      grid-template-columns: 1fr 50px 1fr;
       align-items: center;
       gap: 6px;
     }
@@ -179,7 +244,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       color: #4eef90;
       background: #1c2541;
@@ -190,9 +255,9 @@
 
     .event-card {
       background: #131b2e;
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 12px;
       width: 100%;
       display: flex;
       align-items: center;
@@ -210,19 +275,18 @@
       justify-content: flex-start;
     }
 
-    .event-icon { font-size: 16px; flex-shrink: 0; }
+    .event-icon { font-size: 15px; flex-shrink: 0; }
     .event-details { display: flex; flex-direction: column; overflow: hidden; }
-    .event-player { font-size: 13px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .event-sub { font-size: 11px; color: #a0aec0; }
+    .event-player { font-size: 12px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .event-sub { font-size: 10px; color: #a0aec0; }
 
-    /* Oyuncu Değişikliği Okları */
     .sub-box {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
-    .sub-in { color: #4eef90; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 12px; }
-    .sub-out { color: #ef4444; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 12px; }
+    .sub-in { color: #4eef90; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 11px; }
+    .sub-out { color: #ef4444; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 11px; }
     .timeline-side.left .sub-box { align-items: flex-end; }
     .timeline-side.right .sub-box { align-items: flex-start; }
     .timeline-side.left .sub-in, .timeline-side.left .sub-out { flex-direction: row-reverse; }
@@ -232,7 +296,7 @@
       align-items: center;
       text-align: center;
       color: #a0aec0;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       margin: 14px 0;
     }
@@ -240,10 +304,10 @@
       content: ''; flex: 1; border-bottom: 1px dashed #2a3859;
     }
     .timeline-divider span {
-      padding: 5px 14px; background: #1c2541; border-radius: 12px; color: #4eef90;
+      padding: 4px 12px; background: #1c2541; border-radius: 12px; color: #4eef90;
     }
 
-    /* Kadro Yapısı */
+    /* Kadrolar */
     .lineup-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -252,10 +316,8 @@
       padding: 12px;
       border-radius: 12px;
     }
-    .lineup-column { display: flex; flex-direction: column; gap: 8px; }
-    .lineup-column.away { text-align: right; }
     .section-title {
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       color: #4eef90;
       font-weight: bold;
@@ -264,21 +326,21 @@
       margin-bottom: 4px;
     }
     .player-row {
-      font-size: 13px;
+      font-size: 12px;
       padding: 4px 0;
       color: #e2e8f0;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .lineup-column.away .player-row { justify-content: flex-end; }
+    .lineup-column-away .player-row { justify-content: flex-end; text-align: right; }
     .jersey-num {
-      font-size: 11px;
+      font-size: 10px;
       color: #a0aec0;
       background: #1c2541;
       padding: 2px 5px;
       border-radius: 4px;
-      min-width: 20px;
+      min-width: 18px;
       text-align: center;
     }
   </style>
@@ -288,7 +350,7 @@
   <div id="app">Yükleniyor...</div>
 
   <script>
-    let currentDate = new Date();
+    let currentDate = new Date('2026-10-06'); // Sistem tarihine uyumlu başlangıç
     let selectedMatch = null;
     let matchData = null;
 
@@ -306,12 +368,52 @@
       const dateStr = formatDate(currentDate);
       const app = document.getElementById('app');
       
+      // Tarih şeridi için günleri üret (-3 gün ile +3 gün arası)
+      let dateChipsHtml = '';
+      for (let i = -3; i <= 3; i++) {
+        let d = new Date(currentDate);
+        d.setDate(d.getDate() + i);
+        const dStr = formatDate(d);
+        const isSelected = (dStr === dateStr);
+        
+        const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+        const dayName = dayNames[d.getDay()];
+        const dayMonth = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
+        
+        // Bugün kontrolü
+        let displayLabel = dayName;
+        const todayStr = '2026-10-06';
+        if (dStr === todayStr) {
+          displayLabel = 'Bugün';
+        }
+
+        dateChipsHtml += `
+          <div class="date-chip ${isSelected ? 'active' : ''}" onclick="selectDate('${dStr}')">
+            <div class="day-name">${displayLabel}</div>
+            <div class="day-date">${dayMonth}</div>
+          </div>
+        `;
+      }
+
       app.innerHTML = `
-        <header>
-          <button class="nav-btn" onclick="changeDate(-1)">&lt; Önceki</button>
-          <div class="date-display">${dateStr.split('-').reverse().join('.')}</div>
-          <button class="nav-btn" onclick="changeDate(1)">Sonraki &gt;</button>
-        </header>
+        <!-- Üst Bar (Logo ve İsim Alanı) -->
+        <div class="top-bar">
+          <div class="brand-area">OFİSYEL</div>
+          <div class="top-icons">
+            <button class="top-icon-btn">🔍</button>
+            <button class="top-icon-btn">⚙️</button>
+          </div>
+        </div>
+
+        <!-- Yatay Tarih Şeridi ve Takvim İkonu -->
+        <div class="date-strip-container">
+          <div class="calendar-icon-btn calendar-input-wrapper" title="Takvimden Tarih Seç">
+            📅
+            <input type="date" value="${dateStr}" onchange="selectDate(this.value)">
+          </div>
+          ${dateChipsHtml}
+        </div>
+
         <div id="matches-list">Yükleniyor...</div>
       `;
 
@@ -364,6 +466,11 @@
         });
     }
 
+    function selectDate(dateStr) {
+      currentDate = new Date(dateStr);
+      renderList();
+    }
+
     function openDetail(id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore) {
       selectedMatch = { id, homeTeam, awayTeam, homeLogo, awayLogo, homeScore, awayScore };
       renderDetail();
@@ -381,11 +488,11 @@
         </div>
 
         <div class="match-summary-box">
-          <div id="status-detail" style="color: #a0aec0; font-size: 13px; font-weight: bold; letter-spacing: 1px;">MS</div>
+          <div id="status-detail" style="color: #a0aec0; font-size: 12px; font-weight: bold; letter-spacing: 1px;">MS</div>
           <div class="teams-vs">
             <div class="team-box">
               <img src="${m.homeLogo}" onerror="this.style.opacity=0">
-              <strong style="font-size:14px;">${m.homeTeam}</strong>
+              <strong style="font-size:13px;">${m.homeTeam}</strong>
             </div>
             <div class="score-container">
               <div class="big-score">${msScore}</div>
@@ -393,7 +500,7 @@
             </div>
             <div class="team-box">
               <img src="${m.awayLogo}" onerror="this.style.opacity=0">
-              <strong style="font-size:14px;">${m.awayTeam}</strong>
+              <strong style="font-size:13px;">${m.awayTeam}</strong>
             </div>
           </div>
         </div>
@@ -523,22 +630,22 @@
 
         startersHtml += `
           <div class="player-row">${hName}</div>
-          <div class="player-row" style="justify-content: flex-end;">${aName}</div>
+          <div class="player-row" style="justify-content: flex-end; text-align: right;">${aName}</div>
         `;
       }
 
       container.innerHTML = `
         <div class="lineup-grid">
-          <div class="section-title">${selectedMatch.homeTeam}</div>
-          <div class="section-title" style="text-align: right;">${selectedMatch.awayTeam}</div>
-          ${startersHtml}
+          <div>
+            <div class="section-title">${selectedMatch.homeTeam}</div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">${startersHtml.split('</div>\n          <div class="player-row" style="justify-content: flex-end; text-align: right;">')[0]}</div>
+          </div>
+          <div class="lineup-column-away">
+         <div class="section-title" style="text-align: right;">${selectedMatch.awayTeam}</div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">${startersHtml.split('</div>\n          <div class="player-row" style="justify-content: flex-end; text-align: right;">')[1] || ''}</div>
+          </div>
         </div>
       `;
-    }
-
-    function changeDate(days) {
-      currentDate.setDate(currentDate.getDate() + days);
-      renderList();
     }
 
     function goBack() {
