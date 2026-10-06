@@ -71,32 +71,6 @@ function renderList() {
         return;
       }
 
-      const priorityLeagues = [
-        'SÜPER LİG',
-        'PREMIER LİG',
-        'LA LİGA',
-        'SERİE A',
-        'BUNDESLİGA',
-        'LİGUE 1',
-        'İNGİLTERE CHAMPIONSHIP'
-      ];
-
-      data.sort((a, b) => {
-        const nameA = (a.league || '').toUpperCase();
-        const nameB = (b.league || '').toUpperCase();
-
-        let indexA = priorityLeagues.indexOf(nameA);
-        let indexB = priorityLeagues.indexOf(nameB);
-
-        if (indexA === -1) indexA = 999;
-        if (indexB === -1) indexB = 999;
-
-        if (indexA !== indexB) {
-          return indexA - indexB;
-        }
-        return nameA.localeCompare(nameB);
-      });
-
       let html = '';
       data.forEach(group => {
         html += `<div class="league-title">${group.league}</div>`;
@@ -105,7 +79,12 @@ function renderList() {
           let badgeClass = '';
 
           if (m.state === 'pre') {
-            scoreText = m.time;
+            let timeStr = m.time;
+            if (timeStr.includes('at')) {
+              const parts = timeStr.split('at');
+              timeStr = parts[1] ? parts[1].trim().replace('EDT', '').replace('EST', '').trim() : timeStr;
+            }
+            scoreText = timeStr;
             badgeClass = 'upcoming';
           } else if (m.state === 'in') {
             scoreText = `<span class="live-dot"></span> ${m.homeScore} - ${m.awayScore}`;
@@ -116,15 +95,18 @@ function renderList() {
           }
 
           html += `
-            <div class="match-card" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}', '${m.homeId || ''}', '${m.awayId || ''}')">
-              <div class="team">
-                <img src="${m.homeLogo}" onerror="this.style.opacity=0">
-                <span>${m.homeTeam}</span>
-              </div>
-              <div class="score ${badgeClass}">${scoreText}</div>
-              <div class="team away">
-                <span>${m.awayTeam}</span>
-                <img src="${m.awayLogo}" onerror="this.style.opacity=0">
+            <div class="match-card mackolik-style" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}', '${m.homeId || ''}', '${m.awayId || ''}')">
+              <div class="match-time-col ${badgeClass}">${scoreText}</div>
+              <div class="match-teams-col">
+                <div class="team-side home">
+                  <span>${m.homeTeam}</span>
+                  <img src="${m.homeLogo}" onerror="this.style.opacity=0">
+                </div>
+                <div class="vs-divider">v</div>
+                <div class="team-side away">
+                  <img src="${m.awayLogo}" onerror="this.style.opacity=0">
+                  <span>${m.awayTeam}</span>
+                </div>
               </div>
             </div>
           `;
@@ -416,25 +398,25 @@ function renderLineupsTab(container) {
   const homeBench = matchData?.lineups?.home?.bench || [];
   const awayBench = matchData?.lineups?.away?.bench || [];
 
-  if (homeStarters.length === 0 && awayStarters.length === 0) {
+  Id (homeStarters.length === 0 && awayStarters.length === 0) {
     container.innerHTML = '<div style="text-align:center; color:#a0aec0; padding:20px;">Kadro bilgisi henüz açıklanmadı.</div>';
     return;
   }
 
   const renderPlayerList = (players, isHome) => {
-    if (!players || players.length === 0) return '<div style="color:#718096; font-size:12px; padding:4px 0;">Bulunmuyor</div>';
-    return players.map(p => {
-      const numHtml = p.jersey ? `<span class="jersey-num">${p.jersey}</span>` : '';
+    If (!players || players.length === 0) return '<div style="color:#718096; font-size:12px; padding:4px 0;">Bulunmuyor</div>';
+    Return players.map(p => {
+      Const numHtml = p.jersey ? `<span class="jersey-num">${p.jersey}</span>` : '';
       
-      if (isHome) {
-        return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span></div>`;
+      If (isHome) {
+        Return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span></div>`;
       } else {
-        return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
+        Return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
       }
     }).join('');
   };
 
-  container.innerHTML = `
+  Container.innerHTML = `
     <div class="lineup-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px;">
       <div>
         <div class="section-title" style="color: #4ade80; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #2d3748; padding-bottom: 4px;">${selectedMatch.homeTeam}</div>
@@ -464,7 +446,7 @@ function renderLineupsTab(container) {
 }
 
 function goBack() {
-  renderList();
+  RenderList();
 }
 
 renderList();
