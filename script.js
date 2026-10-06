@@ -133,7 +133,10 @@ function renderList() {
             badgeClass = 'upcoming';
             centerDisplay = `<div class="vs-divider">v</div>`;
           } else if (m.state === 'in') {
-            let liveMinute = m.minute || m.clock || 'Canlı';
+            // Canlı maç objesini konsola yazdırıyoruz (F12 -> Konsol kısmından dakikanın adını görebilmek için)
+            console.log("Canlı maç verisi:", m);
+
+            let liveMinute = m.minute || m.clock || m.min || m.matchTime || m.time || 'Canlı';
             if (/^\d+$/.test(liveMinute)) {
               liveMinute = `${liveMinute}'`;
             }
@@ -464,8 +467,7 @@ function renderLineupsTab(container) {
       
       if (isHome) {
         return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span></div>`;
-      } else {
-        return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
+      } else {        return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
       }
     }).join('');
   };
@@ -504,3 +506,4 @@ function goBack() {
 }
 
 renderList();
+    
