@@ -32,7 +32,6 @@ export default async function handler(req, res) {
       const competition = ev?.competitions?.[0];
       if (!competition) return;
 
-      // Lig adını net bir şekilde alıyoruz
       const leagueName = ev?.league?.name || competition?.tournament?.name || 'Diğer Ligler';
 
       const competitors = competition?.competitors || [];
@@ -78,11 +77,29 @@ export default async function handler(req, res) {
       });
     });
 
-    // Ligleri dizi formatına çeviriyoruz
-    const result = Object.keys(leaguesMap).map(league => ({
+    let result = Object.keys(leaguesMap).map(league => ({
       league,
       matches: leaguesMap[league]
     }));
+
+    // İstediğin özel sıralama mantığı
+    const getPriority = (leagueName) => {
+      const name = leagueName.toLowerCase();
+      if (name.includes('süper lig') || name.includes('turkish')) return 1;
+      if (name.includes('premier league') || name.includes('premier')) return 2;
+      if (name.includes('laliga') || name.includes('la liga') || name.includes('spanish')) return 3;
+      if (name.includes('serie a') || name.includes('italian')) return 4;
+      if (name.includes('bundesliga') || name.includes('german')) return 5;
+      if (name.includes('ligue 1') || name.includes('french')) return 6;
+      return 100; // Diğer ligler en sonda yer alacak
+    };
+
+    result.sort((a, b) => {
+      const pA = getPriority(a.league);
+      const pB = getPriority(b.league);
+      if (pA !== pB) return pA - pB;
+      return a.league.localeCompare(b.league);
+    });
 
     return res.status(200).json(result);
 
@@ -90,4 +107,4 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-                   }
+          }
