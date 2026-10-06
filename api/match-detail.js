@@ -129,5 +129,35 @@ Export default async function handler(req, res) {
 
         if (item?.participants && item.participants.length > 0) {
           const p1 = item.participants[0]?.athlete?.displayName || '';
-          const p2 =
-      
+          const p2 = item.participants[1]?.athlete?.displayName || '';
+
+          if (icon === '🔄' && p1 && p2) {
+            playerIn = p1;
+            playerOut = p2;
+            player = `${p1} ➔ ${p2}`;
+          } else if (p1) {
+            player = p1;
+          }
+        }
+
+        if (!player) player = text;
+
+        events.push({ clock, icon, typeLabel, player, playerIn, playerOut, isHome });
+      } catch (err) {
+        console.error('Event parse error:', err);
+      }
+    });
+
+    return res.status(200).json({
+      statusDetail,
+      homeIY,
+      awayIY,
+      events,
+      lineups
+    });
+
+  } catch (error) {
+    console.error('Match Detail API Error:', error);
+    return res.status(200).json({ events: [], lineups: { home: [], away: [] }, statusDetail: 'MS', homeIY: 0, awayIY: 0 });
+  }
+ }
