@@ -83,11 +83,10 @@
             return;
           }
 
-          // İstediğiniz Lig Sıralaması Önceliği:
-          // 1. Süper Lig, 2. 1. Lig, 3. Premier Lig, 4. İspanya, 5. İtalya, 6. Almanya
+          // Güçlendirilmiş Lig Sıralaması Önceliği (Süper Lig, 1. Lig, Premier Lig, İspanya, İtalya, Almanya)
           const leaguePriority = [
-            /süper lig/i,
-            /1\. lig/i,
+            /süper|super/i,
+            /1\.lig|tff 1|1 lig|first league/i,
             /premier/i,
             /laliga|spain|ispanya/i,
             /serie a|italya|italy/i,
@@ -95,8 +94,11 @@
           ];
 
           data.sort((a, b) => {
-            let indexA = leaguePriority.findIndex(regex => regex.test(a.league));
-            let indexB = leaguePriority.findIndex(regex => regex.test(b.league));
+            const nameA = a.league || '';
+            const nameB = b.league || '';
+
+            let indexA = leaguePriority.findIndex(regex => regex.test(nameA));
+            let indexB = leaguePriority.findIndex(regex => regex.test(nameB));
             
             if (indexA === -1) indexA = 999;
             if (indexB === -1) indexB = 999;
