@@ -83,22 +83,26 @@
             return;
           }
 
-          // Güçlendirilmiş Lig Sıralaması Önceliği (Süper Lig, 1. Lig, Premier Lig, İspanya, İtalya, Almanya)
+          // Kesin Sıralama: 1. Süper Lig, 2. 1. Lig, 3. Premier Lig, Sonra Diğerleri
           const leaguePriority = [
             /süper|super/i,
             /1\.lig|tff 1|1 lig|first league/i,
-            /premier/i,
+            /english.*premier|premier-league|premier league/i,
             /laliga|spain|ispanya/i,
             /serie a|italya|italy/i,
             /bundesliga|almanya|germany/i
           ];
 
           data.sort((a, b) => {
-            const nameA = a.league || '';
-            const nameB = b.league || '';
+            const nameA = (a.league || '').toLowerCase();
+            const nameB = (b.league || '').toLowerCase();
 
             let indexA = leaguePriority.findIndex(regex => regex.test(nameA));
             let indexB = leaguePriority.findIndex(regex => regex.test(nameB));
+
+            // İskoçya gibi karışabilecek ligleri öne atmasın
+            if (nameA.includes('scottish') || nameA.includes('scotland')) indexA = 99;
+            if (nameB.includes('scottish') || nameB.includes('scotland')) indexB = 99;
             
             if (indexA === -1) indexA = 999;
             if (indexB === -1) indexB = 999;
@@ -299,14 +303,14 @@
       let startersHtml = '';
 
       for (let i = 0; i < maxStarters; i++) {
-        const h = homeStarters[i];
-        const a = awayStarters[i];
+        let h = homeStarters[i];
+        let a = awayStarters[i];
 
-        const hNum = h?.jersey ? `<span class="jersey-num">${h.jersey}</span>` : '';
-        const hName = h ? `${hNum} <span>${h.name}</span>` : '';
+        let hNum = h?.jersey ? `<span class="jersey-num">${h.jersey}</span>` : '';
+        let hName = h ? `${hNum} <span>${h.name}</span>` : '';
 
-        const aNum = a?.jersey ? `<span class="jersey-num">${a.jersey}</span>` : '';
-        const aName = a ? `<span>${a.name}</span> ${aNum}` : '';
+        let aNum = a?.jersey ? `<span class="jersey-num">${a.jersey}</span>` : '';
+        let aName = a ? `<span>${a.name}</span> ${aNum}` : '';
 
         startersHtml += `
           <div class="player-row">${hName}</div>
