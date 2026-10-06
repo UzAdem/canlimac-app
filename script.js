@@ -71,14 +71,13 @@ function renderList() {
         return;
       }
 
-      // Liglere göre gruplama kontrolü (Eğer veri zaten gruplu değilse lig adına göre grupla)
       let groupedData = [];
       if (Array.isArray(rawdata) && rawdata.length > 0 && Array.isArray(rawdata[0].matches)) {
         groupedData = rawdata; 
       } else {
         let map = {};
         rawdata.forEach(m => {
-          let lName = m.league || m.competition || m.leagueName || m.tournament || m.competitionName || 'Diğer Ligler';
+          let lName = m.league || m.competition || m.leagueName || m.tournament || m.competitionName || m.cName || m.league_name || m.group || 'Diğer Ligler';
           if (!map[lName]) map[lName] = [];
           map[lName].push(m);
         });
@@ -90,7 +89,7 @@ function renderList() {
       groupedData.forEach(group => {
         html += `
           <div class="league-title">
-            <span>${group.league}</span>
+            <span>${group.league || 'Diğer Ligler'}</span>
           </div>
         `;
 
@@ -134,7 +133,6 @@ function renderList() {
             badgeClass = 'upcoming';
             centerDisplay = `<div class="vs-divider">v</div>`;
           } else if (m.state === 'in') {
-            // Canlı maçlar için dakika bilgisi (minute veya clock varsa yazdır, yoksa 'Canlı')
             let liveMinute = m.minute || m.clock || 'Canlı';
             if (/^\d+$/.test(liveMinute)) {
               liveMinute = `${liveMinute}'`;
@@ -506,4 +504,3 @@ function goBack() {
 }
 
 renderList();
-        
