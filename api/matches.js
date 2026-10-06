@@ -24,18 +24,18 @@ export default async function handler(req, res) {
 
     const grouped = {};
 
-    // Lig adlarını Türkçeleştirme ve standartlaştırma
+    // Kesin Lig Çevirisi
     const translateLeague = (slug, leagueNameAPI) => {
       const s = ((slug || '') + ' ' + (leagueNameAPI || '')).toLowerCase();
       
-      if (s.includes('turkish-super-lig') || s.includes('super lig') || s.includes('sÜper lig')) return 'SÜPER LİG';
-      if (s.includes('english-premier-league') || s.includes('premier lig')) return 'PREMIER LİG';
-      if (s.includes('spanish-primera-division') || s.includes('la liga') || s.includes('laliga')) return 'LA LİGA';
-      if (s.includes('italian-serie-a') || s.includes('serie a')) return 'SERİE A';
-      if (s.includes('german-bundesliga') || s.includes('bundesliga')) return 'BUNDESLİGA';
-      if (s.includes('french-ligue-one') || s.includes('ligue 1')) return 'LİGUE 1';
+      if (s.includes('turkish-super-lig') || s.includes('super-lig') || s.includes('super lig') || s.includes('türkiye süper')) return 'SÜPER LİG';
+      if (s.includes('english-premier-league') || s.includes('premier-league') || s.includes('premier lig')) return 'PREMIER LİG';
+      if (s.includes('spanish-primera-division') || s.includes('la-liga') || s.includes('laliga') || s.includes('spain')) return 'LA LİGA';
+      if (s.includes('italian-serie-a') || s.includes('serie-a') || s.includes('italy')) return 'SERİE A';
+      if (s.includes('german-bundesliga') || s.includes('bundesliga') || s.includes('germany')) return 'BUNDESLİGA';
+      if (s.includes('french-ligue-one') || s.includes('ligue-1') || s.includes('france')) return 'LİGUE 1';
       if (s.includes('english-championship') || s.includes('championship')) return 'İNGİLTERE CHAMPIONSHIP';
-      if (s.includes('turkish-1-lig') || s.includes('1. lig') || s.includes('tff 1')) return '1. LİG';
+      if (s.includes('turkish-1-lig') || s.includes('1-lig') || s.includes('tff-1')) return '1. LİG';
       
       return (leagueNameAPI || slug || 'DİĞER LİGLER').replace(/-/g, ' ').toUpperCase();
     };
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
       const homeComp = competition.competitors?.find(c => c.homeAway === 'home');
       const awayComp = competition.competitors?.find(c => c.homeAway === 'away');
 
-      const status = competition.status?.type?.state; // 'pre', 'in', 'post'
+      const status = competition.status?.type?.state;
       const matchDate = new Date(event.date);
       
       const timeStr = matchDate.toLocaleTimeString('tr-TR', { 
@@ -108,7 +108,7 @@ export default async function handler(req, res) {
       grouped[leagueName].push(matchObj);
     });
 
-    // İstediğin Kesin Sıralama Önceliği
+    // Kesin Sıralama Listesi
     const priorityLeagues = [
       'SÜPER LİG',
       'PREMIER LİG',
@@ -142,5 +142,4 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(200).json([]);
   }
-        }
-      
+}
