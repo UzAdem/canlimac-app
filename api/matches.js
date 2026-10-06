@@ -32,15 +32,13 @@ export default async function handler(req, res) {
       const competition = ev?.competitions?.[0];
       if (!competition) return;
 
-      // Lig adını en garanti yoldan çekiyoruz
-      let leagueName = 'Diğer Ligler';
-      if (ev?.league?.name) {
-        leagueName = ev.league.name;
-      } else if (competition?.tournament?.name) {
-        leagueName = competition.tournament.name;
-      } else if (ev?.season?.type === 1) {
-        leagueName = 'Hazırlık Maçları';
-      }
+      // Lig adını olabilecek bütün ESPN yollarından sırayla arayıp buluyoruz
+      let leagueName = ev?.league?.name || 
+                       competition?.league?.name || 
+                       ev?.tournament?.name || 
+                       competition?.tournament?.name || 
+                       ev?.season?.name || 
+                       'Diğer Ligler';
 
       const competitors = competition?.competitors || [];
       const homeComp = competitors.find(c => c.homeAway === 'home');
@@ -90,15 +88,15 @@ export default async function handler(req, res) {
       matches: leaguesMap[league]
     }));
 
-    // İstediğin lig öncelik sıralaması
+    // İstediğin sıralama önceliği (1: Süper Lig, 2: Premier, 3: La Liga, 4: Serie A, 5: Bundesliga, 6: Ligue 1)
     const getPriority = (name) => {
       const l = name.toLowerCase();
-      if (l.includes('süper lig') || l.includes('turkish')) return 1;
-      if (l.includes('premier league') || l.includes('premier')) return 2;
-      if (l.includes('laliga') || l.includes('la liga')) return 3;
-      if (l.includes('serie a')) return 4;
-      if (l.includes('bundesliga')) return 5;
-      if (l.includes('ligue 1')) return 6;
+      if (l.includes('süper lig') || l.includes('turkish') || l.includes('turkey')) return 1;
+      if (l.includes('premier league') || l.includes('premier') || l.includes('england')) return 2;
+      if (l.includes('laliga') || l.includes('la liga') || l.includes('spanish') || l.includes('spain')) return 3;
+      if (l.includes('serie a') || l.includes('italian') || l.includes('italy')) return 4;
+      if (l.includes('bundesliga') || l.includes('german') || l.includes('germany')) return 5;
+      if (l.includes('ligue 1') || l.includes('french') || l.includes('france')) return 6;
       return 50; // Diğer ligler
     };
 
@@ -115,5 +113,4 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-      }
-      
+          }
