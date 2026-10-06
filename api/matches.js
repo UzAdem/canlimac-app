@@ -34,7 +34,13 @@ export default async function handler(req, res) {
 
       const status = competition.status?.type?.state; // 'pre', 'in', 'post'
       const matchDate = new Date(event.date);
-      const timeStr = matchDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      
+      // Kesin olarak Türkiye Saati (TRT / UTC+3) dilimine göre saat formatı
+      const timeStr = matchDate.toLocaleTimeString('tr-TR', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        timeZone: 'Europe/Istanbul' 
+      });
 
       const matchObj = {
         id: event.id,
@@ -62,7 +68,6 @@ export default async function handler(req, res) {
     return res.status(200).json(result);
   } catch (error) {
     console.error('Matches API Error:', error);
-    // Hata durumunda uygulamanın çökmemesi için boş liste dönüyoruz
     return res.status(200).json([]);
   }
 }
