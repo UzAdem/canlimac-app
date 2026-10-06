@@ -75,7 +75,8 @@ function renderList() {
       data.forEach(group => {
         html += `<div class="league-title">${group.league}</div>`;
         group.matches.forEach(m => {
-          let scoreText = '';
+          let timeDisplay = '';
+          let centerDisplay = '';
           let badgeClass = '';
 
           if (m.state === 'pre') {
@@ -100,29 +101,39 @@ function renderList() {
               }
             }
 
-            scoreText = timeStr;
+            timeDisplay = timeStr;
             badgeClass = 'upcoming';
+            centerDisplay = `<div class="vs-divider" style="padding: 0 10px; color: #64748b; font-size: 12px; flex-shrink: 0;">v</div>`;
           } else if (m.state === 'in') {
-            scoreText = `<span class="live-dot"></span> ${m.homeScore} - ${m.awayScore}`;
+            timeDisplay = `<span class="live-dot"></span> Canlı`;
             badgeClass = 'live';
+            centerDisplay = `<div style="background: #1e293b; border: 1px solid #4ade80; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #4ade80; font-size: 12px; flex-shrink: 0;">${m.homeScore} - ${m.awayScore}</div>`;
           } else {
-            scoreText = `${m.homeScore} - ${m.awayScore}`;
+            timeDisplay = `MS`;
             badgeClass = 'finished';
+            centerDisplay = `<div style="background: #0f172a; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #fff; font-size: 12px; flex-shrink: 0;">${m.homeScore} - ${m.awayScore}</div>`;
           }
 
           html += `
             <div class="match-card mackolik-style" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}', '${m.homeId || ''}', '${m.awayId || ''}')">
-              <div class="match-time-col ${badgeClass}">${scoreText}</div>
-              <div class="match-teams-col">
-                <div class="team-side home">
-                  <span>${m.homeTeam}</span>
-                  <img src="${m.homeLogo}" onerror="this.style.opacity=0">
+              <div class="match-time-col ${badgeClass}">${timeDisplay}</div>
+              <div class="match-teams-col" style="display: flex; align-items: center; width: 100%;">
+                
+                <!-- Ev Sahibi: Logo Solda, İsim Sağda -->
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-start; overflow: hidden;">
+                  <img src="${m.homeLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${m.homeTeam}</span>
                 </div>
-                <div class="vs-divider">v</div>
-                <div class="team-side away">
-                  <img src="${m.awayLogo}" onerror="this.style.opacity=0">
-                  <span>${m.awayTeam}</span>
+
+                <!-- Ortada Skor veya 'v' -->
+                ${centerDisplay}
+
+                <!-- Deplasman: İsim Solda, Logo Sağda -->
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; overflow: hidden;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;">${m.awayTeam}</span>
+                  <img src="${m.awayLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
                 </div>
+
               </div>
             </div>
           `;
@@ -466,4 +477,4 @@ function goBack() {
 }
 
 renderList();
-                                                                                                                                                           
+    
