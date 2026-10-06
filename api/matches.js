@@ -32,9 +32,8 @@ export default async function handler(req, res) {
       const competition = ev?.competitions?.[0];
       if (!competition) return;
 
-      const leagueName = ev?.season?.type === 1 
-        ? (ev?.league?.name || 'Özel Maçlar') 
-        : (ev?.league?.name || competition?.tournament?.name || ev?.tournament?.name || 'Diğer Ligler');
+      // Lig adını net bir şekilde alıyoruz
+      const leagueName = ev?.league?.name || competition?.tournament?.name || 'Diğer Ligler';
 
       const competitors = competition?.competitors || [];
       const homeComp = competitors.find(c => c.homeAway === 'home');
@@ -79,6 +78,7 @@ export default async function handler(req, res) {
       });
     });
 
+    // Ligleri dizi formatına çeviriyoruz
     const result = Object.keys(leaguesMap).map(league => ({
       league,
       matches: leaguesMap[league]
@@ -90,4 +90,4 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+                   }
