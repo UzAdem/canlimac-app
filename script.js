@@ -398,25 +398,25 @@ function renderLineupsTab(container) {
   const homeBench = matchData?.lineups?.home?.bench || [];
   const awayBench = matchData?.lineups?.away?.bench || [];
 
-  Id (homeStarters.length === 0 && awayStarters.length === 0) {
+  if (homeStarters.length === 0 && awayStarters.length === 0) {
     container.innerHTML = '<div style="text-align:center; color:#a0aec0; padding:20px;">Kadro bilgisi henüz açıklanmadı.</div>';
     return;
   }
 
   const renderPlayerList = (players, isHome) => {
-    If (!players || players.length === 0) return '<div style="color:#718096; font-size:12px; padding:4px 0;">Bulunmuyor</div>';
-    Return players.map(p => {
-      Const numHtml = p.jersey ? `<span class="jersey-num">${p.jersey}</span>` : '';
+    if (!players || players.length === 0) return '<div style="color:#718096; font-size:12px; padding:4px 0;">Bulunmuyor</div>';
+    return players.map(p => {
+      const numHtml = p.jersey ? `<span class="jersey-num">${p.jersey}</span>` : '';
       
-      If (isHome) {
-        Return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span></div>`;
+      if (isHome) {
+        return `<div class="player-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">${numHtml} <span>${p.name}</span></div>`;
       } else {
-        Return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
+        return `<div class="player-row" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; text-align:right; padding:4px 0;"><span>${p.name}</span> ${numHtml}</div>`;
       }
     }).join('');
   };
 
-  Container.innerHTML = `
+  container.innerHTML = `
     <div class="lineup-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px;">
       <div>
         <div class="section-title" style="color: #4ade80; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #2d3748; padding-bottom: 4px;">${selectedMatch.homeTeam}</div>
@@ -446,7 +446,8 @@ function renderLineupsTab(container) {
 }
 
 function goBack() {
-  RenderList();
+  renderList();
 }
 
 renderList();
+    
