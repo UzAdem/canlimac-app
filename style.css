@@ -104,6 +104,7 @@ body {
   color: #4eef90;
   font-weight: 600;
 }
+
 .match-card {
   background: #131b2e;
   border-radius: 8px;
@@ -336,61 +337,64 @@ body {
   min-width: 18px;
   text-align: center;
 }
+
+/* Mackolik Tarzı Maç Kartı Düzeni */
 .match-card.mackolik-style {
-  Display: flex;
-  Align-items: center;
-  Padding: 10px 14px;
-  Background: #1e293b;
-  Border-radius: 8px;
-  Margin-bottom: 8px;
-  Gap: 16px;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: #1e293b;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  gap: 16px;
 }
 
 .match-time-col {
-  Width: 65px;
-  Font-size: 13px;
-  Font-weight: bold;
-  Color: #94a3b8;
-  Text-align: center;
+  width: 65px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #94a3b8;
+  text-align: center;
 }
 
 .match-time-col.live {
-  Color: #4ade80;
+  color: #4ade80;
 }
 
 .match-teams-col {
-  Display: flex;
-  Align-items: center;
-  Justify-content: space-between;
-  Flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
 }
 
 .team-side {
-  Display: flex;
-  Align-items: center;
-  Gap: 8px;
-  Font-size: 13px;
-  Color: #e2e8f0;
-  Width: 42%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #e2e8f0;
+  width: 42%;
 }
 
 .team-side.home {
-  Justify-content: flex-start;
+  justify-content: flex-start;
 }
 
 .team-side.away {
-  Justify-content: flex-end;
-  Text-align: right;
+  justify-content: flex-end;
+  text-align: right;
 }
 
 .team-side img {
-  Width: 18px;
-  Height: 18px;
-  Object-fit: contain;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .vs-divider {
-  Color: #64748b;
-  Font-size: 12px;
-  Font-weight: bold;
-}
+  color: #64748b;
+  font-size: 12px;
+  font-weight: bold;
+  }
+  
