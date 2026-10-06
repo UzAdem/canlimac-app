@@ -32,12 +32,12 @@ export default async function handler(req, res) {
       const competition = ev?.competitions?.[0];
       if (!competition) return;
 
-      // Lig adını olabilecek tüm alternatif alanlardan güvenli bir şekilde çekiyoruz
+      // Lig adını ESPN'in farklı yapı taşlarından güvenli bir şekilde çekiyoruz
       const leagueName = ev?.league?.name || 
                          competition?.league?.name || 
                          ev?.tournament?.name || 
                          competition?.tournament?.name || 
-                         ev?.season?.name || 
+                         (competition?.type && competition.type.name) || 
                          'Diğer Ligler';
 
       const competitors = competition?.competitors || [];
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
       matches: leaguesMap[league]
     }));
 
-    // İstediğin öncelik sıralaması (Süper Lig, Premier Lig, La Liga, İtalya, Almanya, Fransa ...)
+    // İstediğin özel sıralama önceliği
     const getPriority = (leagueName) => {
       const name = leagueName.toLowerCase();
       if (name.includes('süper lig') || name.includes('turkish') || name.includes('turkey')) return 1;
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
       if (name.includes('serie a') || name.includes('italian') || name.includes('italy')) return 4;
       if (name.includes('bundesliga') || name.includes('german') || name.includes('germany')) return 5;
       if (name.includes('ligue 1') || name.includes('french') || name.includes('france')) return 6;
-      return 100; // Diğer ligler
+      return 100; // Diğer ligler en sonda
     };
 
     result.sort((a, b) => {
@@ -113,4 +113,4 @@ export default async function handler(req, res) {
     console.error('Matches API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-                        }
+}
