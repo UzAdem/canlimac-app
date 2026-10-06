@@ -72,10 +72,12 @@ function renderList() {
       }
 
       let html = '';
+      
+      // Ligleri ve altındaki maçları gruplar halinde işliyoruz
       data.forEach(group => {
-        // Her lig için ayrı şerit başlık
+        // CSS'indeki .league-title sınıfını kullanarak lig başlığını basıyoruz
         html += `
-          <div style="background: #1e293b; color: #4ade80; padding: 8px 12px; font-weight: bold; font-size: 13px; margin-top: 14px; margin-bottom: 6px; border-left: 4px solid #4ade80; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
+          <div class="league-title">
             <span>${group.league}</span>
           </div>
         `;
@@ -118,39 +120,36 @@ function renderList() {
 
             timeDisplay = timeStr;
             badgeClass = 'upcoming';
-            centerDisplay = `<div class="vs-divider" style="padding: 0 10px; color: #64748b; font-size: 12px; flex-shrink: 0;">v</div>`;
+            centerDisplay = `<div class="vs-divider">v</div>`;
           } else if (m.state === 'in') {
             timeDisplay = `<span class="live-dot"></span> Canlı`;
             badgeClass = 'live';
-            centerDisplay = `<div style="background: #1e293b; border: 1px solid #4ade80; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #4ade80; font-size: 12px; flex-shrink: 0;">${m.homeScore} - ${m.awayScore}</div>`;
+            centerDisplay = `<div class="score live">${m.homeScore} - ${m.awayScore}</div>`;
           } else {
             timeDisplay = `MS`;
             badgeClass = 'finished';
-            centerDisplay = `<div style="background: #0f172a; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #fff; font-size: 12px; flex-shrink: 0;">${m.homeScore} - ${m.awayScore}</div>`;
+            centerDisplay = `<div class="score finished">${m.homeScore} - ${m.awayScore}</div>`;
           }
 
           html += `
             <div class="match-card mackolik-style" onclick="openDetail('${m.id}', '${m.homeTeam}', '${m.awayTeam}', '${m.homeLogo}', '${m.awayLogo}', '${m.homeScore}', '${m.awayScore}', '${m.homeId || ''}', '${m.awayId || ''}')">
               <div class="match-time-col ${badgeClass}">${timeDisplay}</div>
-              <div class="match-teams-col" style="display: flex; align-items: center; width: 100%;">
-                
-                <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-start; overflow: hidden;">
-                  <img src="${m.homeLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
-                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${m.homeTeam}</span>
+              <div class="match-teams-col">
+                <div class="team-side home">
+                  <img src="${m.homeLogo}" onerror="this.style.opacity=0">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.homeTeam}</span>
                 </div>
-
                 ${centerDisplay}
-
-                <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; overflow: hidden;">
-                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;">${m.awayTeam}</span>
-                  <img src="${m.awayLogo}" width="20" height="20" onerror="this.style.opacity=0" style="object-fit: contain; flex-shrink: 0;">
+                <div class="team-side away">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.awayTeam}</span>
+                  <img src="${m.awayLogo}" onerror="this.style.opacity=0">
                 </div>
-
               </div>
             </div>
           `;
         });
       });
+
       listEl.innerHTML = html;
     })
     .catch(() => {
@@ -261,16 +260,16 @@ function openTeamDetail(teamId) {
       } else {
         matches.forEach(m => {
           matchesHtml += `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #131b2e; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 13px;">
               <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
                 <img src="${m.homeLogo}" width="18" height="18" onerror="this.style.opacity=0">
-                <span style="color: ${m.homeTeam === t.name ? '#4ade80' : '#e2e8f0'}; font-weight:${m.homeTeam === t.name ? 'bold' : 'normal'}">${m.homeTeam}</span>
+                <span style="color: ${m.homeTeam === t.name ? '#4eef90' : '#e2e8f0'}; font-weight:${m.homeTeam === t.name ? 'bold' : 'normal'}">${m.homeTeam}</span>
               </div>
-              <div style="background: #0f172a; padding: 4px 10px; border-radius: 4px; font-weight: bold; color: #fff;">
+              <div style="background: #1c2541; padding: 4px 10px; border-radius: 4px; font-weight: bold; color: #fff;">
                 ${m.homeScore} - ${m.awayScore}
               </div>
               <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex: 1; text-align: right;">
-                <span style="color: ${m.awayTeam === t.name ? '#4ade80' : '#e2e8f0'}; font-weight:${m.awayTeam === t.name ? 'bold' : 'normal'}">${m.awayTeam}</span>
+                <span style="color: ${m.awayTeam === t.name ? '#4eef90' : '#e2e8f0'}; font-weight:${m.awayTeam === t.name ? 'bold' : 'normal'}">${m.awayTeam}</span>
                 <img src="${m.awayLogo}" width="18" height="18" onerror="this.style.opacity=0">
               </div>
             </div>
@@ -285,16 +284,16 @@ function openTeamDetail(teamId) {
         </div>
 
         <div style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">
-          <div style="background: #1e293b; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; border-top: 4px solid ${t.color};">
+          <div style="background: #131b2e; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; border-top: 4px solid ${t.color};">
             <img src="${t.logo}" width="60" height="60" onerror="this.style.opacity=0">
             <div>
               <h3 style="margin: 0; font-size: 18px; color: #fff;">${t.name}</h3>
-              <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8;">Stadyum: ${t.venue}</p>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #a0aec0;">Stadyum: ${t.venue}</p>
             </div>
           </div>
 
           <div>
-            <h4 style="color: #cbd5e1; font-size: 14px; margin-bottom: 10px; border-left: 3px solid #4ade80; padding-left: 8px;">Son Maçlar / Fikstür</h4>
+            <h4 style="color: #4eef90; font-size: 14px; margin-bottom: 10px; border-left: 3px solid #4eef90; padding-left: 8px;">Son Maçlar / Fikstür</h4>
             <div>${matchesHtml}</div>
           </div>
         </div>
@@ -419,8 +418,8 @@ function renderStatsTab(container) {
           <span style="color: #a0aec0; font-size: 12px; font-weight: normal;">${s.label}</span>
           <span>${s.awayVal}</span>
         </div>
-        <div style="display: flex; height: 6px; background: #2d3748; border-radius: 3px; overflow: hidden; gap: 2px;">
-          <div style="width: ${hPercent}%; background: #4ade80; border-radius: 3px 0 0 3px; transition: width 0.3s;"></div>
+        <div style="display: flex; height: 6px; background: #1c2541; border-radius: 3px; overflow: hidden; gap: 2px;">
+          <div style="width: ${hPercent}%; background: #4eef90; border-radius: 3px 0 0 3px; transition: width 0.3s;"></div>
           <div style="width: ${aPercent}%; background: #3b82f6; border-radius: 0 3px 3px 0; transition: width 0.3s;"></div>
         </div>
       </div>
@@ -456,26 +455,26 @@ function renderLineupsTab(container) {
   };
 
   container.innerHTML = `
-    <div class="lineup-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px;">
+    <div class="lineup-grid">
       <div>
-        <div class="section-title" style="color: #4ade80; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #2d3748; padding-bottom: 4px;">${selectedMatch.homeTeam}</div>
-        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold;">İlk 11</div>
-        <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+        <div class="section-title">${selectedMatch.homeTeam}</div>
+        <div style="font-size: 12px; color: #e2e8f0; margin: 8px 0 4px 0; font-weight: bold;">İlk 11</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
           ${renderPlayerList(homeStarters, true)}
         </div>
-        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold;">Yedekler</div>
+        <div style="font-size: 12px; color: #e2e8f0; margin-bottom: 4px; font-weight: bold;">Yedekler</div>
         <div style="display: flex; flex-direction: column; gap: 4px;">
           ${renderPlayerList(homeBench, true)}
         </div>
       </div>
 
       <div class="lineup-column-away">
-        <div class="section-title" style="color: #4ade80; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #2d3748; padding-bottom: 4px; text-align: right;">${selectedMatch.awayTeam}</div>
-        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold; text-align: right;">İlk 11</div>
-        <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+        <div class="section-title" style="text-align: right;">${selectedMatch.awayTeam}</div>
+        <div style="font-size: 12px; color: #e2e8f0; margin: 8px 0 4px 0; font-weight: bold; text-align: right;">İlk 11</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
           ${renderPlayerList(awayStarters, false)}
         </div>
-        <div style="font-size: 13px; color: #e2e8f0; margin-bottom: 6px; font-weight: bold; text-align: right;">Yedekler</div>
+        <div style="font-size: 12px; color: #e2e8f0; margin-bottom: 4px; font-weight: bold; text-align: right;">Yedekler</div>
         <div style="display: flex; flex-direction: column; gap: 4px;">
           ${renderPlayerList(awayBench, false)}
         </div>
@@ -489,3 +488,4 @@ function goBack() {
 }
 
 renderList();
+  
